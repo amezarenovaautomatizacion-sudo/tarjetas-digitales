@@ -54,7 +54,7 @@ const Dashboard: React.FC<DashboardProps> = ({ usuario, onLogout, onSolicitarLog
           
           <nav className="sidebar-nav">
             <button className="nav-item active">📊 Dashboard</button>
-            <button className="nav-item">📇 Ver Diseños</button>
+            <button className="nav-item">📇 Ver Diseños nuevos</button>
             {usuario && <button className="nav-item">⚙️ Mi Cuenta</button>}
           </nav>
         </div>
