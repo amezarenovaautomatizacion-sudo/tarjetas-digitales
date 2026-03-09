@@ -1,35 +1,62 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import Login from './pages/Login'; // Ajusta la ruta según donde estén tus archivos
+import Dashboard from './pages/Dashboard';
+import Registro from './pages/Registro';
+import './App.css';
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+// 1. Definimos la forma del objeto usuario
+interface Usuario {
+  email: string;
+  nombre?: string;
 }
 
-export default App
+// 2. Definimos los tipos de vistas posibles
+type Vista = 'dashboard' | 'login' | 'registro';
+
+function App() {
+  const [vistaActual, setVistaActual] = useState<Vista>('dashboard');
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
+
+  const manejarLoginExitoso = (datos: Usuario) => {
+    setUsuario(datos);
+    setVistaActual('dashboard');
+  };
+
+  const manejarLogout = () => {
+    setUsuario(null);
+    setVistaActual('login');
+  };
+
+  return (
+    <div className="App">
+      {vistaActual === 'dashboard' && (
+        <Dashboard 
+          usuario={usuario} 
+          onLogout={manejarLogout} 
+          onSolicitarLogin={() => setVistaActual('login')} 
+        />
+      )}
+
+      {vistaActual === 'login' && (
+        <div className="page-container">
+          <Login 
+            onLogin={manejarLoginExitoso} 
+            irARegistro={() => setVistaActual('registro')}
+            irADashboard={() => setVistaActual('dashboard')}
+          />
+        </div>
+      )}
+
+      {vistaActual === 'registro' && (
+        <div className="page-container">
+          <Registro 
+            alFinalizar={() => setVistaActual('login')} 
+            irALogin={() => setVistaActual('login')}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default App;

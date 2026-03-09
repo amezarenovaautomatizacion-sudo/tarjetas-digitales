@@ -1,42 +1,400 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+:root{
+    --blanco:#ffffff;
+    --negro:#212121;
+    --verde-clarito: #a9c1ae;
+    --verde-oscuro:#264a2e;
+    --primario:#156927;
+    --secundario:#2c3e50;
+    --gris:#757575;
+    --gris-claro:#dfe9f3;
+    --rojo:#e74c3c;
+}
+
+/***********************************************************************************************
+Registro
+***********************************************************************************************/
+
+/* 1. Fondo y Estilo General */
+body {
+  background: linear-gradient(to bottom, var(--blanco), var(--verde-clarito));
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* 2. Corrección de Visibilidad de Títulos */
+h2, .titulo-principal {
+  color: var(--negro)!important; /* Negro fuerte para que se vea siempre */
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.subtitulo {
+  color: var(--gris) !important;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* 3. Cuadros de Selección */
+.opciones-grid {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.opcion-card {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  width: 260px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px var(--negro);
+  transition: transform 0.3s ease, border 0.3s;
+  border: 2px solid transparent;
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.opcion-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--primario);
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.opcion-card h3 {
+  color: var(--secundario) !important;
+  margin: 10px 0;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.opcion-card .icon {
+  font-size: 100px;
 }
 
-.card {
-  padding: 2em;
+.beneficios {
+  text-align: left;
+  font-size: 0.85rem;
+  color: #444 !important;
+  padding-left: 20px;
 }
 
-.read-the-docs {
-  color: #888;
+/* 4. Formulario de Registro */
+.form-container {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px var(--negro);
+  width: 100%;
+  max-width: 400px;
 }
+
+.btn-volver {
+  background: none;
+  border: none;
+  color: var(--primario) !important;
+  cursor: pointer;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+form input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-sizing: border-box;
+  color: #333 !important; /* Texto que escribes en negro */
+  background-color: #fff;
+}
+
+.btn-finalizar {
+  width: 100%;
+  background-color: #4a90e2;
+  color: white !important;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 15px;
+}
+
+.btn-falso {
+  display: block;
+  margin-top: 15px;
+  padding: 8px;
+  background: var(--gris-claro);
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #333 !important;
+}
+
+/* Esto asegura que cada campo tenga su propio espacio y no se amontonen */
+.input-group {
+  text-align: left;
+  margin-bottom: 15px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #555 !important;
+}
+
+/* Ajuste para que el contenedor crezca según el contenido */
+.form-container {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  width: 90%; /* Se adapta a pantallas pequeñas */
+  max-width: 450px;
+  max-height: 90vh; /* Evita que se salga de la pantalla */
+  overflow-y: auto; /* Si es muy largo, permite hacer scroll interno */
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+/*************************************************************************
+Login
+*************************************************************************/
+/* Estilos adicionales para el Login */
+.opciones-login {
+  margin-top: 20px;
+  text-align: center;
+  border-top: 1px solid var(--gris-claro);
+  padding-top: 15px;
+}
+
+.opciones-login p {
+  font-size: 0.9rem;
+  color: var(--gris);
+  margin-bottom: 5px;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--primario);
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 0.9rem;
+}
+
+.btn-link:hover {
+  color: var(--secundario);
+}
+
+
+/*********************************************************************
+Dashboard
+*********************************************************************/
+
+body {
+    background: linear-gradient(to bottom, var(--blanco), var(--verde-clarito));
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    /* Quitamos el flex del body para que no afecte al Dashboard */
+}
+
+/* 2. Estilos para Login y Registro (Páginas Centradas) */
+.page-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2000;
+}
+
+/* 3. Dashboard Layout */
+.dashboard-container {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden; /* Evita scroll doble */
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 260px;
+    background-color: var(--verde-oscuro);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 30px 20px;
+    flex-shrink: 0; /* Evita que el sidebar se encoja */
+}
+
+.sidebar .logo {
+    color: var(--blanco) !important;
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.usuario-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.user-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+.user-dot.online { background-color: #2ecc71; }
+.user-dot.offline { background-color: #95a5a6; }
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.nav-item {
+    background: none;
+    border: none;
+    color: #ecf0f1;
+    padding: 12px 15px;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+.nav-item.active, .nav-item:hover {
+    background-color: var(--primario);
+    color: white;
+}
+
+/* MAIN CONTENT (Arreglado) */
+.main-content {
+    flex: 1;
+    padding: 40px;
+    overflow-y: auto;
+    display: block; /* Asegura que fluya hacia abajo */
+}
+
+.main-content h1 {
+    color: var(--negro) !important;
+    font-size: 2.2rem;
+    margin: 0 0 10px 0;
+}
+
+.main-content p {
+    color: var(--gris);
+    margin-bottom: 30px;
+}
+
+/* BUSCADOR */
+.search-box input {
+    width: 100%;
+    max-width: 400px;
+    padding: 12px 20px;
+    border-radius: 25px;
+    border: 1px solid #ccc;
+    background: white;
+    color: var(--negro) !important;
+    margin-bottom: 30px;
+}
+
+/* FILTROS */
+.filtros-container {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.filter-btn {
+    padding: 8px 18px;
+    border-radius: 20px;
+    border: 1px solid var(--primario);
+    background: white;
+    color: var(--primario);
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.filter-btn.active {
+    background: var(--primario);
+    color: white;
+}
+
+/* GRID DE PLANTILLAS */
+.templates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 25px;
+}
+
+.template-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.template-preview {
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+}
+
+.template-info {
+    padding: 20px;
+    text-align: center;
+}
+
+.template-info h4 {
+    color: var(--negro);
+    margin-bottom: 10px;
+}
+
+/* BOTONES */
+.btn-usar {
+    width: 100%;
+    padding: 10px;
+    background-color: var(--negro);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-logout {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-login-link {
+    background-color: var(--primario);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
