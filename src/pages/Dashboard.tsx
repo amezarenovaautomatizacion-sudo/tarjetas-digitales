@@ -1,38 +1,44 @@
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent, useEffect } from 'react';
+import { plantillaService } from '../services/plantilla.service';
+import { Plantilla } from '../types';
 
-// 1. Definimos la interfaz para una Plantilla
-interface Plantilla {
-  id: number;
-  nombre: string;
-  categoria: string;
-  color: string;
-  icono: string;
-}
-
-// 2. Definimos la interfaz para el usuario (reutilizable)
 interface Usuario {
   email: string;
+  nombre?: string;
 }
 
-// 3. Definimos las Props del Dashboard
 interface DashboardProps {
   usuario: Usuario | null;
   onLogout: () => void;
   onSolicitarLogin: () => void;
+  onIrACuenta: () => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ usuario, onLogout, onSolicitarLogin }) => {
+const Dashboard: React.FC<DashboardProps> = ({ 
+  usuario, 
+  onLogout, 
+  onSolicitarLogin,
+  onIrACuenta 
+}) => {
   const [busqueda, setBusqueda] = useState<string>('');
   const [categoriaActual, setCategoriaActual] = useState<string>('Todas');
+  const [plantillas, setPlantillas] = useState<Plantilla[]>([]);
+  const [cargando, setCargando] = useState(true);
 
-  const plantillas: Plantilla[] = [
-    { id: 1, nombre: 'Ejecutiva Pro', categoria: 'Profesional', color: '#4a90e2', icono: '💼' },
-    { id: 2, nombre: 'Diseño Creativo', categoria: 'Creativa', color: '#f1c40f', icono: '🎨' },
-    { id: 3, nombre: 'Corporativa Dark', categoria: 'Corporativa', color: '#2c3e50', icono: '🏢' },
-    { id: 4, nombre: 'Minimalista White', categoria: 'Profesional', color: '#bdc3c7', icono: '⚪' },
-    { id: 5, nombre: 'Portfolio Art', categoria: 'Creativa', color: '#e74c3c', icono: '🖼️' },
-    { id: 6, nombre: 'Tech StartUp', categoria: 'Corporativa', color: '#2ecc71', icono: '🚀' },
-  ];
+  useEffect(() => {
+    cargarPlantillas();
+  }, []);
+
+  const cargarPlantillas = async () => {
+    try {
+      const data = await plantillaService.obtenerTodas();
+      setPlantillas(data);
+    } catch (error) {
+      console.error('Error al cargar plantillas:', error);
+    } finally {
+      setCargando(false);
+    }
+  };
 
   const categorias: string[] = ['Todas', 'Profesional', 'Creativa', 'Corporativa'];
 
@@ -42,30 +48,50 @@ const Dashboard: React.FC<DashboardProps> = ({ usuario, onLogout, onSolicitarLog
     return coincideBusqueda && coincideCategoria;
   });
 
+  const handleUsarPlantilla = (plantillaId: number) => {
+    if (!usuario) {
+      onSolicitarLogin();
+    } else {
+      console.log('Usando plantilla:', plantillaId);
+    }
+  };
+
   return (
     <div className="dashboard-container">
       <aside className="sidebar">
         <div className="sidebar-top">
           <h2 className="logo">RENOVA</h2>
-          <div className="usuario-info">
+          <div className="usuario-info" onClick={usuario ? onIrACuenta : undefined} style={{ cursor: usuario ? 'pointer' : 'default' }}>
             <span className={`user-dot ${usuario ? 'online' : 'offline'}`}></span>
-            <p>{usuario ? usuario.email : 'Modo Invitado'}</p>
+            <p>{usuario ? (usuario.nombre || usuario.email) : 'Modo Invitado'}</p>
           </div>
           
           <nav className="sidebar-nav">
-            <button className="nav-item active">📊 Dashboard</button>
-            <button className="nav-item">📇 Ver Diseños nuevos</button>
-            {usuario && <button className="nav-item">⚙️ Mi Cuenta</button>}
+            <button className="nav-item active">
+              <i className="bi bi-grid"></i> Dashboard
+            </button>
+            <button className="nav-item">
+              <i className="bi bi-images"></i> Ver Diseños nuevos
+            </button>
+            {usuario && (
+              <button className="nav-item" onClick={onIrACuenta}>
+                <i className="bi bi-person"></i> Mi Cuenta
+              </button>
+            )}
           </nav>
         </div>
 
         <div className="sidebar-footer">
           {usuario ? (
-            <button className="btn-logout" onClick={onLogout}>🚪 Cerrar Sesión</button>
+            <button className="btn-logout" onClick={onLogout}>
+              <i className="bi bi-box-arrow-right"></i> Cerrar Sesión
+            </button>
           ) : (
             <div className="login-prompt">
               <p>¿Tienes una cuenta?</p>
-              <button className="btn-login-link" onClick={onSolicitarLogin}>🔑 Iniciar Sesión</button>
+              <button className="btn-login-link" onClick={onSolicitarLogin}>
+                <i className="bi bi-key"></i> Iniciar Sesión
+              </button>
             </div>
           )}
         </div>
@@ -79,6 +105,7 @@ const Dashboard: React.FC<DashboardProps> = ({ usuario, onLogout, onSolicitarLog
           </div>
           
           <div className="search-box">
+            <i className="bi bi-search search-icon"></i>
             <input 
               type="text" 
               placeholder="Buscar por nombre..." 
@@ -100,25 +127,36 @@ const Dashboard: React.FC<DashboardProps> = ({ usuario, onLogout, onSolicitarLog
           ))}
         </section>
 
-        <div className="templates-grid">
-          {plantillasFiltradas.map((p: Plantilla) => (
-            <div key={p.id} className="template-card">
-              <div className="template-preview" style={{ backgroundColor: p.color }}>
-                <span className="preview-icon">{p.icono}</span>
+        {cargando ? (
+          <div className="cargando-spinner">Cargando plantillas...</div>
+        ) : (
+          <div className="templates-grid">
+            {plantillasFiltradas.map((p: Plantilla) => (
+              <div key={p.id} className="template-card">
+                <div className="template-preview" style={{ backgroundColor: p.color }}>
+                  <span className="preview-icon">{p.icono}</span>
+                </div>
+                <div className="template-info">
+                  <h4>{p.nombre}</h4>
+                  <span className="tag-categoria">{p.categoria}</span>
+                  <button 
+                    className="btn-usar" 
+                    onClick={() => handleUsarPlantilla(p.id)}
+                  >
+                    <i className="bi bi-pencil-square"></i> Usar esta plantilla
+                  </button>
+                </div>
               </div>
-              <div className="template-info">
-                <h4>{p.nombre}</h4>
-                <span className="tag-categoria">{p.categoria}</span>
-                <button 
-                  className="btn-usar" 
-                  onClick={!usuario ? onSolicitarLogin : undefined}
-                >
-                  Usar esta plantilla
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
+
+        {plantillasFiltradas.length === 0 && !cargando && (
+          <div className="sin-resultados">
+            <i className="bi bi-emoji-frown"></i>
+            <p>No se encontraron plantillas</p>
+          </div>
+        )}
       </main>
     </div>
   );

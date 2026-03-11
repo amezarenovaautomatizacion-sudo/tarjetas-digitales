@@ -1,87 +1,197 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
-const API_URL: string = import.meta.env.VITE_API_URL;
-//cambio de prueba
+import { useAuth } from '../hooks/useAuth';
+import { RegisterData } from '../types';
 
-// 1. Interfaz completa según la documentación de tu API
-interface FormDataCliente {
-  nombre: string;
-  email: string;
-  password: string;
-  telefono: string;
-  fecha_nacimiento: string;
-  calle: string;
-  numero_exterior: string;
-  colonia: string;
-  ciudad: string;
-  estado: string;
-  codigo_postal: string;
-  rfc: string;
-  razon_social: string;
+interface RegistroProps {
+  alFinalizar: () => void;
+  irALogin: () => void;
 }
 
-const Registro: React.FC = () => {
+const Registro: React.FC<RegistroProps> = ({ alFinalizar, irALogin }) => {
   const [cargando, setCargando] = useState(false);
+  const [error, setError] = useState<string>('');
+  const [exito, setExito] = useState(false);
+  const { register } = useAuth();
   
-  // 2. Inicializamos todos los campos requeridos
-  const [formData, setFormData] = useState<FormDataCliente>({
-    nombre: '', email: '', password: '', telefono: '',
-    fecha_nacimiento: '', calle: '', numero_exterior: '',
-    colonia: '', ciudad: '', estado: '', codigo_postal: '',
-    rfc: '', razon_social: ''
+  const [formData, setFormData] = useState<RegisterData>({
+    nombre: '', 
+    email: '', 
+    password: '', 
+    telefono: '',
+    fecha_nacimiento: '', 
+    calle: '', 
+    numero_exterior: '',
+    colonia: '', 
+    ciudad: '', 
+    estado: '', 
+    codigo_postal: '',
+    rfc: '', 
+    razon_social: ''
   });
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError('');
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setCargando(true);
+    setError('');
 
     try {
-      // 3. Endpoint exacto para Rol 4
-
-      const response = await fetch(`${API_URL}/api/cliente/register`, { 
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const resData = await response.json();
-
-      if (response.ok) {
-        alert("¡Registro de cliente exitoso!");
-      } else {
-        alert("Error: " + (resData.message || "Verifica los datos"));
-        console.log("Detalle del error:", resData);
-      }
-    } catch (error) {
-      alert("Error de conexión con el servidor");
+      await register(formData);
+      setExito(true);
+      setTimeout(() => {
+        alFinalizar();
+      }, 2000);
+    } catch (err: any) {
+      setError(err.message || 'Error al registrar usuario');
     } finally {
       setCargando(false);
     }
   };
 
+  if (exito) {
+    return (
+      <div className="form-container">
+        <div className="exito-mensaje">
+          <i className="bi bi-check-circle-fill"></i>
+          <h3>¡Registro exitoso!</h3>
+          <p>Serás redirigido al login...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="form-container registration-scroll">
-      <h2>Registro de Cliente (Rol 4)</h2>
+      <button className="btn-volver" onClick={irALogin} type="button">
+        <i className="bi bi-arrow-left"></i> Volver al Login
+      </button>
+
+      <h2 className="titulo-principal">Registro de Cliente</h2>
+      <p className="subtitulo">Completa todos los campos para registrarte</p>
+
+      {error && <div className="error-mensaje">{error}</div>}
+
       <form onSubmit={handleSubmit} className="grid-form">
-        {/* Datos Principales */}
-        <input type="text" name="nombre" placeholder="Nombre Completo" required onChange={handleChange} />
-        <input type="email" name="email" placeholder="Correo" required onChange={handleChange} />
-        <input type="password" name="password" placeholder="Contraseña" required onChange={handleChange} />
+        <div className="form-section">
+          <h3>Datos Personales</h3>
+          <input 
+            type="text" 
+            name="nombre" 
+            placeholder="Nombre Completo" 
+            required 
+            onChange={handleChange}
+            disabled={cargando}
+          />
+          <input 
+            type="email" 
+            name="email" 
+            placeholder="Correo Electrónico" 
+            required 
+            onChange={handleChange}
+            disabled={cargando}
+          />
+          <input 
+            type="password" 
+            name="password" 
+            placeholder="Contraseña" 
+            required 
+            onChange={handleChange}
+            disabled={cargando}
+          />
+          <input 
+            type="text" 
+            name="telefono" 
+            placeholder="Teléfono" 
+            onChange={handleChange}
+            disabled={cargando}
+          />
+          <input 
+            type="date" 
+            name="fecha_nacimiento" 
+            placeholder="Fecha Nacimiento" 
+            onChange={handleChange}
+            disabled={cargando}
+          />
+        </div>
+
+        <div className="form-section">
+          <h3>Datos Fiscales</h3>
+          <input 
+            type="text" 
+            name="rfc" 
+            placeholder="RFC" 
+            onChange={handleChange}
+            disabled={cargando}
+          />
+          <input 
+            type="text" 
+            name="razon_social" 
+            placeholder="Razón Social" 
+            onChange={handleChange}
+            disabled={cargando}
+          />
+        </div>
+
+        <div className="form-section">
+          <h3>Dirección</h3>
+          <input 
+            type="text" 
+            name="calle" 
+            placeholder="Calle" 
+            onChange={handleChange}
+            disabled={cargando}
+          />
+          <input 
+            type="text" 
+            name="numero_exterior" 
+            placeholder="Número Exterior" 
+            onChange={handleChange}
+            disabled={cargando}
+          />
+          <input 
+            type="text" 
+            name="colonia" 
+            placeholder="Colonia" 
+            onChange={handleChange}
+            disabled={cargando}
+          />
+          <input 
+            type="text" 
+            name="ciudad" 
+            placeholder="Ciudad" 
+            onChange={handleChange}
+            disabled={cargando}
+          />
+          <input 
+            type="text" 
+            name="estado" 
+            placeholder="Estado" 
+            onChange={handleChange}
+            disabled={cargando}
+          />
+          <input 
+            type="text" 
+            name="codigo_postal" 
+            placeholder="Código Postal" 
+            onChange={handleChange}
+            disabled={cargando}
+          />
+        </div>
         
-        {/* Datos de contacto y ubicación requeridos por tu API */}
-        <input type="text" name="telefono" placeholder="Teléfono" onChange={handleChange} />
-        <input type="date" name="fecha_nacimiento" placeholder="Fecha Nacimiento" onChange={handleChange} />
-        <input type="text" name="calle" placeholder="Calle" onChange={handleChange} />
-        <input type="text" name="ciudad" placeholder="Ciudad" onChange={handleChange} />
-        <input type="text" name="rfc" placeholder="RFC" onChange={handleChange} />
-        
-        <button type="submit" className="btn-finalizar" disabled={cargando}>
-          {cargando ? "Registrando..." : "Crear Cuenta de Cliente"}
+        <button 
+          type="submit" 
+          className="btn-finalizar" 
+          disabled={cargando}
+        >
+          {cargando ? (
+            <> <i className="bi bi-arrow-repeat spin"></i> Registrando...</>
+          ) : (
+            <> <i className="bi bi-person-plus"></i> Crear Cuenta de Cliente</>
+          )}
         </button>
       </form>
     </div>
@@ -89,4 +199,3 @@ const Registro: React.FC = () => {
 }
 
 export default Registro;
-
