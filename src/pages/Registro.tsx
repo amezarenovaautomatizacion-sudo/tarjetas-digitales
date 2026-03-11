@@ -1,80 +1,92 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
+const API_URL: string = import.meta.env.VITE_API_URL;
+//cambio de prueba
 
-// 1. Interfaz con nombres exactos
-interface FormData {
+// 1. Interfaz completa según la documentación de tu API
+interface FormDataCliente {
   nombre: string;
-  direccion: string;
-  contrasenia: string; // Usamos 'n' para evitar errores de codificación
-  numero: string;
-  empresa: string;
-  profesion: string;
   email: string;
+  password: string;
+  telefono: string;
+  fecha_nacimiento: string;
+  calle: string;
+  numero_exterior: string;
+  colonia: string;
+  ciudad: string;
+  estado: string;
+  codigo_postal: string;
+  rfc: string;
+  razon_social: string;
 }
 
-type Perfil = 'cliente' | 'diseñador' | null;
-
 const Registro: React.FC = () => {
-  const [tipoSeleccionado, setTipoSeleccionado] = useState<Perfil>(null);
+  const [cargando, setCargando] = useState(false);
   
-  // 2. El objeto inicial DEBE tener todas las llaves de la interfaz
-  const [formData, setFormData] = useState<FormData>({
-    nombre: '',
-    direccion: '',
-    contrasenia: '', // Verifica que este nombre sea igual al de la interfaz arriba
-    numero: '',
-    empresa: '',
-    profesion: '',
-    email: ''
+  // 2. Inicializamos todos los campos requeridos
+  const [formData, setFormData] = useState<FormDataCliente>({
+    nombre: '', email: '', password: '', telefono: '',
+    fecha_nacimiento: '', calle: '', numero_exterior: '',
+    colonia: '', ciudad: '', estado: '', codigo_postal: '',
+    rfc: '', razon_social: ''
   });
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData({ 
-      ...formData, 
-      [name]: value 
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    alert("¡Registro enviado!");
-  };
+    setCargando(true);
 
-  if (!tipoSeleccionado) {
-    return (
-      <div className="seleccion-contenedor">
-        <h2 className="titulo-principal">Selecciona tu perfil</h2>
-        <div className="opciones-grid">
-          <div className="opcion-card cliente" onClick={() => setTipoSeleccionado('cliente')}>
-            <span className="icon">👤</span>
-            <h3>Soy Cliente</h3>
-            <span className="btn-falso">Seleccionar</span>
-          </div>
-          <div className="opcion-card disenador" onClick={() => setTipoSeleccionado('diseñador')}>
-            <span className="icon">🎨</span>
-            <h3>Soy Diseñador</h3>
-            <span className="btn-falso">Seleccionar</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
+    try {
+      // 3. Endpoint exacto para Rol 4
+
+      const response = await fetch(`${API_URL}/api/cliente/register`, { 
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const resData = await response.json();
+
+      if (response.ok) {
+        alert("¡Registro de cliente exitoso!");
+      } else {
+        alert("Error: " + (resData.message || "Verifica los datos"));
+        console.log("Detalle del error:", resData);
+      }
+    } catch (error) {
+      alert("Error de conexión con el servidor");
+    } finally {
+      setCargando(false);
+    }
+  };
 
   return (
-    <div className="form-container">
-      <button className="btn-volver" onClick={() => setTipoSeleccionado(null)}>← Volver</button>
-      <h2>Registro para {tipoSeleccionado}</h2>
-      <form onSubmit={handleSubmit}>
-        <input type="text" name="nombre" placeholder="Nombre" required onChange={handleChange} />
-        <input type="email" name="email" placeholder="Email" required onChange={handleChange} />
-        {/* El atributo 'name' debe ser exactamente 'contrasenia' */}
-        <input type="password" name="contrasenia" placeholder="Contraseña" required onChange={handleChange} />
-        <input type="text" name="direccion" placeholder="Dirección" onChange={handleChange} />
-        <input type="tel" name="numero" placeholder="Teléfono" onChange={handleChange} />
-        <button type="submit" className="btn-finalizar">Finalizar Registro</button>
+    <div className="form-container registration-scroll">
+      <h2>Registro de Cliente (Rol 4)</h2>
+      <form onSubmit={handleSubmit} className="grid-form">
+        {/* Datos Principales */}
+        <input type="text" name="nombre" placeholder="Nombre Completo" required onChange={handleChange} />
+        <input type="email" name="email" placeholder="Correo" required onChange={handleChange} />
+        <input type="password" name="password" placeholder="Contraseña" required onChange={handleChange} />
+        
+        {/* Datos de contacto y ubicación requeridos por tu API */}
+        <input type="text" name="telefono" placeholder="Teléfono" onChange={handleChange} />
+        <input type="date" name="fecha_nacimiento" placeholder="Fecha Nacimiento" onChange={handleChange} />
+        <input type="text" name="calle" placeholder="Calle" onChange={handleChange} />
+        <input type="text" name="ciudad" placeholder="Ciudad" onChange={handleChange} />
+        <input type="text" name="rfc" placeholder="RFC" onChange={handleChange} />
+        
+        <button type="submit" className="btn-finalizar" disabled={cargando}>
+          {cargando ? "Registrando..." : "Crear Cuenta de Cliente"}
+        </button>
       </form>
     </div>
   );
 }
 
 export default Registro;
+

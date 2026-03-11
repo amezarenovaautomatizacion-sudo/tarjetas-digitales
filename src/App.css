@@ -398,3 +398,46 @@ body {
     cursor: pointer;
 }
 
+/*********************************************************************
+Mi cuenta
+*********************************************************************/
+.perfil-container {
+  padding: 40px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.id-badge {
+  font-size: 0.9rem;
+  background: var(--gris-claro);
+  padding: 4px 10px;
+  border-radius: 15px;
+  color: var(--secundario);
+}
+
+.perfil-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-top: 20px;
+}
+
+.perfil-section {
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.info-sistema .info-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+}
+
+.status-text {
+  font-weight: bold;
+  margin-top: 5px;
+}
