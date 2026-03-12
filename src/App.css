@@ -1,3 +1,7 @@
+/* =================================================BA
+   1. VARIABLES GLOBALES (Temas de color)
+   Aquí defines los colores que usas en todo el proyecto.
+   ================================================= */
 :root{
     --blanco:#ffffff;
     --negro:#212121;
@@ -12,25 +16,33 @@
     --warning:#f39c12;
 }
 
-body {
+/* =================================================
+   2. ESTILOS BASE Y CUERPO
+   Controla el fondo general de la aplicación.
+   ================================================= */
+body { /* Crea el efecto de fondo verde que ves en tus capturas */
   background: linear-gradient(to bottom, var(--blanco), var(--verde-clarito));
   font-family: 'Segoe UI', sans-serif;
   margin: 0;
   min-height: 100vh;
 }
 
-h2, .titulo-principal {
+h2, .titulo-principal {/* Títulos principales del Registro y Login */
   color: var(--negro);
   text-align: center;
   margin-bottom: 1rem;
 }
 
-.subtitulo {
+.subtitulo {/* Texto de ayuda debajo de los títulos */
   color: var(--gris);
   text-align: center;
   margin-bottom: 2rem;
 }
 
+/* =================================================
+   3. CONTENEDORES DE PÁGINA (Layout)
+   Define cómo se centran los formularios en pantalla.
+   ================================================= */
 .page-container {
   width: 100vw;
   height: 100vh;
@@ -43,7 +55,7 @@ h2, .titulo-principal {
   z-index: 2000;
 }
 
-.form-container {
+.form-container { /* El cuadro blanco donde viven los formularios */
   background: white;
   padding: 2.5rem;
   border-radius: 15px;
@@ -93,6 +105,10 @@ h2, .titulo-principal {
   text-decoration: underline;
 }
 
+/* =================================================
+   4. COMPONENTES DE FORMULARIO
+   Estilos de los inputs, etiquetas y grupos.
+   ================================================= */
 .input-group {
   text-align: left;
   margin-bottom: 15px;
@@ -132,6 +148,10 @@ form input:disabled {
   cursor: not-allowed;
 }
 
+/* =================================================
+   5. BOTONES Y ACCIONES
+   ================================================= */
+/* Botón principal (Entrar / Registrar) */
 .btn-finalizar {
   width: 100%;
   background-color: var(--primario);
@@ -671,4 +691,16 @@ form input:disabled {
 
 .password-toggle-btn i {
   font-size: 1.2rem;
+}
+
+.info-item span {
+    color: var(--secundario) !important; 
+    font-weight: 500;
+    margin-left: 10px;
+}
+
+.info-item strong {
+    color: var(--negro);
+    min-width: 140px;
+    display: inline-block;
 }

@@ -3,6 +3,14 @@ import { UsuarioData, LoginCredentials, RegisterData, AuthResponse } from '../ty
 
 export const authService = {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>('/api/cliente/login', credentials);
+    if (response.token) {
+      api.setToken(response.token);
+    }
+    return response;
+  },
+
+    async login_empleados(credentials: LoginCredentials): Promise<AuthResponse> {
     const response = await api.post<AuthResponse>('/api/login', credentials);
     if (response.token) {
       api.setToken(response.token);
@@ -24,7 +32,7 @@ export const authService = {
       const token = api.getToken();
       if (!token) return null;
       
-      const response = await api.get<{ usuario: UsuarioData }>('/api/usuario/actual');
+      const response = await api.get<{ usuario: UsuarioData }>('/api/cliente/profile');
       return response.usuario;
     } catch {
       return null;
