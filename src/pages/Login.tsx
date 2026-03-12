@@ -1,5 +1,6 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
+import { obtenerIpPublica } from '../utils/ipUtils';
 
 interface LoginProps {
   onLogin: (datos: any) => void;
@@ -10,6 +11,7 @@ interface LoginProps {
 interface LoginData {
   email: string;
   password: string;
+  ip_ultimo_login?: string;
 }
 
 const Login: React.FC<LoginProps> = ({ onLogin, irARegistro, irADashboard }) => {
@@ -17,8 +19,19 @@ const Login: React.FC<LoginProps> = ({ onLogin, irARegistro, irADashboard }) => 
     email: '',
     password: ''
   });
+  const [ipAddress, setIpAddress] = useState<string>('');
   const [error, setError] = useState<string>('');
+  const [mostrarPassword, setMostrarPassword] = useState<boolean>(false);
   const { login, cargando } = useAuth();
+
+  // Obtener IP al montar el componente
+  useEffect(() => {
+    const obtenerIP = async () => {
+      const ip = await obtenerIpPublica();
+      setIpAddress(ip);
+    };
+    obtenerIP();
+  }, []);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -26,10 +39,20 @@ const Login: React.FC<LoginProps> = ({ onLogin, irARegistro, irADashboard }) => 
     setError('');
   };
 
+  const toggleMostrarPassword = () => {
+    setMostrarPassword(!mostrarPassword);
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const response = await login(loginData);
+      // Agregar la IP a los datos de login
+      const datosLogin = {
+        ...loginData,
+        ip_ultimo_login: ipAddress
+      };
+      
+      const response = await login(datosLogin);
       onLogin(response.usuario);
     } catch (err: any) {
       setError(err.message || 'Credenciales inválidas');
@@ -67,16 +90,29 @@ const Login: React.FC<LoginProps> = ({ onLogin, irARegistro, irADashboard }) => 
           <label>
             <i className="bi bi-lock"></i> Contraseña
           </label>
-          <input 
-            type="password" 
-            name="password" 
-            placeholder="********" 
-            required 
-            onChange={handleChange} 
-            value={loginData.password}
-            disabled={cargando}
-          />
+          <div className="password-input-container">
+            <input 
+              type={mostrarPassword ? "text" : "password"}
+              name="password" 
+              placeholder="********" 
+              required 
+              onChange={handleChange} 
+              value={loginData.password}
+              disabled={cargando}
+            />
+            <button 
+              type="button"
+              className="password-toggle-btn"
+              onClick={toggleMostrarPassword}
+              tabIndex={-1}
+            >
+              <i className={`bi ${mostrarPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
+            </button>
+          </div>
         </div>
+
+        {/* IP oculta (no visible para el usuario) */}
+        <input type="hidden" name="ip_ultimo_login" value={ipAddress} />
 
         <button 
           type="submit" 
