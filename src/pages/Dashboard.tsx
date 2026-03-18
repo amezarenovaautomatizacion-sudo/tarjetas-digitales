@@ -12,13 +12,15 @@ interface DashboardProps {
   onLogout: () => void;
   onSolicitarLogin: () => void;
   onIrACuenta: () => void;
+  onIrAMisTarjetas: () => void;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ 
   usuario, 
   onLogout, 
   onSolicitarLogin,
-  onIrACuenta 
+  onIrACuenta,
+  onIrAMisTarjetas
 }) => {
   const [busqueda, setBusqueda] = useState<string>('');
   const [categoriaActual, setCategoriaActual] = useState<string>('Todas');
@@ -31,11 +33,11 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   const cargarPlantillas = async () => {
     try {
-      const data = await plantillaService.obtenerTodas();
+      const data = await plantillaService.obtenerTodas(); 
       setPlantillas(data);
     } catch (error) {
-      console.error('Error al cargar plantillas:', error);
-    } finally {
+      console.error('Error al cargar:', error);
+    } finally{
       setCargando(false);
     }
   };
@@ -48,11 +50,35 @@ const Dashboard: React.FC<DashboardProps> = ({
     return coincideBusqueda && coincideCategoria;
   });
 
-  const handleUsarPlantilla = (plantillaId: number) => {
-    if (!usuario) {
-      onSolicitarLogin();
-    } else {
-      console.log('Usando plantilla:', plantillaId);
+  const handleUsarPlantilla = async (plantillaId: any) => {
+    if (!plantillaId) {
+      console.error("ID de plantilla no válido:", plantillaId);
+      return;
+    }
+
+    try {
+      setCargando(true);
+
+      // Mapeamos la información del formulario con los campos exactos de la API
+      const datosCompletos = {
+        nombre: usuario?.nombre || "Usuario",
+        apellido: (usuario as any)?.apellido || "Apellido",
+        puesto: (usuario as any)?.puesto || "Puesto",
+        empresa: (usuario as any)?.razon_social || "Empresa",
+        email: usuario?.email || "",
+        telefono: (usuario as any)?.telefono || "",
+        // Incluye el resto de campos (ciudad, estado, etc.) según tu doc
+        lema: "Transformando ideas en realidad"
+      };
+
+      const preview = await plantillaService.generarPreview(plantillaId, datosCompletos);
+      console.log("Datos para el editor cargados:", preview);
+
+      // TODO: Redirigir a la vista de editor con los datos recibidos
+    } catch (error) {
+      console.error("Error al procesar la plantilla:", error);
+    } finally {
+      setCargando(false);
     }
   };
 
@@ -70,8 +96,11 @@ const Dashboard: React.FC<DashboardProps> = ({
             <button className="nav-item active">
               <i className="bi bi-grid"></i> Dashboard
             </button>
-            <button className="nav-item">
-              <i className="bi bi-images"></i> Ver Diseños nuevos
+            <button 
+              className="nav-item" 
+              onClick={onIrAMisTarjetas}
+            >
+              <i className="bi bi-images"></i> Mis tarjetas
             </button>
             {usuario && (
               <button className="nav-item" onClick={onIrACuenta}>
@@ -131,8 +160,8 @@ const Dashboard: React.FC<DashboardProps> = ({
           <div className="cargando-spinner">Cargando plantillas...</div>
         ) : (
           <div className="templates-grid">
-            {plantillasFiltradas.map((p: Plantilla) => (
-              <div key={p.id} className="template-card">
+            {plantillasFiltradas.map((p: any) => (
+              <div key={p.plantillaid} className="template-card">
                 <div className="template-preview" style={{ backgroundColor: p.color }}>
                   <span className="preview-icon">{p.icono}</span>
                 </div>
@@ -141,7 +170,8 @@ const Dashboard: React.FC<DashboardProps> = ({
                   <span className="tag-categoria">{p.categoria}</span>
                   <button 
                     className="btn-usar" 
-                    onClick={() => handleUsarPlantilla(p.id)}
+                    // Intentamos con .id o ._id según lo que mande tu servidor
+                    onClick={() => handleUsarPlantilla(p.plantillaid)} 
                   >
                     <i className="bi bi-pencil-square"></i> Usar esta plantilla
                   </button>

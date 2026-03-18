@@ -66,6 +66,7 @@ class ApiClient {
     return this.request<T>(endpoint, {
       method: 'PUT',
       body: JSON.stringify(body),
+    
     });
   }
 

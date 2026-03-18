@@ -48,6 +48,7 @@ const RecuperarPassword: React.FC<RecuperarProps> = ({ onVolver }) => {
       {paso === 1 ? (
         <form onSubmit={handleSolicitar}>
           <h2>Recuperar Contraseña</h2>
+          <label htmlFor="email">Correo Electrónico</label>
           <input type="email" placeholder="Correo electrónico" required onChange={(e) => setEmail(e.target.value)} />
           <button type="submit" disabled={cargando}>
             {cargando ? 'Enviando...' : 'Enviar token'}
@@ -57,7 +58,9 @@ const RecuperarPassword: React.FC<RecuperarProps> = ({ onVolver }) => {
       ) : (
         <form onSubmit={handleRestablecer}>
           <h2>Nueva Contraseña</h2>
+          <label htmlFor="email">Ingresa el token que llego a tu correo</label>
           <input placeholder="Ingresa el token" required onChange={(e) => setToken(e.target.value)} />
+          <label htmlFor="email">Ingresa tu nueva contraseña</label>
           <input type="password" placeholder="Nueva contraseña" required onChange={(e) => setNewPassword(e.target.value)} />
           <button type="submit" disabled={cargando}>
             {cargando ? 'Guardando...' : 'Confirmar cambio'}

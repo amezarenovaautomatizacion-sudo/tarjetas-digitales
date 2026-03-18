@@ -65,3 +65,23 @@ export interface ApiError {
   message: string;
   data?: unknown;
 }
+
+export interface DatosTarjeta {
+  nombre: string;
+  apellido: string;
+  puesto: string;
+  empresa: string;
+  email: string;
+  telefono: string;
+  telefono_movil?: string;
+  sitio_web?: string;
+  direccion?: string;
+  ciudad?: string;
+  estado?: string;
+  codigo_postal?: string;
+  pais?: string;
+  linkedin?: string;
+  twitter?: string;
+  instagram?: string;
+  lema?: string;
+}

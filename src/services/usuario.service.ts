@@ -1,6 +1,7 @@
 import { api } from './api';
 import { UsuarioData, UpdateUserData } from '../types';
 
+
 export const usuarioService = {
   async getPerfil(): Promise<UsuarioData> {
     const response = await api.get<{ usuario: UsuarioData }>('/api/usuario/perfil');
@@ -8,12 +9,15 @@ export const usuarioService = {
   },
 
   async actualizarPerfil(data: UpdateUserData): Promise<UsuarioData> {
-    const response = await api.put<{ usuario: UsuarioData }>('/api/usuario/perfil', data);
+    const response = await api.put<{ usuario: UsuarioData }>('/api/cliente/update-profile', data);
     return response.usuario;
   },
 
-  async cambiarPassword(oldPassword: string, newPassword: string): Promise<void> {
-    await api.put('/api/cliente/change-password', { oldPassword, newPassword });
+  async cambiarPassword(password_actual: string, password_nuevo: string): Promise<void> {
+    return await api.put('/api/cliente/change-password', { 
+      password_actual, 
+      password_nuevo 
+    })
   },
 
   async solicitarRecuperacion(email: string): Promise<any> {

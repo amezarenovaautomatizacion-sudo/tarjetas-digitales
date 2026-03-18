@@ -3,12 +3,13 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Registro from './pages/Registro';
 import MiCuenta from './pages/MiCuenta';
+import MisTarjetas from './pages/MisTarjetas';
 import RecuperarPassword from './pages/RecuperarPassword';
 import { useAuth } from './hooks/useAuth';
 import { UsuarioData } from './types';
 import './App.css';
 
-type Vista = 'dashboard' | 'login' | 'registro' | 'cuenta' | 'recuperarpassword';
+type Vista = 'dashboard' | 'login' | 'registro' | 'cuenta' | 'mistarjetas' |'recuperarpassword';
 
 function App() {
   const [vistaActual, setVistaActual] = useState<Vista>('dashboard');
@@ -41,6 +42,7 @@ function App() {
           onLogout={manejarLogout}
           onSolicitarLogin={() => setVistaActual('login')}
           onIrACuenta={irACuenta}
+          onIrAMisTarjetas={() => setVistaActual('mistarjetas')}
         />
       )}
       
@@ -49,6 +51,7 @@ function App() {
           usuarioActual={usuario} 
           onLogout={manejarLogout}
           onVolver={() => setVistaActual('dashboard')}
+          onIrAMisTarjetas={() => setVistaActual('mistarjetas')}
         />
       )}
 
@@ -59,6 +62,18 @@ function App() {
             irARegistro={() => setVistaActual('registro')}
             irADashboard={() => setVistaActual('dashboard')}
             irARecuperarPassword={() => setVistaActual('recuperarpassword')}
+          />
+        </div>
+      )}
+
+      {vistaActual === 'mistarjetas' && (
+        <div className="page-container">
+          <MisTarjetas
+            usuario={usuario} 
+            onLogout={manejarLogout}
+            onSolicitarLogin={() => setVistaActual('login')}
+            onIrACuenta={irACuenta}
+            onIrADashboard={() => setVistaActual('dashboard')} 
           />
         </div>
       )}
