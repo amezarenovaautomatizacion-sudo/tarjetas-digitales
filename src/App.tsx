@@ -99,8 +99,8 @@ function App() {
         <div className="page-container">
           <EditorTarjeta 
             plantillaId={plantillaSeleccionada}
+            nombreTarjeta="Nueva tarjeta"
             onVolver={() => setVistaActual('dashboard')}
-            // AGREGA ESTAS LÍNEAS QUE SON LAS QUE FALTAN:
             usuario={usuario} 
             onIrAMisTarjetas={() => setVistaActual('mistarjetas')}
             onIrACuenta={() => setVistaActual('cuenta')}
