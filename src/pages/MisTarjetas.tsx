@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api'; // Tu ApiClient con el header corregido
+import { plantillaService } from '../services/plantilla.service';
 import { Plantilla } from '../types';
 
 // Definimos la interfaz para tus tarjetas guardadas
@@ -28,26 +29,30 @@ const MisTarjetas: React.FC<TarjetasProps> = ({
   const [cargando, setCargando] = useState(true);
   const [tarjetaEditar, setTarjetaEditar] = useState<TarjetaPersonal | null>(null);
 
+  const obtenerMisTarjetas = async () => {
+    try {
+      setCargando(true);
+      
+      // LLAMADA AL SERVICE: Aquí usamos lo que acabas de escribir
+      const data = await plantillaService.obtenerMisTarjetas();
+      
+      // ACTUALIZACIÓN DE ESTADO: Esto quita el mensaje de "No tienes tarjetas"
+      // El service ya devuelve 'response.tarjetas || []', así que 'data' es el arreglo directo
+      setTarjetas(data); 
+      
+    } catch (error) {
+      console.error("Error al cargar tarjetas:", error);
+      setTarjetas([]);
+    } finally {
+      setCargando(false);
+    }
+  };
+  
   useEffect(() => {
     if (usuario) {
-      cargarMisTarjetas();
+      obtenerMisTarjetas();
     }
   }, [usuario]);
-
-  const cargarMisTarjetas = async () => {
-    try {
-        setCargando(true);
-        const response = await api.get<any>('/api/cliente/mis-tarjetas');
-        const listaTarjetas = Array.isArray(response) ? response : (response.tarjetas || []);
-        
-        setTarjetas(listaTarjetas);
-    } catch (error) {
-        console.error('Error al cargar tus tarjetas:', error);
-        setTarjetas([]); // Evita que quede como undefined
-    } finally {
-        setCargando(false);
-    }
-    };
 
   const handleEliminar = async (id: number) => {
     if (window.confirm('¿Estás seguro de eliminar esta tarjeta?')) {
@@ -64,13 +69,12 @@ const MisTarjetas: React.FC<TarjetasProps> = ({
   if (tarjetaEditar) {
     return (
       <div className="dashboard-container">
-        {/* Aquí podrías renderizar un componente de Formulario pasándole tarjetaEditar */}
-        <div className="perfil-main-content">
-           <button onClick={() => setTarjetaEditar(null)} className="btn-back">
-             <i className="bi bi-arrow-left"></i> Volver a la lista
+        <div className="main-content">
+           <button onClick={() => setTarjetaEditar(null)} className="btn-volver">
+             <i className="bi bi-arrow-left"></i> Volver a mis tarjetas
            </button>
            <h2>Editando: {tarjetaEditar.nombre_tarjeta}</h2>
-           {/* El formulario usaría los campos de tu doc: nombre, puesto, empresa... */}
+           {/* Aquí puedes reutilizar tu componente EditorTarjeta pasándole los datos */}
         </div>
       </div>
     );

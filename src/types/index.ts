@@ -85,3 +85,4 @@ export interface DatosTarjeta {
   instagram?: string;
   lema?: string;
 }
+

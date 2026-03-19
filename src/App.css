@@ -750,3 +750,118 @@ form input:disabled {
     color: white !important;
     border: 1px solid rgba(255, 255, 255, 0.4);
 }
+/****************************************************************************************
+****************************************************************************************/
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+/* División del Editor en dos columnas */
+.editor-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+.editor-panel {
+  background: white;
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-grid input, 
+.form-grid textarea {
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.full-width {
+  grid-column: span 2;
+  min-height: 80px;
+}
+
+.btn-save {
+  margin-top: 1.5rem;
+  width: 100%;
+  padding: 1rem;
+  background-color: #1a1a1a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.btn-save:hover {
+  background-color: #333;
+}
+.preview-panel {
+  display: flex;
+  justify-content: center;
+  position: sticky;
+  top: 2rem;
+}
+
+.card-render {
+  width: 100%;
+  max-width: 400px;
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease;
+}
+
+.card-header {
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #fafafa;
+}
+
+.card-icon {
+  font-size: 2.5rem;
+  background: #eee;
+  padding: 10px;
+  border-radius: 12px;
+}
+
+.card-body {
+  padding: 1.5rem;
+  color: #444;
+}
+
+.card-body p {
+  margin: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-footer {
+  padding: 1rem;
+  text-align: center;
+  background: #f9f9f9;
+  font-style: italic;
+  color: #888;
+}

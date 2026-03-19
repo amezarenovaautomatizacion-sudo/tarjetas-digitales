@@ -4,16 +4,18 @@ import Dashboard from './pages/Dashboard';
 import Registro from './pages/Registro';
 import MiCuenta from './pages/MiCuenta';
 import MisTarjetas from './pages/MisTarjetas';
+import EditorTarjeta from './pages/EditorTarjetas';
 import RecuperarPassword from './pages/RecuperarPassword';
 import { useAuth } from './hooks/useAuth';
 import { UsuarioData } from './types';
 import './App.css';
 
-type Vista = 'dashboard' | 'login' | 'registro' | 'cuenta' | 'mistarjetas' |'recuperarpassword';
+type Vista = 'dashboard' | 'login' | 'registro' | 'cuenta' | 'mistarjetas'|'editortarjeta' |'recuperarpassword';
 
 function App() {
   const [vistaActual, setVistaActual] = useState<Vista>('dashboard');
   const { usuario, login, logout, cargando } = useAuth();
+  const [plantillaSeleccionada, setPlantillaSeleccionada] = useState<number | null>(null);
 
   if (cargando) {
     return <div className="cargando-container">Cargando...</div>;
@@ -34,6 +36,11 @@ function App() {
     else setVistaActual('login');
   };
 
+  const entrarAlEditor = (id: number) => {
+    setPlantillaSeleccionada(id);
+    setVistaActual('editortarjeta');
+  };
+
   return (
     <div className="App">
       {vistaActual === 'dashboard' && (
@@ -43,6 +50,7 @@ function App() {
           onSolicitarLogin={() => setVistaActual('login')}
           onIrACuenta={irACuenta}
           onIrAMisTarjetas={() => setVistaActual('mistarjetas')}
+          onSeleccionarPlantilla={entrarAlEditor}
         />
       )}
       
@@ -83,6 +91,20 @@ function App() {
           <Registro
             alFinalizar={() => setVistaActual('login')}
             irALogin={() => setVistaActual('login')}
+          />
+        </div>
+      )}
+
+      {vistaActual === 'editortarjeta' && plantillaSeleccionada && (
+        <div className="page-container">
+          <EditorTarjeta 
+            plantillaId={plantillaSeleccionada}
+            onVolver={() => setVistaActual('dashboard')}
+            // AGREGA ESTAS LÍNEAS QUE SON LAS QUE FALTAN:
+            usuario={usuario} 
+            onIrAMisTarjetas={() => setVistaActual('mistarjetas')}
+            onIrACuenta={() => setVistaActual('cuenta')}
+            onLogout={manejarLogout}
           />
         </div>
       )}

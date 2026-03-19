@@ -30,12 +30,18 @@ export const plantillaService = {
     return response;
   },
 
-  async guardarTarjeta(plantillaId: number, datos: any): Promise<any> {
-    // Este suele ser un endpoint privado que asocia la plantilla al usuario
+  async guardarTarjeta(plantillaId: number, nombreTarjeta: string, datos: any) {
     const response = await api.post<any>('/api/cliente/tarjetas', {
-      plantilla_id: plantillaId,
+      plantillaid: plantillaId,              
+      nombre_tarjeta: nombreTarjeta,         
+      visibilidad: "privado",                
       datos: datos
     });
     return response;
+  },
+
+  async obtenerMisTarjetas() {
+    const response = await api.get<any>('/api/cliente/tarjetas');
+    return response.tarjetas || [];
   }
 };

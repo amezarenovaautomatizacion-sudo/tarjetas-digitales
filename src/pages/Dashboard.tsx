@@ -13,6 +13,7 @@ interface DashboardProps {
   onSolicitarLogin: () => void;
   onIrACuenta: () => void;
   onIrAMisTarjetas: () => void;
+  onSeleccionarPlantilla: (id: number) => void;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ 
@@ -20,7 +21,8 @@ const Dashboard: React.FC<DashboardProps> = ({
   onLogout, 
   onSolicitarLogin,
   onIrACuenta,
-  onIrAMisTarjetas
+  onIrAMisTarjetas,
+  onSeleccionarPlantilla
 }) => {
   const [busqueda, setBusqueda] = useState<string>('');
   const [categoriaActual, setCategoriaActual] = useState<string>('Todas');
@@ -50,38 +52,38 @@ const Dashboard: React.FC<DashboardProps> = ({
     return coincideBusqueda && coincideCategoria;
   });
 
-  const handleUsarPlantilla = async (plantillaId: any) => {
-    if (!plantillaId) {
-      console.error("ID de plantilla no válido:", plantillaId);
-      return;
+  const handleUsarPlantilla = async (plantillaId: number) => {
+    if (!usuario) {
+      onSolicitarLogin();
+    } else {
+      // En lugar de solo el log, avisamos al componente App
+      onSeleccionarPlantilla(plantillaId); 
     }
-
     try {
       setCargando(true);
-
-      // Mapeamos la información del formulario con los campos exactos de la API
-      const datosCompletos = {
-        nombre: usuario?.nombre || "Usuario",
-        apellido: (usuario as any)?.apellido || "Apellido",
-        puesto: (usuario as any)?.puesto || "Puesto",
-        empresa: (usuario as any)?.razon_social || "Empresa",
-        email: usuario?.email || "",
-        telefono: (usuario as any)?.telefono || "",
-        // Incluye el resto de campos (ciudad, estado, etc.) según tu doc
-        lema: "Transformando ideas en realidad"
+      
+      // Estos son los datos iniciales que se verán en la tarjeta
+      const datosIniciales = {
+        nombre: usuario?.nombre || '',
+        email: usuario?.email || '',
+        puesto: 'Tu Puesto',
+        empresa: 'Tu Empresa',
+        telefono: (usuario as any)?.telefono || '',
+        lema: 'Transformando ideas en realidad'
       };
 
-      const preview = await plantillaService.generarPreview(plantillaId, datosCompletos);
-      console.log("Datos para el editor cargados:", preview);
-
-      // TODO: Redirigir a la vista de editor con los datos recibidos
+      // Llamamos al servicio
+      const previewData = await plantillaService.generarPreview(plantillaId, datosIniciales);
+      
+      // PASO CLAVE: Aquí notificas a tu App.tsx que cambie la vista
+      // Ejemplo: onIrAEditor(previewData); 
+      
     } catch (error) {
-      console.error("Error al procesar la plantilla:", error);
+      console.error("Error al obtener preview:", error);
     } finally {
       setCargando(false);
     }
   };
-
   return (
     <div className="dashboard-container">
       <aside className="sidebar">
