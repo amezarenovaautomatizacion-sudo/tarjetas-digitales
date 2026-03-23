@@ -105,21 +105,7 @@ function App() {
       {vistaActual === 'editortarjeta' && (
         <div className="page-container">
           <EditorTarjeta 
-            // PRIORIDAD: Si estamos editando, usamos la plantilla que ya tenía la tarjeta.
-            // Si es nueva, usamos la que el usuario acaba de elegir en el dashboard.
-            plantillaId={tarjetaAEditar ? tarjetaAEditar.plantillaid : plantillaSeleccionada}
-            
-            // El ID de la tarjeta solo se pasa si existe la tarjeta a editar
-            tarjetaId={tarjetaAEditar?.tarjetaclienteid}
-            
-            // Los datos iniciales solo se pasan en edición
-            datosIniciales={tarjetaAEditar?.datos} 
 
-            onVolver={() => {
-                setVistaActual('dashboard');
-                setTarjetaAEditar(null);
-                setPlantillaSeleccionada(null); // Limpiar selección al volver
-            }}
             usuario={usuario} 
             onIrAMisTarjetas={() => {
                 setVistaActual('mistarjetas');
