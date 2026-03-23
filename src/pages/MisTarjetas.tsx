@@ -14,6 +14,7 @@ interface TarjetaPersonal {
 interface TarjetasProps {
   usuario: any;
   onLogout: () => void;
+  onVerTarjeta: (tarjeta: any) => void;
   onSolicitarLogin: () => void;
   onIrACuenta: () => void;
   onIrADashboard: () => void;
@@ -22,6 +23,7 @@ interface TarjetasProps {
 
 const MisTarjetas: React.FC<TarjetasProps> = ({ 
   usuario, 
+  onVerTarjeta,
   onLogout, 
   onSolicitarLogin,
   onIrACuenta,
@@ -157,6 +159,12 @@ const MisTarjetas: React.FC<TarjetasProps> = ({
                         onClick={() => handleEliminar(tarjeta.tarjetaclienteid)} 
                       >
                         <i className="bi bi-trash"></i>
+                      </button>
+                      <button 
+                        className="btn-ver-sm" 
+                        onClick={() => onVerTarjeta(tarjeta)} // Esta función la pasas por props desde App.tsx
+                      >
+                        <i className="bi bi-eye"></i> Ver Fullscreen
                       </button>
                     </div>
                   </div>

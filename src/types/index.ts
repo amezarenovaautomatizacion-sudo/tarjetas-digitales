@@ -86,3 +86,17 @@ export interface DatosTarjeta {
   lema?: string;
 }
 
+export interface RespuestaPublica {
+  tarjetaclienteid: number;    // Antes te faltaba esto
+  nombre_tarjeta: string;      // Y esto
+  plantilla_nombre: string;
+  slug: string;
+  visitas: number;
+  renderizado: {
+    html: string;
+    css: string;
+    usa_bootstrap: boolean;
+    usa_bootstrap_icons: boolean;
+    bootstrap_version: string;
+  };
+}

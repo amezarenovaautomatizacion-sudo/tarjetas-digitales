@@ -865,3 +865,41 @@ form input:disabled {
   font-style: italic;
   color: #888;
 }
+
+/*********************************************************************
+Vista de tarjetas
+*********************************************************************/
+.fullscreen-preview-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #f8f9fa; /* Fondo claro */
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.card-render-large {
+  background: white;
+  width: 100%;
+  max-width: 600px; /* Tamaño ideal para lectura */
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+.btn-close-preview {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  padding: 10px 20px;
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
