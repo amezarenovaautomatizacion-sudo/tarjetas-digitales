@@ -43,5 +43,26 @@ export const plantillaService = {
   async obtenerMisTarjetas() {
     const response = await api.get<any>('/api/cliente/tarjetas');
     return response.tarjetas || [];
+  },
+
+  async obtenerTarjetaPorId(id: number) {
+    const response = await api.get<any>(`/api/cliente/tarjetas/${id}`);
+    return response; // Retorna el objeto de la tarjeta o su HTML renderizado
+  },
+
+  async actualizarTarjeta(id: number, nombreTarjeta: string, datos: any) {
+  // Asegúrate de usar la ruta en plural y pasar el ID
+    const response = await api.put(`/api/cliente/tarjetas/${id}`, {
+      nombre_tarjeta: nombreTarjeta,
+      visibilidad: "publico", // O "privado" según prefieras
+      datos: datos // El objeto con nombre, puesto, etc.
+    });
+    return response;
+  },
+  
+  async eliminarTarjeta(id: number) {
+    // Según tu documentación: DELETE /api/cliente/tarjetas/:id
+    const response = await api.delete<any>(`/api/cliente/tarjetas/${id}`);
+    return response;
   }
 };

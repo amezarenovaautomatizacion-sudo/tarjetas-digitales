@@ -5,7 +5,7 @@ import { Plantilla } from '../types';
 
 // Definimos la interfaz para tus tarjetas guardadas
 interface TarjetaPersonal {
-  id: number;
+  tarjetaclienteid: number;
   nombre_tarjeta: string;
   datos: any; // Aquí vienen los campos como puesto, empresa, etc.
   fecha_creacion: string;
@@ -17,13 +17,15 @@ interface TarjetasProps {
   onSolicitarLogin: () => void;
   onIrACuenta: () => void;
   onIrADashboard: () => void;
+  onEditarTarjeta: (tarjeta: any) => void;
 }
 
 const MisTarjetas: React.FC<TarjetasProps> = ({ 
   usuario, 
   onLogout, 
   onSolicitarLogin,
-  onIrACuenta 
+  onIrACuenta,
+  onEditarTarjeta
 }) => {
   const [tarjetas, setTarjetas] = useState<TarjetaPersonal[]>([]);
   const [cargando, setCargando] = useState(true);
@@ -55,16 +57,25 @@ const MisTarjetas: React.FC<TarjetasProps> = ({
   }, [usuario]);
 
   const handleEliminar = async (id: number) => {
-    if (window.confirm('¿Estás seguro de eliminar esta tarjeta?')) {
-      try {
-        await api.delete(`/api/cliente/tarjeta/${id}`);
-        setTarjetas(tarjetas.filter(t => t.id !== id));
-      } catch (error) {
-        alert('No se pudo eliminar la tarjeta');
-      }
+    // 1. Confirmación de seguridad
+    if (!window.confirm("¿Estás seguro de que deseas eliminar esta tarjeta?")) {
+      return;
+    }
+
+    try {
+      // 2. Llamada al servicio
+      await plantillaService.eliminarTarjeta(id);
+      
+      // 3. Actualizar el estado local para quitar la tarjeta de la vista
+      // Asumiendo que tu estado se llama 'tarjetas'
+      setTarjetas(prevTarjetas => prevTarjetas.filter(t => t.tarjetaclienteid !== id));
+      
+      alert("Tarjeta eliminada correctamente.");
+    } catch (error: any) {
+      console.error("Error al eliminar:", error);
+      alert("No se pudo eliminar la tarjeta.");
     }
   };
-
   // Renderizado Condicional: Si estamos editando, mostramos el formulario
   if (tarjetaEditar) {
     return (
@@ -126,7 +137,7 @@ const MisTarjetas: React.FC<TarjetasProps> = ({
               <div className="no-data">No tienes tarjetas creadas aún.</div>
             ) : (
               tarjetas.map((tarjeta) => (
-                <div key={tarjeta.id} className="tarjeta-card">
+                <div key={tarjeta.tarjetaclienteid} className="tarjeta-card">
                   <div className="tarjeta-preview">
                      <i className="bi bi-person-badge"></i>
                   </div>
@@ -136,13 +147,14 @@ const MisTarjetas: React.FC<TarjetasProps> = ({
                     <div className="tarjeta-acciones">
                       <button 
                         className="btn-editar-sm" 
-                        onClick={() => setTarjetaEditar(tarjeta)}
+                        onClick={() => onEditarTarjeta(tarjeta)}
                       >
                         <i className="bi bi-pencil-square"></i> Editar
                       </button>
                       <button 
                         className="btn-eliminar-sm"
-                        onClick={() => handleEliminar(tarjeta.id)}
+                        // CAMBIO CLAVE: Pasar tarjetaclienteid
+                        onClick={() => handleEliminar(tarjeta.tarjetaclienteid)} 
                       >
                         <i className="bi bi-trash"></i>
                       </button>

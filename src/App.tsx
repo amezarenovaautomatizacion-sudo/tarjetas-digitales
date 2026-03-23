@@ -16,6 +16,7 @@ function App() {
   const [vistaActual, setVistaActual] = useState<Vista>('dashboard');
   const { usuario, login, logout, cargando } = useAuth();
   const [plantillaSeleccionada, setPlantillaSeleccionada] = useState<number | null>(null);
+  const [tarjetaAEditar, setTarjetaAEditar] = useState<any | null>(null);
 
   if (cargando) {
     return <div className="cargando-container">Cargando...</div>;
@@ -39,6 +40,11 @@ function App() {
   const entrarAlEditor = (id: number) => {
     setPlantillaSeleccionada(id);
     setVistaActual('editortarjeta');
+  };
+
+  const manejarEditarTarjeta = (tarjeta: any) => {
+    setTarjetaAEditar(tarjeta);      // Guardamos toda la info de la tarjeta
+    setVistaActual('editortarjeta'); // Cambiamos a la vista del editor
   };
 
   return (
@@ -82,6 +88,7 @@ function App() {
             onSolicitarLogin={() => setVistaActual('login')}
             onIrACuenta={irACuenta}
             onIrADashboard={() => setVistaActual('dashboard')} 
+            onEditarTarjeta={manejarEditarTarjeta}
           />
         </div>
       )}
@@ -95,14 +102,29 @@ function App() {
         </div>
       )}
 
-      {vistaActual === 'editortarjeta' && plantillaSeleccionada && (
+      {vistaActual === 'editortarjeta' && (
         <div className="page-container">
           <EditorTarjeta 
-            plantillaId={plantillaSeleccionada}
-            onVolver={() => setVistaActual('dashboard')}
-            // AGREGA ESTAS LÍNEAS QUE SON LAS QUE FALTAN:
+            // PRIORIDAD: Si estamos editando, usamos la plantilla que ya tenía la tarjeta.
+            // Si es nueva, usamos la que el usuario acaba de elegir en el dashboard.
+            plantillaId={tarjetaAEditar ? tarjetaAEditar.plantillaid : plantillaSeleccionada}
+            
+            // El ID de la tarjeta solo se pasa si existe la tarjeta a editar
+            tarjetaId={tarjetaAEditar?.tarjetaclienteid}
+            
+            // Los datos iniciales solo se pasan en edición
+            datosIniciales={tarjetaAEditar?.datos} 
+
+            onVolver={() => {
+                setVistaActual('dashboard');
+                setTarjetaAEditar(null);
+                setPlantillaSeleccionada(null); // Limpiar selección al volver
+            }}
             usuario={usuario} 
-            onIrAMisTarjetas={() => setVistaActual('mistarjetas')}
+            onIrAMisTarjetas={() => {
+                setVistaActual('mistarjetas');
+                setTarjetaAEditar(null);
+            }}
             onIrACuenta={() => setVistaActual('cuenta')}
             onLogout={manejarLogout}
           />

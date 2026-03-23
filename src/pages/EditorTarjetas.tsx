@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
 import { plantillaService } from '../services/plantilla.service';
 import { UsuarioData } from '../types'; // Asegúrate de importar tu tipo de usuario
 
@@ -14,8 +15,9 @@ interface DatosTarjeta {
 
 interface EditorProps {
   plantillaId: number;
-  nombreTarjeta: string;
-  usuario: UsuarioData | null; // Necesario para la sidebar
+  tarjetaId?: number; // Añadimos esto para saber si estamos editando una existente
+  datosIniciales?: DatosTarjeta; // Para cargar los datos que ya tenías
+  usuario: UsuarioData | null;
   color?: string;
   icono?: string;
   onVolver: () => void;
@@ -26,7 +28,8 @@ interface EditorProps {
 
 const EditorTarjeta: React.FC<EditorProps> = ({ 
   plantillaId, 
-  nombreTarjeta,
+  tarjetaId,
+  datosIniciales,
   usuario, 
   color = '#2c3e50', 
   icono = '📇',
@@ -36,14 +39,29 @@ const EditorTarjeta: React.FC<EditorProps> = ({
   onLogout
 }) => {
   const [datos, setDatos] = useState<DatosTarjeta>({
-    nombre: usuario?.nombre || '',
-    apellido: '',
-    puesto: '',
-    empresa: '',
-    email: usuario?.email || '',
-    telefono: '',
-    lema: 'Transformando ideas en realidad'
+    nombre: datosIniciales?.nombre || usuario?.nombre || '',
+    apellido: datosIniciales?.apellido || '',
+    puesto: datosIniciales?.puesto || '',
+    empresa: datosIniciales?.empresa || '',
+    email: datosIniciales?.email || usuario?.email || '',
+    telefono: datosIniciales?.telefono || '',
+    lema: datosIniciales?.lema || 'Transformando ideas en realidad'
   });
+
+  useEffect(() => {
+    if (tarjetaId) {
+      const cargarDatos = async () => {
+        try {
+          const data = await plantillaService.obtenerTarjetaPorId(tarjetaId);
+          // data.datos contiene el JSON con nombre, puesto, etc.
+          setDatos(data.datos); 
+        } catch (error) {
+          console.error("Error al cargar la tarjeta");
+        }
+      };
+      cargarDatos();
+    }
+  }, [tarjetaId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDatos({ ...datos, [e.target.name]: e.target.value });
@@ -51,24 +69,34 @@ const EditorTarjeta: React.FC<EditorProps> = ({
 
   const handleGuardar = async () => {
     try {
-      // Definimos un nombre para la tarjeta (puede ser fijo o un nuevo input)
       const nombreDeLaTarjeta = `Mi tarjeta ${datos.nombre}`; 
 
-      // IMPORTANTE: Envía los 3 parámetros requeridos
-      const response = await plantillaService.guardarTarjeta(
-        plantillaId, 
-        nombreDeLaTarjeta, 
-        datos
-      );
+      if (tarjetaId) {
+        // --- CASO EDICIÓN ---
+        // Si existe tarjetaId, llamamos al método PUT
+        await plantillaService.actualizarTarjeta(
+          tarjetaId, 
+          nombreDeLaTarjeta, 
+          datos
+        );
+        alert("¡Cambios guardados con éxito!");
+      } else {
+        // --- CASO CREACIÓN ---
+        // Si NO existe tarjetaId, llamamos al método POST original
+        await plantillaService.guardarTarjeta(
+          plantillaId, 
+          nombreDeLaTarjeta, 
+          datos
+        );
+        alert("¡Nueva tarjeta creada!");
+      }
       
-      alert("¡Tarjeta guardada con éxito!");
-      onIrAMisTarjetas();
+      onIrAMisTarjetas(); // Regresamos a la lista
     } catch (error: any) {
-      // Esto te ayudará a ver qué campo falta exactamente en el 'data' del error
-      console.error("Error detallado:", error.data || error);
+      console.error("Error al procesar la tarjeta:", error);
+      alert("No se pudo procesar la solicitud.");
     }
   };
-
   return (
     <div className="dashboard-container"> {/* Usamos la misma clase base que el Dashboard */}
       {/* --- SIDEBAR --- */}
