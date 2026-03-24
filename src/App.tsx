@@ -2,21 +2,37 @@ import { useState, useEffect } from 'react';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Registro from './pages/Registro';
+import RegistroAdmin from './pages/registroadmin';
 import MiCuenta from './pages/MiCuenta';
 import MisTarjetas from './pages/MisTarjetas';
 import EditorTarjeta from './pages/EditorTarjetas';
 import RecuperarPassword from './pages/RecuperarPassword';
+import VistaTarjeta from './pages/VistaTarjeta';
 import { useAuth } from './hooks/useAuth';
 import { UsuarioData } from './types';
 import './App.css';
 
-type Vista = 'dashboard' | 'login' | 'registro' | 'cuenta' | 'mistarjetas'|'editortarjeta' |'recuperarpassword';
+type Vista = 'dashboard' | 'login' | 'registro' | 'cuenta' | 'mistarjetas'|'editortarjeta' |'recuperarpassword' | "vistatarjeta" | 'registro-admin';
 
 function App() {
   const [vistaActual, setVistaActual] = useState<Vista>('dashboard');
   const { usuario, login, logout, cargando } = useAuth();
   const [plantillaSeleccionada, setPlantillaSeleccionada] = useState<number | null>(null);
   const [tarjetaAEditar, setTarjetaAEditar] = useState<any | null>(null);
+  const [tarjetaEnVistaPrevia, setTarjetaEnVistaPrevia] = useState<any | null>(null);
+  const [tarjetaSeleccionada, setTarjetaSeleccionada] = useState<any>(null);
+
+  useEffect(() => {
+    // Detectar el parámetro en la URL: localhost:3000/?setup=admin
+    const queryParams = new URLSearchParams(window.location.search);
+    
+    if (queryParams.get('setup') === 'admin') {
+      setVistaActual('registro-admin'); // Cambia a la vista que creamos
+      
+      // Opcional: Limpia la URL para que se vea limpia después de entrar
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   if (cargando) {
     return <div className="cargando-container">Cargando...</div>;
@@ -45,6 +61,15 @@ function App() {
   const manejarEditarTarjeta = (tarjeta: any) => {
     setTarjetaAEditar(tarjeta);      // Guardamos toda la info de la tarjeta
     setVistaActual('editortarjeta'); // Cambiamos a la vista del editor
+  };
+
+  const manejarVerTarjeta = (tarjeta: any) => {
+    if (tarjeta && tarjeta.slug) {
+      console.log("Abriendo vista para el slug:", tarjeta.slug); // Para depurar
+      setTarjetaSeleccionada(tarjeta);
+    } else {
+      alert("Esta tarjeta no tiene un slug configurado en la base de datos.");
+    }
   };
 
   return (
@@ -89,6 +114,7 @@ function App() {
             onIrACuenta={irACuenta}
             onIrADashboard={() => setVistaActual('dashboard')} 
             onEditarTarjeta={manejarEditarTarjeta}
+            onVerTarjeta={manejarVerTarjeta}
           />
         </div>
       )}
@@ -102,10 +128,27 @@ function App() {
         </div>
       )}
 
+      {vistaActual === 'registro-admin' && (
+        <div className="page-container">
+          <RegistroAdmin
+            alFinalizar={() => setVistaActual('login')}
+            irALogin={() => setVistaActual('login')}
+          />
+        </div>
+      )}
+
       {vistaActual === 'editortarjeta' && (
         <div className="page-container">
           <EditorTarjeta 
+            plantillaId={tarjetaAEditar ? tarjetaAEditar.plantillaid : plantillaSeleccionada}
+            tarjetaId={tarjetaAEditar?.tarjetaclienteid}
+            datosIniciales={tarjetaAEditar?.datos} 
 
+            onVolver={() => {
+                setVistaActual('dashboard');
+                setTarjetaAEditar(null);
+                setPlantillaSeleccionada(null); 
+            }}
             usuario={usuario} 
             onIrAMisTarjetas={() => {
                 setVistaActual('mistarjetas');
@@ -115,6 +158,13 @@ function App() {
             onLogout={manejarLogout}
           />
         </div>
+      )}
+      
+      {tarjetaSeleccionada && (
+        <VistaTarjeta 
+          slug={tarjetaSeleccionada.slug} 
+          onCerrar={() => setTarjetaSeleccionada(null)} 
+        />
       )}
 
       {vistaActual === 'recuperarpassword' && (

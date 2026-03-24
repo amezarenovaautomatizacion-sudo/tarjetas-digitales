@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { authService } from '../services/auth.service';
 import { usuarioService } from '../services/usuario.service';
-import { UsuarioData, LoginCredentials, RegisterData } from '../types';
+import { UsuarioData, LoginCredentials, RegisterData,RegisterAdminData } from '../types';
 
 export const useAuth = () => {
   const [usuario, setUsuario] = useState<UsuarioData | null>(null);
@@ -39,6 +39,22 @@ export const useAuth = () => {
     }
   }, []);
 
+  const loginEmpleado = useCallback(async (credentials: LoginCredentials) => {
+    try {
+      setCargando(true);
+      setError(null);
+      // Llamamos al método que vimos en tu captura de pantalla
+      const response = await authService.login_empleados(credentials);
+      setUsuario(response.usuario);
+      return response;
+    } catch (err: any) {
+      setError(err.message || 'Error en acceso administrativo');
+      throw err;
+    } finally {
+      setCargando(false);
+    }
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await authService.logout();
@@ -53,6 +69,21 @@ export const useAuth = () => {
       setCargando(true);
       setError(null);
       const response = await authService.registerCliente(data);
+      return response;
+    } catch (err: any) {
+      setError(err.message || 'Error al registrar');
+      throw err;
+    } finally {
+      setCargando(false);
+    }
+  }, []);
+
+  const registerEmpleado = useCallback(async (data: RegisterAdminData) => {
+    try {
+      setCargando(true);
+      setError(null);
+      // Asegúrate de que authService tenga el método registerAdmin
+      const response = await authService.registerAdmin(data); 
       return response;
     } catch (err: any) {
       setError(err.message || 'Error al registrar');
@@ -82,8 +113,10 @@ export const useAuth = () => {
     cargando,
     error,
     login,
+    loginEmpleado,
     logout,
     register,
+    registerEmpleado,
     actualizarPerfil,
     isAuthenticated: !!usuario,
   };

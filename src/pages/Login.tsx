@@ -23,7 +23,8 @@ const Login: React.FC<LoginProps> = ({ onLogin, irARegistro, irADashboard, irARe
   const [ipAddress, setIpAddress] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [mostrarPassword, setMostrarPassword] = useState<boolean>(false);
-  const { login, cargando } = useAuth();
+  const { login, loginEmpleado, cargando } = useAuth();
+  const [esAdmin, setEsAdmin] = useState<boolean>(false);
 
   // Obtener IP al montar el componente
   useEffect(() => {
@@ -47,16 +48,21 @@ const Login: React.FC<LoginProps> = ({ onLogin, irARegistro, irADashboard, irARe
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      // Agregar la IP a los datos de login
-      const datosLogin = {
-        ...loginData,
-        ip_ultimo_login: ipAddress
-      };
+      const datosLogin = { ...loginData, ip_ultimo_login: ipAddress };
       
-      const response = await login(datosLogin);
-      onLogin(response.usuario);
-    } catch (err: any) {
-      setError(err.message || 'Credenciales inválidas');
+      let response;
+      
+      // OPCIÓN A: Intentar login de empleado primero si falla el de cliente
+      // OPCIÓN B: Usar una lógica de dominio (ejemplo abajo)
+      if (esAdmin) {
+        const respuesta = await loginEmpleado(datosLogin); // Usa el endpoint /api/login
+        onLogin(respuesta.usuario);
+      } else {
+        const respuesta = await login(datosLogin); // Usa /api/cliente/login
+        onLogin(respuesta.usuario);
+      }
+    } catch (err) {
+      setError("Credenciales inválidas para este tipo de acceso");
     }
   };
 
@@ -110,6 +116,20 @@ const Login: React.FC<LoginProps> = ({ onLogin, irARegistro, irADashboard, irARe
               <i className={`bi ${mostrarPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
             </button>
           </div>
+        </div>
+
+        <div className="flex items-center gap-2 my-4 p-2 bg-gray-100 rounded">
+          <label>
+            <i className="bi bi-lock"></i> Eres administrador?
+          </label>
+          <input 
+            type="checkbox" 
+            id="admin-toggle"
+            checked={esAdmin}
+            onChange={(e) => setEsAdmin(e.target.checked)}
+            className="w-4 h-4 cursor-pointer"
+          />
+          
         </div>
 
         {/* IP oculta (no visible para el usuario) */}

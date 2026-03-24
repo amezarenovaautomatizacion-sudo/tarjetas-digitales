@@ -1,5 +1,5 @@
 import { api } from './api';
-import { UsuarioData, LoginCredentials, RegisterData, AuthResponse } from '../types';
+import { UsuarioData, LoginCredentials, RegisterData, AuthResponse, RegisterAdminData } from '../types';
 
 export const authService = {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
@@ -22,6 +22,12 @@ export const authService = {
     const response = await api.post<AuthResponse>('/api/cliente/register', data);
     return response;
   },
+
+  async registerAdmin(data: RegisterAdminData): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>('/api/register', data);
+    return response;
+  },
+
 
   async logout(): Promise<void> {
     api.removeToken();

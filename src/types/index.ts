@@ -100,3 +100,10 @@ export interface RespuestaPublica {
     bootstrap_version: string;
   };
 }
+
+export interface RegisterAdminData {
+  nombre: string;
+  email: string;
+  password: string;
+  ip_registro: string; // La IP es obligatoria según tu documentación
+}
