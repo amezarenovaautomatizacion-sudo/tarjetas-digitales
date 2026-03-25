@@ -101,7 +101,7 @@ export interface RespuestaPublica {
   };
 }
 
-export interface RegisterAdminData {
+export interface RegisterAdminDatas {
   nombre: string;
   email: string;
   password: string;

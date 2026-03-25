@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Registro from './pages/Registro';
-import RegistroAdmin from './pages/registroadmin';
+import RegistroAdmin from './pages/RegistroAdmin';
 import MiCuenta from './pages/MiCuenta';
 import MisTarjetas from './pages/MisTarjetas';
 import EditorTarjeta from './pages/EditorTarjetas';
