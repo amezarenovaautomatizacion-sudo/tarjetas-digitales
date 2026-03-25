@@ -66,6 +66,7 @@ export const plantillaService = {
     return response;
   },
 
+
   async obtenerTarjetaPublica(slug: string): Promise<any> { 
     const response = await api.get(`/api/tarjetas/publicas/${slug}`);
     return response; // Aquí es donde se origina el tipo que causa el conflicto

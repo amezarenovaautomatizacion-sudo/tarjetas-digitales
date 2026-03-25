@@ -73,16 +73,17 @@ export interface DatosTarjeta {
   empresa: string;
   email: string;
   telefono: string;
-  telefono_movil?: string;
-  sitio_web?: string;
-  direccion?: string;
-  ciudad?: string;
-  estado?: string;
-  codigo_postal?: string;
-  pais?: string;
+  telefono_movil: string;
+  sitio_web: string;
+  direccion: string;
+  ciudad: string;
+  estado: string;
+  codigo_postal: string;
+  pais: string;
   linkedin?: string;
   twitter?: string;
   instagram?: string;
+  qr_url?: string;
   lema?: string;
 }
 
@@ -101,7 +102,7 @@ export interface RespuestaPublica {
   };
 }
 
-export interface RegisterAdminDatas {
+export interface RegisterAdminData {
   nombre: string;
   email: string;
   password: string;

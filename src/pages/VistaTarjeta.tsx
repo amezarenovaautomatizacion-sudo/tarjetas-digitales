@@ -19,10 +19,11 @@ const estilosBase: React.CSSProperties = {
 
 interface VistaTarjetaProps {
   slug: string; // Recibimos el slug para usar el método público
+  datos: any;
   onCerrar: () => void;
 }
 
-const VistaTarjeta: React.FC<VistaTarjetaProps> = ({ slug, onCerrar }) => {
+const VistaTarjeta: React.FC<VistaTarjetaProps> = ({ slug, datos, onCerrar }) => {
   const [renderData, setRenderData] = useState<RespuestaPublica['renderizado'] | null>(null);
   const [cargando, setCargando] = useState(true);
 

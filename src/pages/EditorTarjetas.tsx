@@ -10,7 +10,18 @@ interface DatosTarjeta {
   empresa: string;
   email: string;
   telefono: string;
-  lema: string;
+  telefono_movil: string;
+  sitio_web: string;
+  direccion: string;
+  ciudad: string;
+  estado: string;
+  codigo_postal: string;
+  pais: string;
+  linkedin?: string;
+  twitter?: string;
+  instagram?: string;
+  qr_url?: string;
+  lema?: string;
 }
 
 interface EditorProps {
@@ -45,9 +56,19 @@ const EditorTarjeta: React.FC<EditorProps> = ({
     empresa: datosIniciales?.empresa || '',
     email: datosIniciales?.email || usuario?.email || '',
     telefono: datosIniciales?.telefono || '',
+    telefono_movil: datosIniciales?.telefono_movil || '',
+    sitio_web: datosIniciales?.sitio_web || '',
+    direccion: datosIniciales?.direccion || '',
+    ciudad: datosIniciales?.ciudad || '',
+    estado: datosIniciales?.estado || '',
+    codigo_postal: datosIniciales?.codigo_postal || '',
+    pais: datosIniciales?.pais || '',
+    linkedin: datosIniciales?.linkedin || '',
+    twitter: datosIniciales?.twitter || '',
+    instagram: datosIniciales?.instagram || '',
+    qr_url: datosIniciales?.qr_url || '',
     lema: datosIniciales?.lema || 'Transformando ideas en realidad'
   });
-
   useEffect(() => {
     if (tarjetaId) {
       const cargarDatos = async () => {
@@ -63,7 +84,7 @@ const EditorTarjeta: React.FC<EditorProps> = ({
     }
   }, [tarjetaId]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setDatos({ ...datos, [e.target.name]: e.target.value });
   };
 
@@ -143,20 +164,40 @@ const EditorTarjeta: React.FC<EditorProps> = ({
           {/* PANEL IZQUIERDO: FORMULARIO */}
           <div className="editor-panel">
             <h3>Personaliza tu Diseño</h3>
-            <div className="form-grid">
-              <input name="nombre" value={datos.nombre} placeholder="Nombre" onChange={handleChange} />
-              <input name="apellido" placeholder="Apellido" onChange={handleChange} />
-              <input name="puesto" placeholder="Puesto / Profesión" onChange={handleChange} />
-              <input name="empresa" placeholder="Empresa" onChange={handleChange} />
-              <input name="email" value={datos.email} placeholder="Correo Electrónico" onChange={handleChange} />
-              <input name="telefono" placeholder="Teléfono" onChange={handleChange} />
-              <textarea 
-                name="lema" 
-                placeholder="Frase o Lema" 
-                onChange={(e: any) => setDatos({...datos, lema: e.target.value})}
-                className="full-width"
-              />
-            </div>
+              <div className="form-grid">
+                {/* Datos Principales */}
+                <input name="nombre" value={datos.nombre} placeholder="Nombre" onChange={handleChange} />
+                <input name="apellido" value={datos.apellido} placeholder="Apellido" onChange={handleChange} />
+                <input name="puesto" value={datos.puesto} placeholder="Puesto / Profesión" onChange={handleChange} />
+                <input name="empresa" value={datos.empresa} placeholder="Empresa" onChange={handleChange} />
+                <input name="email" value={datos.email} placeholder="Correo Electrónico" onChange={handleChange} />
+                
+                {/* Teléfonos */}
+                <input name="telefono" value={datos.telefono} placeholder="Teléfono Oficina" onChange={handleChange} />
+                <input name="telefono_movil" value={datos.telefono_movil} placeholder="Teléfono Móvil" onChange={handleChange} />
+
+                {/* Ubicación y Web */}
+                <input name="sitio_web" value={datos.sitio_web} placeholder="Sitio Web (ej: www.web.com)" onChange={handleChange} />
+                <input name="direccion" value={datos.direccion} placeholder="Dirección" onChange={handleChange} />
+                <input name="Codigo postal" value={datos.codigo_postal} placeholder="Codigo postal" onChange={handleChange} />
+                <input name="ciudad" value={datos.ciudad} placeholder="Ciudad" onChange={handleChange} />
+                <input name="estado" value={datos.estado} placeholder="Estado / Provincia" onChange={handleChange} />
+                <input name="pais" value={datos.pais} placeholder="País" onChange={handleChange} />
+
+                {/* Redes Sociales */}
+                <input name="linkedin" value={datos.linkedin} placeholder="URL LinkedIn" onChange={handleChange} />
+                <input name="instagram" value={datos.instagram} placeholder="Usuario Instagram" onChange={handleChange} />
+                <input name="twitter" value={datos.twitter} placeholder="Usuario Twitter" onChange={handleChange} />
+
+                {/* Lema (Usando handleChange para consistencia) */}
+                <textarea 
+                  name="lema" 
+                  value={datos.lema}
+                  placeholder="Frase o Lema" 
+                  onChange={handleChange}
+                  className="full-width"
+                />
+              </div>
             <button onClick={handleGuardar} className="btn-save">
               <i className="bi bi-check-circle"></i> Confirmar y Guardar
             </button>
