@@ -26,27 +26,24 @@ export interface Plantilla {
   activo?: number;
 }
 
-export interface PlantillaDetalle extends Plantilla {
-  html_content: string;
-  css_content: string;
-  usa_bootstrap: number;
-  usa_bootstrap_icons: number;
-  bootstrap_version: string;
-  variables_requeridas: Variable[];
-}
-
-export interface PreviewResponse {
-  html_preview: string;
-  css_preview: string;
-  usa_bootstrap: boolean;
-  usa_bootstrap_icons: boolean;
-  bootstrap_version: string;
-}
-
-export interface ApiResponse<T> {
-  data?: T;
-  error?: string;
-  message?: string;
+export interface DatosTarjeta {
+  nombre: string;
+  apellido: string;
+  puesto: string;
+  empresa: string;
+  email: string;
+  telefono: string;
+  telefono_movil?: string;
+  sitio_web?: string;
+  direccion?: string;
+  ciudad?: string;
+  estado?: string;
+  codigo_postal?: string;
+  pais?: string;
+  linkedin?: string;
+  twitter?: string;
+  instagram?: string;
+  lema?: string;
 }
 
 export interface TarjetaCliente {
@@ -65,6 +62,15 @@ export interface TarjetaDetalle extends TarjetaCliente {
   renderizado?: {
     html: string;
     css: string;
+    usa_bootstrap: boolean;
+    usa_bootstrap_icons: boolean;
+    bootstrap_version: string;
   };
-  plantilla_detalle?: PlantillaDetalle;
+}
+
+export interface RegisterAdminDatas {
+  nombre: string;
+  email: string;
+  password: string;
+  ip_registro: string; // La IP es obligatoria según tu documentación
 }
