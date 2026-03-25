@@ -1,4 +1,3 @@
-// src/hooks/useTarjetas.ts
 import { useState, useEffect, useCallback } from 'react';
 import { TarjetaCliente, TarjetaDetalle } from '../types';
 import { tarjetaService } from '../services/tarjeta.service';
@@ -55,8 +54,11 @@ export const useTarjetaDetalle = (id?: number, slug?: string) => {
       if (!id && !slug) return;
       setLoading(true);
       const response = id ? await tarjetaService.obtener(id) : slug ? await tarjetaService.obtenerPublica(slug) : null;
-      if (response?.error) setError(response.error);
-      else if (response?.data) setTarjeta(response.data);
+      if (response?.error) {
+        setError(response.error);
+      } else if (response?.data) {
+        setTarjeta(response.data as TarjetaDetalle);
+      }
       setLoading(false);
     };
     fetch();

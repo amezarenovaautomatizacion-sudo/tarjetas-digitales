@@ -1,4 +1,3 @@
-// src/hooks/useAuth.ts
 import { useState, useEffect, useCallback } from 'react';
 import { authService } from '../services/auth.service';
 
@@ -21,7 +20,9 @@ export const useAuth = () => {
       setCargando(true);
       setError(null);
       const response = await authService.login(credentials);
-      setUsuario(response.usuario);
+      if (response.data) {
+        setUsuario(response.data.usuario);
+      }
       return response;
     } catch (err: any) {
       setError(err.message || 'Error al iniciar sesión');

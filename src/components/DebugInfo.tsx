@@ -8,7 +8,7 @@ interface DebugInfoProps {
 }
 
 const DebugInfo: React.FC<DebugInfoProps> = ({ plantillas, loading, error, apiUrl }) => {
-  if (process.env.NODE_ENV === 'production') return null;
+  if (import.meta.env.NODE_ENV === 'production') return null;
 
   return (
     <div style={{

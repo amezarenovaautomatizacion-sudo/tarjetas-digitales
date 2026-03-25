@@ -1,4 +1,3 @@
-// src/pages/PerfilPage.tsx
 import React, { useState, useEffect } from 'react';
 import { authService } from '../services/auth.service';
 import { obtenerIpPublica } from '../utils/ipUtils';
@@ -8,11 +7,23 @@ interface PerfilPageProps {
   onBack: () => void;
 }
 
+interface PerfilData {
+  nombre?: string;
+  email?: string;
+  telefono?: string;
+  calle?: string;
+  numero_exterior?: string;
+  colonia?: string;
+  ciudad?: string;
+  estado?: string;
+  codigo_postal?: string;
+}
+
 const PerfilPage: React.FC<PerfilPageProps> = ({ onBack }) => {
   const [perfil, setPerfil] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [editando, setEditando] = useState(false);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState<PerfilData>({});
   const [passwordData, setPasswordData] = useState({ password_actual: '', password_nuevo: '' });
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
