@@ -1,90 +1,52 @@
-const API_URL: string = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// src/services/api.ts
+import { Plantilla, PlantillaDetalle, PreviewResponse, Variable, ApiResponse } from '../types';
 
-class ApiClient {
-  private baseURL: string;
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api-tarjetas.vercel.app';
 
-  constructor(baseURL: string) {
-    this.baseURL = baseURL;
-  }
-
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
-    const url = `${this.baseURL}${endpoint}`;
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      ...options.headers as Record<string, string>,
-    };
-
-    const token = localStorage.getItem('token');
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    const config: RequestInit = {
-      ...options,
-      headers,
-    };
-
+class ApiService {
+  private async request<T>(endpoint: string, options?: RequestInit): Promise<ApiResponse<T>> {
     try {
-      const response = await fetch(url, config);
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, { 
+        ...options, 
+        headers: { 'Content-Type': 'application/json', ...options?.headers } 
+      });
       const data = await response.json();
-
-      if (!response.ok) {
-        throw {
-          status: response.status,
-          message: data.message || 'Error en la petición',
-          data: data,
-        };
-      }
-
-      return data as T;
-    } catch (error) {
-      if (error instanceof Error) {
-        throw {
-          status: 500,
-          message: error.message || 'Error de conexión',
-        };
-      }
-      throw error;
+      if (!response.ok) return { error: data.error || data.message || `Error ${response.status}` };
+      return { data };
+    } catch {
+      return { error: 'Error de conexión' };
     }
   }
 
-  async get<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'GET' });
+  async getPlantillas(params?: { categoriaid?: number; activo?: boolean }) {
+    let url = '/api/plantillas';
+    const queryParams = new URLSearchParams();
+    if (params?.categoriaid) queryParams.append('categoriaid', params.categoriaid.toString());
+    if (params?.activo !== undefined) queryParams.append('activo', params.activo ? '1' : '0');
+    if (queryParams.toString()) url += `?${queryParams.toString()}`;
+    return this.request<{ plantillas: Plantilla[] }>(url);
   }
 
-  async post<T>(endpoint: string, body: any): Promise<T> {
-    return this.request<T>(endpoint, {
-      method: 'POST',
-      body: JSON.stringify(body),
+  async getPlantillaById(id: number) {
+    return this.request<{ plantilla: PlantillaDetalle }>(`/api/plantillas/${id}`);
+  }
+
+  async getPlantillaBySlug(slug: string) {
+    return this.request<{ plantilla: PlantillaDetalle }>(`/api/plantillas/${slug}`);
+  }
+
+  async getPreview(id: number, datos: Record<string, string>) {
+    return this.request<PreviewResponse>(`/api/plantillas/${id}/preview`, { 
+      method: 'POST', 
+      body: JSON.stringify({ datos }) 
     });
   }
 
-  async put<T>(endpoint: string, body: any): Promise<T> {
-    return this.request<T>(endpoint, {
-      method: 'PUT',
-      body: JSON.stringify(body),
-    
-    });
-  }
-
-  async delete<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'DELETE' });
-  }
-
-  setToken(token: string): void {
-    localStorage.setItem('token', token);
-  }
-
-  removeToken(): void {
-    localStorage.removeItem('token');
-  }
-
-  getToken(): string | null {
-    return localStorage.getItem('token');
+  async getVariables(activo?: boolean) {
+    let url = '/api/variables';
+    if (activo !== undefined) url += `?activo=${activo ? '1' : '0'}`;
+    return this.request<{ variables: Variable[] }>(url);
   }
 }
 
-export const api = new ApiClient(API_URL);
+export const api = new ApiService();

@@ -1,3 +1,4 @@
+// src/utils/ipUtils.ts
 export const obtenerIpPublica = async (): Promise<string> => {
   try {
     const response = await fetch('https://api.ipify.org?format=json');

@@ -1,181 +1,88 @@
-import { useState, useEffect } from 'react';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import Registro from './pages/Registro';
-import RegistroAdmin from './pages/RegistroAdmin';
-import MiCuenta from './pages/MiCuenta';
-import MisTarjetas from './pages/MisTarjetas';
-import EditorTarjeta from './pages/EditorTarjetas';
-import RecuperarPassword from './pages/RecuperarPassword';
-import VistaTarjeta from './pages/VistaTarjeta';
-import { useAuth } from './hooks/useAuth';
-import { UsuarioData } from './types';
-import './App.css';
+// src/App.tsx
+import React, { useState, useEffect } from 'react';
+import Layout from './components/Layout';
+import HomePage from './pages/HomePage';
+import PlantillasPage from './pages/PlantillasPage';
+import PricingPlans from './components/PricingPlans';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import DashboardPage from './pages/DashboardPage';
+import PlantillaDetailPage from './pages/PlantillaDetailPage';
+import TarjetaPublicaPage from './pages/TarjetaPublicaPage';
+import AdminPlantillasPage from './pages/AdminPlantillasPage';
+import PerfilPage from './pages/PerfilPage';
+import ErrorBoundary from './components/ErrorBoundary';
+import './styles/global.css';
+import './styles/custom-bootstrap.scss';
 
-type Vista = 'dashboard' | 'login' | 'registro' | 'cuenta' | 'mistarjetas'|'editortarjeta' |'recuperarpassword' | "vistatarjeta" | 'registro-admin';
-
-function App() {
-  const [vistaActual, setVistaActual] = useState<Vista>('dashboard');
-  const { usuario, login, logout, cargando } = useAuth();
-  const [plantillaSeleccionada, setPlantillaSeleccionada] = useState<number | null>(null);
-  const [tarjetaAEditar, setTarjetaAEditar] = useState<any | null>(null);
-  const [tarjetaEnVistaPrevia, setTarjetaEnVistaPrevia] = useState<any | null>(null);
-  const [tarjetaSeleccionada, setTarjetaSeleccionada] = useState<any>(null);
+const App: React.FC = () => {
+  const [currentPage, setCurrentPage] = useState('home');
+  const [selectedPlantillaId, setSelectedPlantillaId] = useState<number | null>(null);
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
+  const [userType, setUserType] = useState<string | null>(null);
 
   useEffect(() => {
-    // Detectar el parámetro en la URL: localhost:3000/?setup=admin
-    const queryParams = new URLSearchParams(window.location.search);
-    
-    if (queryParams.get('setup') === 'admin') {
-      setVistaActual('registro-admin'); // Cambia a la vista que creamos
-      
-      // Opcional: Limpia la URL para que se vea limpia después de entrar
-      window.history.replaceState({}, document.title, window.location.pathname);
+    const token = localStorage.getItem('token');
+    const type = localStorage.getItem('userType');
+    if (token && type) {
+      setUserType(type);
     }
   }, []);
 
-  if (cargando) {
-    return <div className="cargando-container">Cargando...</div>;
-  }
-
-  const manejarLoginExitoso = (datos: UsuarioData) => {
-    localStorage.setItem('usuario', JSON.stringify(datos));
-    setVistaActual('dashboard');
+  const navigateTo = (page: string, plantillaId?: number, slug?: string) => {
+    setCurrentPage(page);
+    if (plantillaId) setSelectedPlantillaId(plantillaId);
+    if (slug) setSelectedSlug(slug);
   };
 
-  const manejarLogout = () => {
-    logout();
-    setVistaActual('login');
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userType');
+    localStorage.removeItem('userData');
+    setUserType(null);
+    navigateTo('home');
   };
 
-  const irACuenta = () => {
-    if (usuario) setVistaActual('cuenta');
-    else setVistaActual('login');
-  };
-
-  const entrarAlEditor = (id: number) => {
-    setPlantillaSeleccionada(id);
-    setVistaActual('editortarjeta');
-  };
-
-  const manejarEditarTarjeta = (tarjeta: any) => {
-    setTarjetaAEditar(tarjeta);      // Guardamos toda la info de la tarjeta
-    setVistaActual('editortarjeta'); // Cambiamos a la vista del editor
-  };
-
-  const manejarVerTarjeta = (tarjeta: any) => {
-    if (tarjeta && tarjeta.slug) {
-      console.log("Abriendo vista para el slug:", tarjeta.slug); // Para depurar
-      setTarjetaSeleccionada(tarjeta);
-    } else {
-      alert("Esta tarjeta no tiene un slug configurado en la base de datos.");
+  const renderContent = () => {
+    switch (currentPage) {
+      case 'home':
+        return <HomePage onPlantillaClick={(id) => navigateTo('plantilla-detail', id)} />;
+      case 'plantillas':
+        return <PlantillasPage onPlantillaClick={(id) => navigateTo('plantilla-detail', id)} />;
+      case 'precios':
+        return <PricingPlans />;
+      case 'login':
+        return <LoginPage onLoginSuccess={(type) => { setUserType(type); navigateTo('dashboard'); }} />;
+      case 'register':
+        return <RegisterPage onRegisterSuccess={() => navigateTo('login')} />;
+      case 'dashboard':
+        return <DashboardPage onPlantillaClick={(id) => navigateTo('plantilla-detail', id)} onTarjetaPublicaClick={(slug) => navigateTo('tarjeta-publica', undefined, slug)} />;
+      case 'admin-plantillas':
+        return userType === 'admin' ? <AdminPlantillasPage onPlantillaClick={(id) => navigateTo('plantilla-detail', id)} /> : <HomePage onPlantillaClick={(id) => navigateTo('plantilla-detail', id)} />;
+      case 'plantilla-detail':
+        return selectedPlantillaId ? <PlantillaDetailPage plantillaId={selectedPlantillaId} onBack={() => navigateTo('plantillas')} /> : null;
+      case 'tarjeta-publica':
+        return selectedSlug ? <TarjetaPublicaPage slug={selectedSlug} onBack={() => navigateTo('home')} /> : null;
+      case 'perfil':
+        return <PerfilPage onBack={() => navigateTo('dashboard')} />;
+      default:
+        return <HomePage onPlantillaClick={(id) => navigateTo('plantilla-detail', id)} />;
     }
   };
 
   return (
-    <div className="App">
-      {vistaActual === 'dashboard' && (
-        <Dashboard
-          usuario={usuario}
-          onLogout={manejarLogout}
-          onSolicitarLogin={() => setVistaActual('login')}
-          onIrACuenta={irACuenta}
-          onIrAMisTarjetas={() => setVistaActual('mistarjetas')}
-          onSeleccionarPlantilla={entrarAlEditor}
-        />
-      )}
-      
-      {vistaActual === 'cuenta' && usuario && (
-        <MiCuenta 
-          usuarioActual={usuario} 
-          onLogout={manejarLogout}
-          onVolver={() => setVistaActual('dashboard')}
-          onIrAMisTarjetas={() => setVistaActual('mistarjetas')}
-        />
-      )}
-
-      {vistaActual === 'login' && (
-        <div className="page-container">
-          <Login
-            onLogin={manejarLoginExitoso}
-            irARegistro={() => setVistaActual('registro')}
-            irADashboard={() => setVistaActual('dashboard')}
-            irARecuperarPassword={() => setVistaActual('recuperarpassword')}
-          />
-        </div>
-      )}
-
-      {vistaActual === 'mistarjetas' && (
-        <div className="page-container">
-          <MisTarjetas
-            usuario={usuario} 
-            onLogout={manejarLogout}
-            onSolicitarLogin={() => setVistaActual('login')}
-            onIrACuenta={irACuenta}
-            onIrADashboard={() => setVistaActual('dashboard')} 
-            onEditarTarjeta={manejarEditarTarjeta}
-            onVerTarjeta={manejarVerTarjeta}
-          />
-        </div>
-      )}
-
-      {vistaActual === 'registro' && (
-        <div className="page-container">
-          <Registro
-            alFinalizar={() => setVistaActual('login')}
-            irALogin={() => setVistaActual('login')}
-          />
-        </div>
-      )}
-
-      {vistaActual === 'registro-admin' && (
-        <div className="page-container">
-          <RegistroAdmin
-            alFinalizar={() => setVistaActual('login')}
-            irALogin={() => setVistaActual('login')}
-          />
-        </div>
-      )}
-
-      {vistaActual === 'editortarjeta' && (
-        <div className="page-container">
-          <EditorTarjeta 
-            plantillaId={tarjetaAEditar ? tarjetaAEditar.plantillaid : plantillaSeleccionada}
-            tarjetaId={tarjetaAEditar?.tarjetaclienteid}
-            datosIniciales={tarjetaAEditar?.datos} 
-
-            onVolver={() => {
-                setVistaActual('dashboard');
-                setTarjetaAEditar(null);
-                setPlantillaSeleccionada(null); 
-            }}
-            usuario={usuario} 
-            onIrAMisTarjetas={() => {
-                setVistaActual('mistarjetas');
-                setTarjetaAEditar(null);
-            }}
-            onIrACuenta={() => setVistaActual('cuenta')}
-            onLogout={manejarLogout}
-          />
-        </div>
-      )}
-      
-      {tarjetaSeleccionada && (
-        <VistaTarjeta 
-          slug={tarjetaSeleccionada.slug} 
-          onCerrar={() => setTarjetaSeleccionada(null)} 
-        />
-      )}
-
-      {vistaActual === 'recuperarpassword' && (
-        <div className="page-container">
-          <RecuperarPassword 
-            onVolver={() => setVistaActual('login')} 
-          />
-        </div>
-      )}
-    </div>
+    <ErrorBoundary>
+      <Layout
+        userType={userType}
+        isAuthenticated={!!userType}
+        onLogout={handleLogout}
+        onNavigate={navigateTo}
+        currentPage={currentPage}
+      >
+        {renderContent()}
+      </Layout>
+    </ErrorBoundary>
   );
-}
+};
 
 export default App;

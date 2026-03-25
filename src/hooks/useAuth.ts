@@ -1,30 +1,22 @@
+// src/hooks/useAuth.ts
 import { useState, useEffect, useCallback } from 'react';
 import { authService } from '../services/auth.service';
-import { usuarioService } from '../services/usuario.service';
-import { UsuarioData, LoginCredentials, RegisterData,RegisterAdminData } from '../types';
 
 export const useAuth = () => {
-  const [usuario, setUsuario] = useState<UsuarioData | null>(null);
+  const [usuario, setUsuario] = useState<any>(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    verificarSesion();
+    const token = localStorage.getItem('token');
+    const userData = localStorage.getItem('userData');
+    if (token && userData) {
+      setUsuario(JSON.parse(userData));
+    }
+    setCargando(false);
   }, []);
 
-  const verificarSesion = async () => {
-    try {
-      setCargando(true);
-      const usuarioActual = await authService.getCurrentUser();
-      setUsuario(usuarioActual);
-    } catch (err) {
-      setError('Error al verificar sesión');
-    } finally {
-      setCargando(false);
-    }
-  };
-
-  const login = useCallback(async (credentials: LoginCredentials) => {
+  const login = useCallback(async (credentials: { email: string; password: string; tipo?: string }) => {
     try {
       setCargando(true);
       setError(null);
@@ -39,85 +31,10 @@ export const useAuth = () => {
     }
   }, []);
 
-  const loginEmpleado = useCallback(async (credentials: LoginCredentials) => {
-    try {
-      setCargando(true);
-      setError(null);
-      // Llamamos al método que vimos en tu captura de pantalla
-      const response = await authService.login_empleados(credentials);
-      setUsuario(response.usuario);
-      return response;
-    } catch (err: any) {
-      setError(err.message || 'Error en acceso administrativo');
-      throw err;
-    } finally {
-      setCargando(false);
-    }
+  const logout = useCallback(() => {
+    authService.logout();
+    setUsuario(null);
   }, []);
 
-  const logout = useCallback(async () => {
-    try {
-      await authService.logout();
-      setUsuario(null);
-    } catch (err: any) {
-      setError(err.message || 'Error al cerrar sesión');
-    }
-  }, []);
-
-  const register = useCallback(async (data: RegisterData) => {
-    try {
-      setCargando(true);
-      setError(null);
-      const response = await authService.registerCliente(data);
-      return response;
-    } catch (err: any) {
-      setError(err.message || 'Error al registrar');
-      throw err;
-    } finally {
-      setCargando(false);
-    }
-  }, []);
-
-  const registerEmpleado = useCallback(async (data: RegisterAdminData) => {
-    try {
-      setCargando(true);
-      setError(null);
-      // Asegúrate de que authService tenga el método registerAdmin
-      const response = await authService.registerAdmin(data); 
-      return response;
-    } catch (err: any) {
-      setError(err.message || 'Error al registrar');
-      throw err;
-    } finally {
-      setCargando(false);
-    }
-  }, []);
-
-  const actualizarPerfil = useCallback(async (data: Partial<UsuarioData>) => {
-    try {
-      setCargando(true);
-      setError(null);
-      const usuarioActualizado = await usuarioService.actualizarPerfil(data);
-      setUsuario(usuarioActualizado);
-      return usuarioActualizado;
-    } catch (err: any) {
-      setError(err.message || 'Error al actualizar perfil');
-      throw err;
-    } finally {
-      setCargando(false);
-    }
-  }, []);
-
-  return {
-    usuario,
-    cargando,
-    error,
-    login,
-    loginEmpleado,
-    logout,
-    register,
-    registerEmpleado,
-    actualizarPerfil,
-    isAuthenticated: !!usuario,
-  };
+  return { usuario, cargando, error, login, logout, isAuthenticated: !!usuario };
 };
