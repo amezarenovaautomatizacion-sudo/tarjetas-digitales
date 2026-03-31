@@ -1,24 +1,26 @@
-// src/services/auth.service.ts
-import { ApiResponse } from '../types';
-
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api-tarjetas.vercel.app';
 
 class AuthService {
-  private async request<T>(endpoint: string, options?: RequestInit): Promise<ApiResponse<T>> {
+  private async request<T>(endpoint: string, options?: RequestInit): Promise<{ data?: T; error?: string }> {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         ...options,
-        headers: { 
-          'Content-Type': 'application/json', 
-          ...(token ? { Authorization: `Bearer ${token}` } : {}), 
-          ...options?.headers 
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...options?.headers
         }
       });
-      
       const data = await response.json();
+      console.log(`Respuesta de ${endpoint}:`, { status: response.status, data });
       
+      // IMPORTANTE: Devolver los datos incluso si no es 200 (para 2FA)
       if (!response.ok) {
+        // Si hay datos, los devolvemos para que el frontend pueda leer requires_two_factor
+        if (data && (data.requires_two_factor || data.error)) {
+          return { data };
+        }
         return { error: data.error || data.message || `Error ${response.status}` };
       }
       return { data };
@@ -28,7 +30,14 @@ class AuthService {
     }
   }
 
-  async login(credentials: { email: string; password: string; ip_ultimo_login?: string; tipo?: string }) {
+  async login(credentials: { 
+    email: string; 
+    password: string; 
+    ip_ultimo_login?: string; 
+    tipo?: string; 
+    two_factor_code?: string; 
+    backup_code?: string 
+  }) {
     const endpoint = credentials.tipo === 'admin' ? '/api/login' : '/api/cliente/login';
     
     const body: any = {
@@ -41,16 +50,28 @@ class AuthService {
       body.tipo = 'admin';
     }
     
-    const response = await this.request<{ token: string; usuario: any }>(endpoint, { 
+    if (credentials.two_factor_code) {
+      body.two_factor_code = credentials.two_factor_code;
+    }
+    
+    if (credentials.backup_code) {
+      body.backup_code = credentials.backup_code;
+    }
+    
+    console.log('Enviando login request:', { endpoint, body: { ...body, password: '***' } });
+    
+    const response = await this.request<any>(endpoint, { 
       method: 'POST', 
       body: JSON.stringify(body) 
     });
     
-    if (response.data) {
+    // Si el login es exitoso (tiene token), guardar en localStorage
+    if (response.data && response.data.token) {
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('userType', credentials.tipo === 'admin' ? 'admin' : 'cliente');
       localStorage.setItem('userData', JSON.stringify(response.data.usuario));
     }
+    
     return response;
   }
 
