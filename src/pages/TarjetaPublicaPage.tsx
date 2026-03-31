@@ -1,5 +1,8 @@
+// src/pages/TarjetaPublicaPage.tsx
 import React, { useState, useEffect } from 'react';
 import LoadingSpinner from '../components/LoadingSpinner';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api-tarjetas.vercel.app';
 
 interface TarjetaPublicaPageProps {
   slug: string;
@@ -14,7 +17,7 @@ const TarjetaPublicaPage: React.FC<TarjetaPublicaPageProps> = ({ slug, onBack })
   useEffect(() => {
     const fetchTarjeta = async () => {
       try {
-        const response = await fetch(`https://api-tarjetas.vercel.app/api/tarjetas/publicas/${slug}`);
+        const response = await fetch(`${API_BASE_URL}/api/tarjetas/publicas/${slug}`);
         const data = await response.json();
         if (response.ok) {
           setTarjeta(data);
@@ -30,7 +33,7 @@ const TarjetaPublicaPage: React.FC<TarjetaPublicaPageProps> = ({ slug, onBack })
   }, [slug]);
 
   if (loading) return <LoadingSpinner />;
-  
+
   if (error || !tarjeta) {
     return (
       <div className="error-container">
@@ -44,7 +47,7 @@ const TarjetaPublicaPage: React.FC<TarjetaPublicaPageProps> = ({ slug, onBack })
     <div className="tarjeta-publica-page">
       <div className="container">
         <button className="btn-back" onClick={onBack}>← Volver</button>
-        
+
         <div className="public-card">
           <div className="public-card-header">
             <h1>{tarjeta.nombre_tarjeta}</h1>
@@ -54,7 +57,7 @@ const TarjetaPublicaPage: React.FC<TarjetaPublicaPageProps> = ({ slug, onBack })
               <span className="meta-item">🔗 {tarjeta.slug}</span>
             </div>
           </div>
-          
+
           <div className="public-card-content">
             <div className="tarjeta-render">
               <style dangerouslySetInnerHTML={{ __html: tarjeta.renderizado?.css || '' }} />

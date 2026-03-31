@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import TarjetaCard from '../components/TarjetaCard';
 import CrearTarjetaModal from '../components/CrearTarjetaModal';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -11,7 +12,11 @@ interface DashboardPageProps {
   onTarjetaPublicaClick: (slug: string) => void;
 }
 
-const DashboardPage: React.FC<DashboardPageProps> = ({ onPlantillaClick, onTarjetaPublicaClick }) => {
+const DashboardPage: React.FC<DashboardPageProps> = ({ 
+  onPlantillaClick, 
+  onTarjetaPublicaClick 
+}) => {
+  const navigate = useNavigate();
   const [tarjetas, setTarjetas] = useState<any[]>([]);
   const [plantillas, setPlantillas] = useState<Plantilla[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,10 +46,15 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onPlantillaClick, onTarje
   };
 
   const handleToggleVisibility = async (id: number, current: string) => {
-    await tarjetaService.actualizar(id, { 
-      visibilidad: current === 'publico' ? 'privado' : 'publico' 
+    await tarjetaService.actualizar(id, {
+      visibilidad: current === 'publico' ? 'privado' : 'publico'
     });
     loadData();
+  };
+
+  const handleEditTarjeta = (tarjetaId: number) => {
+    console.log('[Dashboard] Navegando a editar tarjeta con ID:', tarjetaId);
+    navigate(`/editar-tarjeta/${tarjetaId}`);
   };
 
   if (loading) return <LoadingSpinner />;
@@ -60,7 +70,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onPlantillaClick, onTarje
           </button>
         </div>
       </div>
-      
+
       <div className="container">
         <div className="dashboard-stats">
           <div className="stat-card">
@@ -76,14 +86,14 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onPlantillaClick, onTarje
             <span className="stat-label">Visitas Totales</span>
           </div>
         </div>
-        
+
         <div className="section-header">
           <h2>Mis Tarjetas</h2>
           <button className="btn-secondary btn-sm" onClick={() => setModalOpen(true)}>
             + Nueva Tarjeta
           </button>
         </div>
-        
+
         {tarjetas.length === 0 ? (
           <div className="empty-state">
             <div className="empty-state-icon">📇</div>
@@ -99,16 +109,17 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onPlantillaClick, onTarje
               <TarjetaCard
                 key={t.tarjetaclienteid}
                 tarjeta={t}
-                onClick={() => onPlantillaClick(t.plantillaid)}
+                onEdit={() => handleEditTarjeta(t.tarjetaclienteid)}
                 onPublicClick={() => onTarjetaPublicaClick(t.slug)}
                 onDelete={() => handleDelete(t.tarjetaclienteid)}
                 onToggleVisibility={() => handleToggleVisibility(t.tarjetaclienteid, t.visibilidad)}
+                onUpdate={loadData}
               />
             ))}
           </div>
         )}
       </div>
-      
+
       <CrearTarjetaModal 
         isOpen={modalOpen} 
         onClose={() => setModalOpen(false)} 

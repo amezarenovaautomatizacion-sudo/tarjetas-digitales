@@ -33,7 +33,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         ip_ultimo_login: ip
       });
 
-      // DETECTAR 2FA - Por propiedad o por mensaje de error
       if (response.data?.requires_two_factor === true) {
         setTempData({ email, password, tipo, ip });
         setShowTwoFactor(true);
@@ -41,7 +40,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         return;
       }
 
-      // Fallback: detectar por mensaje de error
       if (response.data?.error === "Se requiere código de verificación") {
         setTempData({ email, password, tipo, ip });
         setShowTwoFactor(true);
@@ -56,11 +54,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       }
 
       if (response.data?.token) {
-        console.log('Login exitoso');
         onLoginSuccess(tipo);
       }
     } catch (err) {
-      console.error('Error en login:', err);
       setError('Error de conexión');
     }
 
@@ -89,7 +85,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       }
 
       if (response.data?.token) {
-        console.log('2FA verificado correctamente');
         setShowTwoFactor(false);
         setTwoFactorCode('');
         onLoginSuccess(tempData.tipo);
@@ -124,7 +119,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           <p style={{ marginBottom: '1rem' }}>
             Se ha enviado un código de verificación a <strong>{tempData.email}</strong>
           </p>
-          
+
           <form onSubmit={handleTwoFactorSubmit}>
             <div className="form-group">
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
@@ -149,17 +144,17 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 placeholder={useBackupCode ? 'XXXX-XXXX-XXXX' : '000000'}
                 required
                 maxLength={useBackupCode ? 16 : 6}
-                style={{ 
-                  textAlign: 'center', 
-                  fontSize: '1.5rem', 
+                style={{
+                  textAlign: 'center',
+                  fontSize: '1.5rem',
                   letterSpacing: '4px',
                   fontFamily: 'monospace'
                 }}
                 autoFocus
               />
               <small className="form-help">
-                {useBackupCode 
-                  ? 'Ingresa uno de los códigos de respaldo que guardaste' 
+                {useBackupCode
+                  ? 'Ingresa uno de los códigos de respaldo que guardaste'
                   : 'Ingresa el código de 6 dígitos que recibiste por correo'}
               </small>
             </div>
@@ -177,10 +172,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 type="button"
                 onClick={handleResendCode}
                 disabled={loading}
-                style={{ 
-                  background: 'none', 
-                  border: 'none', 
-                  color: '#0DB8D3', 
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#0DB8D3',
                   cursor: 'pointer',
                   textDecoration: 'underline'
                 }}
@@ -219,21 +214,21 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           </div>
           <div className="form-group">
             <label>Email</label>
-            <input 
-              type="email" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
-              required 
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
               placeholder="tu@email.com"
             />
           </div>
           <div className="form-group">
             <label>Contraseña</label>
-            <input 
-              type="password" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              required 
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
               placeholder="••••••"
             />
           </div>

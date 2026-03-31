@@ -103,7 +103,7 @@ const PerfilPage: React.FC<PerfilPageProps> = ({ onBack }) => {
 
   const handleDisableTwoFactor = async () => {
     if (!confirm('¿Estás seguro de desactivar la verificación de dos pasos? Tu cuenta será menos segura.')) return;
-    
+
     setTwoFactorLoading(true);
     setError('');
     const response = await twoFactorService.disable();
@@ -119,7 +119,7 @@ const PerfilPage: React.FC<PerfilPageProps> = ({ onBack }) => {
 
   const handleRegenerateBackupCodes = async () => {
     if (!confirm('Esto generará nuevos códigos de respaldo. Los anteriores dejarán de funcionar. ¿Continuar?')) return;
-    
+
     setTwoFactorLoading(true);
     setError('');
     const response = await twoFactorService.regenerateBackupCodes();
@@ -142,7 +142,7 @@ const PerfilPage: React.FC<PerfilPageProps> = ({ onBack }) => {
           <h1>Mi Perfil</h1>
           {message && <div className="success-message">{message}</div>}
           {error && <div className="error-message">{error}</div>}
-          
+
           <div className="perfil-section">
             <h2>Información Personal</h2>
             {editando ? (
@@ -150,45 +150,45 @@ const PerfilPage: React.FC<PerfilPageProps> = ({ onBack }) => {
                 <div className="form-row">
                   <div className="form-group">
                     <label>Nombre</label>
-                    <input value={formData.nombre || ''} onChange={(e) => setFormData({...formData, nombre: e.target.value})} />
+                    <input value={formData.nombre || ''} onChange={(e) => setFormData({ ...formData, nombre: e.target.value })} />
                   </div>
                   <div className="form-group">
                     <label>Email</label>
-                    <input type="email" value={formData.email || ''} onChange={(e) => setFormData({...formData, email: e.target.value})} />
+                    <input type="email" value={formData.email || ''} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
                   </div>
                 </div>
                 <div className="form-group">
                   <label>Teléfono</label>
-                  <input value={formData.telefono || ''} onChange={(e) => setFormData({...formData, telefono: e.target.value})} />
+                  <input value={formData.telefono || ''} onChange={(e) => setFormData({ ...formData, telefono: e.target.value })} />
                 </div>
                 <div className="form-row">
                   <div className="form-group">
                     <label>Calle</label>
-                    <input value={formData.calle || ''} onChange={(e) => setFormData({...formData, calle: e.target.value})} />
+                    <input value={formData.calle || ''} onChange={(e) => setFormData({ ...formData, calle: e.target.value })} />
                   </div>
                   <div className="form-group">
                     <label>Número Exterior</label>
-                    <input value={formData.numero_exterior || ''} onChange={(e) => setFormData({...formData, numero_exterior: e.target.value})} />
+                    <input value={formData.numero_exterior || ''} onChange={(e) => setFormData({ ...formData, numero_exterior: e.target.value })} />
                   </div>
                 </div>
                 <div className="form-row">
                   <div className="form-group">
                     <label>Colonia</label>
-                    <input value={formData.colonia || ''} onChange={(e) => setFormData({...formData, colonia: e.target.value})} />
+                    <input value={formData.colonia || ''} onChange={(e) => setFormData({ ...formData, colonia: e.target.value })} />
                   </div>
                   <div className="form-group">
                     <label>Ciudad</label>
-                    <input value={formData.ciudad || ''} onChange={(e) => setFormData({...formData, ciudad: e.target.value})} />
+                    <input value={formData.ciudad || ''} onChange={(e) => setFormData({ ...formData, ciudad: e.target.value })} />
                   </div>
                 </div>
                 <div className="form-row">
                   <div className="form-group">
                     <label>Estado</label>
-                    <input value={formData.estado || ''} onChange={(e) => setFormData({...formData, estado: e.target.value})} />
+                    <input value={formData.estado || ''} onChange={(e) => setFormData({ ...formData, estado: e.target.value })} />
                   </div>
                   <div className="form-group">
                     <label>Código Postal</label>
-                    <input value={formData.codigo_postal || ''} onChange={(e) => setFormData({...formData, codigo_postal: e.target.value})} />
+                    <input value={formData.codigo_postal || ''} onChange={(e) => setFormData({ ...formData, codigo_postal: e.target.value })} />
                   </div>
                 </div>
                 <div className="form-actions">
@@ -212,20 +212,20 @@ const PerfilPage: React.FC<PerfilPageProps> = ({ onBack }) => {
             <form onSubmit={handleChangePassword}>
               <div className="form-group">
                 <label>Contraseña Actual</label>
-                <input 
-                  type="password" 
-                  value={passwordData.password_actual} 
-                  onChange={(e) => setPasswordData({...passwordData, password_actual: e.target.value})} 
-                  required 
+                <input
+                  type="password"
+                  value={passwordData.password_actual}
+                  onChange={(e) => setPasswordData({ ...passwordData, password_actual: e.target.value })}
+                  required
                 />
               </div>
               <div className="form-group">
                 <label>Nueva Contraseña</label>
-                <input 
-                  type="password" 
-                  value={passwordData.password_nuevo} 
-                  onChange={(e) => setPasswordData({...passwordData, password_nuevo: e.target.value})} 
-                  required 
+                <input
+                  type="password"
+                  value={passwordData.password_nuevo}
+                  onChange={(e) => setPasswordData({ ...passwordData, password_nuevo: e.target.value })}
+                  required
                   minLength={6}
                 />
               </div>
@@ -235,15 +235,15 @@ const PerfilPage: React.FC<PerfilPageProps> = ({ onBack }) => {
 
           <div className="perfil-section">
             <h2>🔐 Verificación de dos pasos (2FA)</h2>
-            
+
             <div style={{ marginBottom: '1rem' }}>
               <p>La verificación de dos pasos añade una capa extra de seguridad a tu cuenta. Cuando inicies sesión, recibirás un código de 6 dígitos por correo electrónico que deberás ingresar además de tu contraseña.</p>
-              
-              <div style={{ 
-                background: twoFactorEnabled ? 'rgba(16, 185, 129, 0.1)' : 'rgba(107, 114, 128, 0.1)', 
-                padding: '1rem', 
-                borderRadius: '12px', 
-                marginTop: '1rem' 
+
+              <div style={{
+                background: twoFactorEnabled ? 'rgba(16, 185, 129, 0.1)' : 'rgba(107, 114, 128, 0.1)',
+                padding: '1rem',
+                borderRadius: '12px',
+                marginTop: '1rem'
               }}>
                 <p><strong>Estado actual:</strong> {twoFactorEnabled ? '✅ Activado' : '❌ Desactivado'}</p>
                 {twoFactorEnabled && backupCodesRemaining > 0 && (
@@ -254,8 +254,8 @@ const PerfilPage: React.FC<PerfilPageProps> = ({ onBack }) => {
 
             <div className="form-actions">
               {!twoFactorEnabled ? (
-                <button 
-                  className="btn-primary" 
+                <button
+                  className="btn-primary"
                   onClick={handleEnableTwoFactor}
                   disabled={twoFactorLoading}
                 >
@@ -263,15 +263,15 @@ const PerfilPage: React.FC<PerfilPageProps> = ({ onBack }) => {
                 </button>
               ) : (
                 <>
-                  <button 
-                    className="btn-secondary" 
+                  <button
+                    className="btn-secondary"
                     onClick={handleRegenerateBackupCodes}
                     disabled={twoFactorLoading}
                   >
                     Regenerar códigos de respaldo
                   </button>
-                  <button 
-                    className="btn-danger" 
+                  <button
+                    className="btn-danger"
                     onClick={handleDisableTwoFactor}
                     disabled={twoFactorLoading}
                   >
@@ -282,10 +282,10 @@ const PerfilPage: React.FC<PerfilPageProps> = ({ onBack }) => {
             </div>
 
             {showBackupCodes && newBackupCodes.length > 0 && (
-              <div style={{ 
-                marginTop: '1rem', 
-                padding: '1rem', 
-                background: 'rgba(13, 184, 211, 0.1)', 
+              <div style={{
+                marginTop: '1rem',
+                padding: '1rem',
+                background: 'rgba(13, 184, 211, 0.1)',
                 borderRadius: '12px',
                 border: '1px solid rgba(13, 184, 211, 0.3)'
               }}>
@@ -293,9 +293,9 @@ const PerfilPage: React.FC<PerfilPageProps> = ({ onBack }) => {
                 <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>
                   Guarda estos códigos en un lugar seguro. Cada código puede usarse una sola vez.
                 </p>
-                <div style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: 'repeat(2, 1fr)', 
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(2, 1fr)',
                   gap: '0.5rem',
                   marginTop: '1rem'
                 }}>
@@ -312,8 +312,8 @@ const PerfilPage: React.FC<PerfilPageProps> = ({ onBack }) => {
                     </code>
                   ))}
                 </div>
-                <button 
-                  className="btn-small" 
+                <button
+                  className="btn-small"
                   style={{ marginTop: '1rem', width: '100%' }}
                   onClick={() => setShowBackupCodes(false)}
                 >

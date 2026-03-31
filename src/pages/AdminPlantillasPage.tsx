@@ -2,8 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { Plantilla } from '../types';
 import { api } from '../services/api';
-import { authService } from '../services/auth.service';
 import LoadingSpinner from '../components/LoadingSpinner';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api-tarjetas.vercel.app';
 
 interface AdminPlantillasPageProps {
   onPlantillaClick: (id: number) => void;
@@ -16,9 +17,15 @@ const AdminPlantillasPage: React.FC<AdminPlantillasPageProps> = ({ onPlantillaCl
   const [modalOpen, setModalOpen] = useState(false);
   const [editingPlantilla, setEditingPlantilla] = useState<any>(null);
   const [formData, setFormData] = useState({
-    nombre: '', descripcion: '', html_content: '', css_content: '', 
-    preview_image: '', categoriaid: '', usa_bootstrap: true, 
-    usa_bootstrap_icons: false, bootstrap_version: '5.3', 
+    nombre: '',
+    descripcion: '',
+    html_content: '',
+    css_content: '',
+    preview_image: '',
+    categoriaid: '',
+    usa_bootstrap: true,
+    usa_bootstrap_icons: false,
+    bootstrap_version: '5.3',
     variables_requeridas: [] as number[]
   });
 
@@ -39,27 +46,33 @@ const AdminPlantillasPage: React.FC<AdminPlantillasPageProps> = ({ onPlantillaCl
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
-    const url = editingPlantilla 
-      ? `https://api-tarjetas.vercel.app/api/plantillas/${editingPlantilla.plantillaid}`
-      : 'https://api-tarjetas.vercel.app/api/plantillas';
-    
+    const url = editingPlantilla
+      ? `${API_BASE_URL}/api/plantillas/${editingPlantilla.plantillaid}`
+      : `${API_BASE_URL}/api/plantillas`;
+
     const response = await fetch(url, {
       method: editingPlantilla ? 'PUT' : 'POST',
-      headers: { 
-        'Content-Type': 'application/json', 
-        Authorization: `Bearer ${token}` 
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
       },
       body: JSON.stringify(formData)
     });
-    
+
     if (response.ok) {
       setModalOpen(false);
       setEditingPlantilla(null);
-      setFormData({ 
-        nombre: '', descripcion: '', html_content: '', css_content: '', 
-        preview_image: '', categoriaid: '', usa_bootstrap: true, 
-        usa_bootstrap_icons: false, bootstrap_version: '5.3', 
-        variables_requeridas: [] 
+      setFormData({
+        nombre: '',
+        descripcion: '',
+        html_content: '',
+        css_content: '',
+        preview_image: '',
+        categoriaid: '',
+        usa_bootstrap: true,
+        usa_bootstrap_icons: false,
+        bootstrap_version: '5.3',
+        variables_requeridas: []
       });
       loadData();
     } else {
@@ -71,7 +84,7 @@ const AdminPlantillasPage: React.FC<AdminPlantillasPageProps> = ({ onPlantillaCl
   const handleDelete = async (id: number) => {
     if (!confirm('¿Eliminar esta plantilla?')) return;
     const token = localStorage.getItem('token');
-    const response = await fetch(`https://api-tarjetas.vercel.app/api/plantillas/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/plantillas/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` }
     });
@@ -102,20 +115,26 @@ const AdminPlantillasPage: React.FC<AdminPlantillasPageProps> = ({ onPlantillaCl
       <div className="container">
         <div className="admin-header">
           <h1>Administrar Plantillas</h1>
-          <button className="btn-primary" onClick={() => { 
-            setEditingPlantilla(null); 
-            setFormData({ 
-              nombre: '', descripcion: '', html_content: '', css_content: '', 
-              preview_image: '', categoriaid: '', usa_bootstrap: true, 
-              usa_bootstrap_icons: false, bootstrap_version: '5.3', 
-              variables_requeridas: [] 
-            }); 
-            setModalOpen(true); 
+          <button className="btn-primary" onClick={() => {
+            setEditingPlantilla(null);
+            setFormData({
+              nombre: '',
+              descripcion: '',
+              html_content: '',
+              css_content: '',
+              preview_image: '',
+              categoriaid: '',
+              usa_bootstrap: true,
+              usa_bootstrap_icons: false,
+              bootstrap_version: '5.3',
+              variables_requeridas: []
+            });
+            setModalOpen(true);
           }}>
             + Crear Plantilla
           </button>
         </div>
-        
+
         <div className="plantillas-grid">
           {plantillas.map(p => (
             <div key={p.plantillaid} className="plantilla-card admin-card">
@@ -152,56 +171,56 @@ const AdminPlantillasPage: React.FC<AdminPlantillasPageProps> = ({ onPlantillaCl
                   <div className="form-row">
                     <div className="form-group">
                       <label>Nombre*</label>
-                      <input value={formData.nombre} onChange={(e) => setFormData({...formData, nombre: e.target.value})} required />
+                      <input value={formData.nombre} onChange={(e) => setFormData({ ...formData, nombre: e.target.value })} required />
                     </div>
                     <div className="form-group">
                       <label>Categoría ID</label>
-                      <input value={formData.categoriaid} onChange={(e) => setFormData({...formData, categoriaid: e.target.value})} />
+                      <input value={formData.categoriaid} onChange={(e) => setFormData({ ...formData, categoriaid: e.target.value })} />
                     </div>
                   </div>
                   <div className="form-group">
                     <label>Descripción</label>
-                    <textarea value={formData.descripcion} onChange={(e) => setFormData({...formData, descripcion: e.target.value})} rows={2} />
+                    <textarea value={formData.descripcion} onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })} rows={2} />
                   </div>
                   <div className="form-group">
                     <label>HTML Content*</label>
-                    <textarea value={formData.html_content} onChange={(e) => setFormData({...formData, html_content: e.target.value})} rows={8} required placeholder="Usa $_nombre_$ para variables" />
+                    <textarea value={formData.html_content} onChange={(e) => setFormData({ ...formData, html_content: e.target.value })} rows={8} required placeholder="Usa $_nombre_$ para variables" />
                   </div>
                   <div className="form-group">
                     <label>CSS Content</label>
-                    <textarea value={formData.css_content} onChange={(e) => setFormData({...formData, css_content: e.target.value})} rows={4} />
+                    <textarea value={formData.css_content} onChange={(e) => setFormData({ ...formData, css_content: e.target.value })} rows={4} />
                   </div>
                   <div className="form-row">
                     <div className="form-group">
                       <label>URL Imagen Preview</label>
-                      <input value={formData.preview_image} onChange={(e) => setFormData({...formData, preview_image: e.target.value})} />
+                      <input value={formData.preview_image} onChange={(e) => setFormData({ ...formData, preview_image: e.target.value })} />
                     </div>
                     <div className="form-group">
                       <label>Bootstrap Version</label>
-                      <input value={formData.bootstrap_version} onChange={(e) => setFormData({...formData, bootstrap_version: e.target.value})} />
+                      <input value={formData.bootstrap_version} onChange={(e) => setFormData({ ...formData, bootstrap_version: e.target.value })} />
                     </div>
                   </div>
                   <div className="form-row">
                     <div className="form-group">
                       <label>
-                        <input type="checkbox" checked={formData.usa_bootstrap} onChange={(e) => setFormData({...formData, usa_bootstrap: e.target.checked})} /> 
+                        <input type="checkbox" checked={formData.usa_bootstrap} onChange={(e) => setFormData({ ...formData, usa_bootstrap: e.target.checked })} />
                         Usar Bootstrap
                       </label>
                     </div>
                     <div className="form-group">
                       <label>
-                        <input type="checkbox" checked={formData.usa_bootstrap_icons} onChange={(e) => setFormData({...formData, usa_bootstrap_icons: e.target.checked})} /> 
+                        <input type="checkbox" checked={formData.usa_bootstrap_icons} onChange={(e) => setFormData({ ...formData, usa_bootstrap_icons: e.target.checked })} />
                         Usar Bootstrap Icons
                       </label>
                     </div>
                   </div>
                   <div className="form-group">
                     <label>Variables Requeridas (IDs)</label>
-                    <select 
-                      multiple 
-                      value={formData.variables_requeridas.map(String)} 
+                    <select
+                      multiple
+                      value={formData.variables_requeridas.map(String)}
                       onChange={(e) => setFormData({
-                        ...formData, 
+                        ...formData,
                         variables_requeridas: Array.from(e.target.selectedOptions, opt => parseInt(opt.value))
                       })}
                     >

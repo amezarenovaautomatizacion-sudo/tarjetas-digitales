@@ -1,22 +1,60 @@
 import React, { useState, useEffect } from 'react';
 import { usePlantillaDetalle, usePreview } from '../hooks/usePlantillas';
+import { tarjetaService } from '../services/tarjeta.service';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 interface PlantillaDetailPageProps {
-  plantillaId: number;
+  plantillaId?: number;
   onBack: () => void;
+  tarjetaId?: number;
+  existingData?: Record<string, string>;
+  existingNombre?: string;
+  existingVisibilidad?: string;
 }
 
-const PlantillaDetailPage: React.FC<PlantillaDetailPageProps> = ({ plantillaId, onBack }) => {
+const PlantillaDetailPage: React.FC<PlantillaDetailPageProps> = ({ 
+  plantillaId: propPlantillaId, 
+  onBack, 
+  tarjetaId,
+  existingData,
+  existingNombre,
+  existingVisibilidad 
+}) => {
+  const plantillaId = propPlantillaId || 0;
+  
   const { plantilla, loading } = usePlantillaDetalle(plantillaId);
   const [formData, setFormData] = useState<Record<string, string>>({});
+  const [nombreTarjeta, setNombreTarjeta] = useState('');
+  const [visibilidad, setVisibilidad] = useState('privado');
+  const [isEditing, setIsEditing] = useState(!!tarjetaId);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const [saveSuccess, setSaveSuccess] = useState('');
   const { preview, loading: previewLoading, error: previewError, generatePreview } = usePreview();
 
+  // Inicializar con datos existentes
+  useEffect(() => {
+    if (existingData) {
+      setFormData(existingData);
+    }
+    if (existingNombre) {
+      setNombreTarjeta(existingNombre);
+    }
+    if (existingVisibilidad) {
+      setVisibilidad(existingVisibilidad);
+    }
+  }, [existingData, existingNombre, existingVisibilidad]);
+
+  // Cargar datos de la plantilla y generar preview inicial
   useEffect(() => {
     if (plantilla?.variables_requeridas) {
       const initial: Record<string, string> = {};
       plantilla.variables_requeridas.forEach(v => { 
-        initial[v.nombre] = v.ejemplo || ''; 
+        if (existingData && existingData[v.nombre]) {
+          initial[v.nombre] = existingData[v.nombre];
+        } else {
+          initial[v.nombre] = v.ejemplo || '';
+        }
       });
       setFormData(initial);
       if (plantillaId) {
@@ -28,7 +66,33 @@ const PlantillaDetailPage: React.FC<PlantillaDetailPageProps> = ({ plantillaId, 
   const handleInputChange = (nombre: string, valor: string) => {
     const newFormData = { ...formData, [nombre]: valor };
     setFormData(newFormData);
-    generatePreview(plantillaId, newFormData);
+    if (plantillaId) {
+      generatePreview(plantillaId, newFormData);
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    if (!tarjetaId) return;
+    
+    setSaving(true);
+    setSaveError('');
+    setSaveSuccess('');
+    
+    const response = await tarjetaService.actualizar(tarjetaId, {
+      nombre_tarjeta: nombreTarjeta,
+      visibilidad: visibilidad,
+      datos: formData
+    });
+    
+    if (response.error) {
+      setSaveError(response.error);
+    } else {
+      setSaveSuccess('Tarjeta actualizada correctamente');
+      setTimeout(() => {
+        onBack();
+      }, 1500);
+    }
+    setSaving(false);
   };
 
   if (loading) return <LoadingSpinner />;
@@ -148,7 +212,7 @@ const PlantillaDetailPage: React.FC<PlantillaDetailPageProps> = ({ plantillaId, 
         <button className="btn-back" onClick={onBack}>← Volver</button>
         
         <div className="detail-header">
-          <h1>{plantilla.nombre}</h1>
+          <h1>{isEditing ? `Editando: ${nombreTarjeta}` : plantilla.nombre}</h1>
           {plantilla.categoria_nombre && (
             <span className="category-badge">{plantilla.categoria_nombre}</span>
           )}
@@ -165,8 +229,37 @@ const PlantillaDetailPage: React.FC<PlantillaDetailPageProps> = ({ plantillaId, 
         <div className="split-layout">
           <div className="form-side">
             <div className="form-card">
-              <h3>Personaliza tu tarjeta</h3>
-              <p className="section-description">Completa todos los campos para crear tu tarjeta digital</p>
+              <h3>{isEditing ? 'Editar tu tarjeta' : 'Personaliza tu tarjeta'}</h3>
+              <p className="section-description">
+                {isEditing 
+                  ? 'Modifica los campos y actualiza tu tarjeta digital' 
+                  : 'Completa todos los campos para crear tu tarjeta digital'}
+              </p>
+              
+              {isEditing && (
+                <div className="edit-info">
+                  <div className="form-group">
+                    <label>Nombre de la Tarjeta</label>
+                    <input
+                      type="text"
+                      value={nombreTarjeta}
+                      onChange={(e) => setNombreTarjeta(e.target.value)}
+                      placeholder="Ej: Mi Tarjeta Personal"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Visibilidad</label>
+                    <select
+                      value={visibilidad}
+                      onChange={(e) => setVisibilidad(e.target.value)}
+                    >
+                      <option value="privado">Privado - Solo visible para mí</option>
+                      <option value="publico">Público - Visible para todos</option>
+                    </select>
+                  </div>
+                  <div className="form-divider">Contenido de la tarjeta</div>
+                </div>
+              )}
               
               {requiredVariables.length > 0 && (
                 <div className="variables-group">
@@ -202,6 +295,28 @@ const PlantillaDetailPage: React.FC<PlantillaDetailPageProps> = ({ plantillaId, 
                       )}
                     </div>
                   ))}
+                </div>
+              )}
+              
+              {saveError && <div className="error-message">{saveError}</div>}
+              {saveSuccess && <div className="success-message">{saveSuccess}</div>}
+              
+              {isEditing && (
+                <div className="form-actions">
+                  <button 
+                    className="btn-primary" 
+                    onClick={handleSaveChanges}
+                    disabled={saving}
+                  >
+                    {saving ? 'Guardando...' : '💾 Guardar Cambios'}
+                  </button>
+                  <button 
+                    className="btn-secondary" 
+                    onClick={onBack}
+                    disabled={saving}
+                  >
+                    Cancelar
+                  </button>
                 </div>
               )}
             </div>

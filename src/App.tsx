@@ -13,7 +13,9 @@ import AdminPlantillasPage from './pages/AdminPlantillasPage';
 import PerfilPage from './pages/PerfilPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import EditarTarjetaPage from './pages/EditarTarjetaPage';
 import ErrorBoundary from './components/ErrorBoundary';
+import useSessionTimeout from './hooks/useSessionTimeout';
 import './styles/global.css';
 import './styles/custom-bootstrap.scss';
 
@@ -38,7 +40,10 @@ const AppContent: React.FC = () => {
     navigate('/');
   };
 
+  useSessionTimeout(handleLogout);
+
   const handleNavigate = (page: string, id?: number, slug?: string) => {
+    console.log('[App] handleNavigate:', { page, id, slug });
     if (page === 'home') navigate('/');
     else if (page === 'plantillas') navigate('/plantillas');
     else if (page === 'precios') navigate('/precios');
@@ -49,14 +54,19 @@ const AppContent: React.FC = () => {
     else if (page === 'perfil') navigate('/perfil');
     else if (page === 'plantilla-detail' && id) navigate(`/plantilla/${id}`);
     else if (page === 'tarjeta-publica' && slug) navigate(`/tarjeta/${slug}`);
+    else if (page === 'editar-tarjeta' && id) navigate(`/editar-tarjeta/${id}`);
   };
 
   const matchPlantilla = location.pathname.match(/^\/plantilla\/(\d+)$/);
   const matchTarjeta = location.pathname.match(/^\/tarjeta\/(.+)$/);
+  const matchEditTarjeta = location.pathname.match(/^\/editar-tarjeta\/(\d+)$/);
   const matchResetAdmin = location.pathname.match(/^\/reset-password$/);
   const matchResetCliente = location.pathname.match(/^\/cliente\/reset-password$/);
   const matchForgotAdmin = location.pathname.match(/^\/forgot-password$/);
   const matchForgotCliente = location.pathname.match(/^\/cliente\/forgot-password$/);
+
+  console.log('[App] Current path:', location.pathname);
+  console.log('[App] matchEditTarjeta:', matchEditTarjeta);
 
   const renderContent = () => {
     if (location.pathname === '/') {
@@ -101,6 +111,10 @@ const AppContent: React.FC = () => {
     }
     if (location.pathname === '/perfil') {
       return <PerfilPage onBack={() => handleNavigate('dashboard')} />;
+    }
+    if (matchEditTarjeta) {
+      console.log('[App] Renderizando EditarTarjetaPage con ID:', matchEditTarjeta[1]);
+      return <EditarTarjetaPage onBack={() => handleNavigate('dashboard')} />;
     }
     if (matchPlantilla) {
       return <PlantillaDetailPage plantillaId={parseInt(matchPlantilla[1])} onBack={() => handleNavigate('plantillas')} />;

@@ -69,15 +69,15 @@ const CrearTarjetaModal: React.FC<CrearTarjetaModalProps> = ({ isOpen, onClose, 
     e.preventDefault();
     setLoading(true);
     setError('');
-    
+
     try {
-      const response = await tarjetaService.crear({ 
-        plantillaid: parseInt(plantillaid), 
-        nombre_tarjeta, 
-        visibilidad, 
-        datos 
+      const response = await tarjetaService.crear({
+        plantillaid: parseInt(plantillaid),
+        nombre_tarjeta,
+        visibilidad,
+        datos
       });
-      
+
       if (response.error) {
         setError(response.error);
       } else {
@@ -115,9 +115,9 @@ const CrearTarjetaModal: React.FC<CrearTarjetaModalProps> = ({ isOpen, onClose, 
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label>Plantilla</label>
-                <select 
-                  value={plantillaid} 
-                  onChange={(e) => setPlantillaid(e.target.value)} 
+                <select
+                  value={plantillaid}
+                  onChange={(e) => setPlantillaid(e.target.value)}
                   required
                   className="form-control"
                 >
@@ -127,23 +127,23 @@ const CrearTarjetaModal: React.FC<CrearTarjetaModalProps> = ({ isOpen, onClose, 
                   ))}
                 </select>
               </div>
-              
+
               <div className="form-group">
                 <label>Nombre de la Tarjeta</label>
-                <input 
-                  type="text" 
-                  value={nombre_tarjeta} 
-                  onChange={(e) => setNombreTarjeta(e.target.value)} 
-                  required 
+                <input
+                  type="text"
+                  value={nombre_tarjeta}
+                  onChange={(e) => setNombreTarjeta(e.target.value)}
+                  required
                   className="form-control"
                   placeholder="Ej: Mi Tarjeta Personal"
                 />
               </div>
-              
+
               <div className="form-group">
                 <label>Visibilidad</label>
-                <select 
-                  value={visibilidad} 
+                <select
+                  value={visibilidad}
                   onChange={(e) => setVisibilidad(e.target.value)}
                   className="form-control"
                 >
@@ -151,7 +151,7 @@ const CrearTarjetaModal: React.FC<CrearTarjetaModalProps> = ({ isOpen, onClose, 
                   <option value="publico">Público - Visible para todos</option>
                 </select>
               </div>
-              
+
               {plantillaDetalle && (
                 <div className="variables-section">
                   <h3>Campos de la Plantilla</h3>
@@ -221,15 +221,15 @@ const CrearTarjetaModal: React.FC<CrearTarjetaModalProps> = ({ isOpen, onClose, 
                   ))}
                 </div>
               )}
-              
+
               {error && <div className="error-message">{error}</div>}
-              
+
               <button type="submit" className="btn-primary btn-block" disabled={loading}>
                 {loading ? 'Creando...' : 'Crear Tarjeta'}
               </button>
             </form>
           </div>
-          
+
           <div className="modal-preview-section">
             <div className="preview-header">
               <h3>Vista Previa en Vivo</h3>
