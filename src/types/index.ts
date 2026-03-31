@@ -68,3 +68,4 @@ export interface TarjetaDetalle extends TarjetaCliente {
   };
   plantilla_detalle?: PlantillaDetalle;
 }
+

@@ -6,6 +6,7 @@ import PlantillasPage from './pages/PlantillasPage';
 import PricingPlans from './components/PricingPlans';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import RegisterAdminPage from './pages/RegisterAdminPage';
 import DashboardPage from './pages/DashboardPage';
 import PlantillaDetailPage from './pages/PlantillaDetailPage';
 import TarjetaPublicaPage from './pages/TarjetaPublicaPage';
@@ -26,6 +27,16 @@ const App: React.FC = () => {
     const type = localStorage.getItem('userType');
     if (token && type) {
       setUserType(type);
+    }
+
+    // 2. Detectar acceso directo por URL (Ejemplo: /registro-admin o ?setup=admin)
+    const path = window.location.pathname;
+    const params = new URLSearchParams(window.location.search);
+
+    if (path === '/registro-admin' || params.get('setup') === 'admin') {
+      setCurrentPage('registerAdmin');
+      // Limpia la URL para que no se quede el parámetro visualmente
+      window.history.replaceState({}, document.title, "/");
     }
   }, []);
 
@@ -55,6 +66,8 @@ const App: React.FC = () => {
         return <LoginPage onLoginSuccess={(type) => { setUserType(type); navigateTo('dashboard'); }} />;
       case 'register':
         return <RegisterPage onRegisterSuccess={() => navigateTo('login')} />;
+      case 'registerAdmin':
+        return <RegisterAdminPage onRegisterSuccess={() => navigateTo('login')} />;
       case 'dashboard':
         return <DashboardPage onPlantillaClick={(id) => navigateTo('plantilla-detail', id)} onTarjetaPublicaClick={(slug) => navigateTo('tarjeta-publica', undefined, slug)} />;
       case 'admin-plantillas':
