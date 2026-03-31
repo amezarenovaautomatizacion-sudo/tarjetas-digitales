@@ -1,25 +1,25 @@
-// src/App.tsx
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import Layout from './components/Layout';
 import HomePage from './pages/HomePage';
 import PlantillasPage from './pages/PlantillasPage';
 import PricingPlans from './components/PricingPlans';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import RegisterAdminPage from './pages/RegisterAdminPage';
 import DashboardPage from './pages/DashboardPage';
 import PlantillaDetailPage from './pages/PlantillaDetailPage';
 import TarjetaPublicaPage from './pages/TarjetaPublicaPage';
 import AdminPlantillasPage from './pages/AdminPlantillasPage';
 import PerfilPage from './pages/PerfilPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ErrorBoundary from './components/ErrorBoundary';
 import './styles/global.css';
 import './styles/custom-bootstrap.scss';
 
-const App: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState('home');
-  const [selectedPlantillaId, setSelectedPlantillaId] = useState<number | null>(null);
-  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
+const AppContent: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [userType, setUserType] = useState<string | null>(null);
 
   useEffect(() => {
@@ -28,72 +28,109 @@ const App: React.FC = () => {
     if (token && type) {
       setUserType(type);
     }
-
-    // 2. Detectar acceso directo por URL (Ejemplo: /registro-admin o ?setup=admin)
-    const path = window.location.pathname;
-    const params = new URLSearchParams(window.location.search);
-
-    if (path === '/registro-admin' || params.get('setup') === 'admin') {
-      setCurrentPage('registerAdmin');
-      // Limpia la URL para que no se quede el parámetro visualmente
-      window.history.replaceState({}, document.title, "/");
-    }
   }, []);
-
-  const navigateTo = (page: string, plantillaId?: number, slug?: string) => {
-    setCurrentPage(page);
-    if (plantillaId) setSelectedPlantillaId(plantillaId);
-    if (slug) setSelectedSlug(slug);
-  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userType');
     localStorage.removeItem('userData');
     setUserType(null);
-    navigateTo('home');
+    navigate('/');
   };
 
+  const handleNavigate = (page: string, id?: number, slug?: string) => {
+    if (page === 'home') navigate('/');
+    else if (page === 'plantillas') navigate('/plantillas');
+    else if (page === 'precios') navigate('/precios');
+    else if (page === 'login') navigate('/login');
+    else if (page === 'register') navigate('/register');
+    else if (page === 'dashboard') navigate('/dashboard');
+    else if (page === 'admin-plantillas') navigate('/admin/plantillas');
+    else if (page === 'perfil') navigate('/perfil');
+    else if (page === 'plantilla-detail' && id) navigate(`/plantilla/${id}`);
+    else if (page === 'tarjeta-publica' && slug) navigate(`/tarjeta/${slug}`);
+  };
+
+  const matchPlantilla = location.pathname.match(/^\/plantilla\/(\d+)$/);
+  const matchTarjeta = location.pathname.match(/^\/tarjeta\/(.+)$/);
+  const matchResetAdmin = location.pathname.match(/^\/reset-password$/);
+  const matchResetCliente = location.pathname.match(/^\/cliente\/reset-password$/);
+  const matchForgotAdmin = location.pathname.match(/^\/forgot-password$/);
+  const matchForgotCliente = location.pathname.match(/^\/cliente\/forgot-password$/);
+
   const renderContent = () => {
-    switch (currentPage) {
-      case 'home':
-        return <HomePage onPlantillaClick={(id) => navigateTo('plantilla-detail', id)} />;
-      case 'plantillas':
-        return <PlantillasPage onPlantillaClick={(id) => navigateTo('plantilla-detail', id)} />;
-      case 'precios':
-        return <PricingPlans />;
-      case 'login':
-        return <LoginPage onLoginSuccess={(type) => { setUserType(type); navigateTo('dashboard'); }} />;
-      case 'register':
-        return <RegisterPage onRegisterSuccess={() => navigateTo('login')} />;
-      case 'registerAdmin':
-        return <RegisterAdminPage onRegisterSuccess={() => navigateTo('login')} />;
-      case 'dashboard':
-        return <DashboardPage onPlantillaClick={(id) => navigateTo('plantilla-detail', id)} onTarjetaPublicaClick={(slug) => navigateTo('tarjeta-publica', undefined, slug)} />;
-      case 'admin-plantillas':
-        return userType === 'admin' ? <AdminPlantillasPage onPlantillaClick={(id) => navigateTo('plantilla-detail', id)} /> : <HomePage onPlantillaClick={(id) => navigateTo('plantilla-detail', id)} />;
-      case 'plantilla-detail':
-        return selectedPlantillaId ? <PlantillaDetailPage plantillaId={selectedPlantillaId} onBack={() => navigateTo('plantillas')} /> : null;
-      case 'tarjeta-publica':
-        return selectedSlug ? <TarjetaPublicaPage slug={selectedSlug} onBack={() => navigateTo('home')} /> : null;
-      case 'perfil':
-        return <PerfilPage onBack={() => navigateTo('dashboard')} />;
-      default:
-        return <HomePage onPlantillaClick={(id) => navigateTo('plantilla-detail', id)} />;
+    if (location.pathname === '/') {
+      return <HomePage onPlantillaClick={(id) => handleNavigate('plantilla-detail', id)} />;
     }
+    if (location.pathname === '/plantillas') {
+      return <PlantillasPage onPlantillaClick={(id) => handleNavigate('plantilla-detail', id)} />;
+    }
+    if (location.pathname === '/precios') {
+      return <PricingPlans />;
+    }
+    if (location.pathname === '/login') {
+      return <LoginPage onLoginSuccess={(type) => { setUserType(type); navigate('/dashboard'); }} />;
+    }
+    if (location.pathname === '/register') {
+      return <RegisterPage onRegisterSuccess={() => navigate('/login')} />;
+    }
+    
+    if (matchResetAdmin) {
+      return <ResetPasswordPage tipo="admin" />;
+    }
+    if (matchResetCliente) {
+      return <ResetPasswordPage tipo="cliente" />;
+    }
+    if (matchForgotAdmin) {
+      return <ForgotPasswordPage tipo="admin" />;
+    }
+    if (matchForgotCliente) {
+      return <ForgotPasswordPage tipo="cliente" />;
+    }
+    
+    if (location.pathname === '/dashboard') {
+      return <DashboardPage 
+        onPlantillaClick={(id) => handleNavigate('plantilla-detail', id)} 
+        onTarjetaPublicaClick={(slug) => handleNavigate('tarjeta-publica', undefined, slug)} 
+      />;
+    }
+    if (location.pathname === '/admin/plantillas') {
+      return userType === 'admin' ? 
+        <AdminPlantillasPage onPlantillaClick={(id) => handleNavigate('plantilla-detail', id)} /> : 
+        <Navigate to="/" />;
+    }
+    if (location.pathname === '/perfil') {
+      return <PerfilPage onBack={() => handleNavigate('dashboard')} />;
+    }
+    if (matchPlantilla) {
+      return <PlantillaDetailPage plantillaId={parseInt(matchPlantilla[1])} onBack={() => handleNavigate('plantillas')} />;
+    }
+    if (matchTarjeta) {
+      return <TarjetaPublicaPage slug={matchTarjeta[1]} onBack={() => handleNavigate('home')} />;
+    }
+    
+    return <HomePage onPlantillaClick={(id) => handleNavigate('plantilla-detail', id)} />;
   };
 
   return (
+    <Layout
+      userType={userType}
+      isAuthenticated={!!userType}
+      onLogout={handleLogout}
+      onNavigate={handleNavigate}
+      currentPage={location.pathname}
+    >
+      {renderContent()}
+    </Layout>
+  );
+};
+
+const App: React.FC = () => {
+  return (
     <ErrorBoundary>
-      <Layout
-        userType={userType}
-        isAuthenticated={!!userType}
-        onLogout={handleLogout}
-        onNavigate={navigateTo}
-        currentPage={currentPage}
-      >
-        {renderContent()}
-      </Layout>
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
     </ErrorBoundary>
   );
 };
