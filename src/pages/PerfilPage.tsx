@@ -20,6 +20,17 @@ interface PerfilData {
   codigo_postal?: string;
 }
 
+interface TwoFactorStatusResponse {
+  two_factor_enabled: boolean;
+  two_factor_verified: boolean;
+  backup_codes_remaining: number;
+}
+
+interface TwoFactorEnableResponse {
+  backup_codes?: string[];
+  message?: string;
+}
+
 const PerfilPage: React.FC<PerfilPageProps> = ({ onBack }) => {
   const [perfil, setPerfil] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -42,8 +53,9 @@ const PerfilPage: React.FC<PerfilPageProps> = ({ onBack }) => {
   const loadPerfil = async () => {
     const response = await authService.getProfile();
     if (response.data) {
-      setPerfil(response.data.usuario || response.data);
-      setFormData(response.data.usuario || response.data);
+      const userData = (response.data as any).usuario || response.data;
+      setPerfil(userData);
+      setFormData(userData);
     }
     setLoading(false);
   };
@@ -51,8 +63,9 @@ const PerfilPage: React.FC<PerfilPageProps> = ({ onBack }) => {
   const loadTwoFactorStatus = async () => {
     const response = await twoFactorService.getStatus();
     if (response.data) {
-      setTwoFactorEnabled(response.data.two_factor_enabled);
-      setBackupCodesRemaining(response.data.backup_codes_remaining);
+      const statusData = response.data as TwoFactorStatusResponse;
+      setTwoFactorEnabled(statusData.two_factor_enabled);
+      setBackupCodesRemaining(statusData.backup_codes_remaining);
     }
   };
 
@@ -88,9 +101,10 @@ const PerfilPage: React.FC<PerfilPageProps> = ({ onBack }) => {
     setError('');
     const response = await twoFactorService.enable();
     if (response.data) {
+      const enableData = response.data as TwoFactorEnableResponse;
       setTwoFactorEnabled(true);
-      if (response.data.backup_codes) {
-        setNewBackupCodes(response.data.backup_codes);
+      if (enableData.backup_codes) {
+        setNewBackupCodes(enableData.backup_codes);
         setShowBackupCodes(true);
       }
       setMessage('2FA activado correctamente. En tu próximo inicio de sesión se te pedirá el código de verificación.');

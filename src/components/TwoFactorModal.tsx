@@ -9,6 +9,12 @@ interface TwoFactorModalProps {
   onVerified: (token: string) => void;
 }
 
+interface TwoFactorVerifyResponse {
+  token?: string;
+  requires_two_factor?: boolean;
+  error?: string;
+}
+
 const TwoFactorModal: React.FC<TwoFactorModalProps> = ({ isOpen, onClose, email, tipo, onVerified }) => {
   const [codigo, setCodigo] = useState('');
   const [loading, setLoading] = useState(false);
@@ -20,7 +26,7 @@ const TwoFactorModal: React.FC<TwoFactorModalProps> = ({ isOpen, onClose, email,
     setLoading(true);
     setError('');
 
-    const response = await twoFactorService.verifyCode(email, codigo, tipo, useBackupCode);
+    const response = await twoFactorService.verifyCode(email, codigo, tipo, useBackupCode) as { data?: TwoFactorVerifyResponse; error?: string };
 
     if (response.error) {
       setError(response.error);

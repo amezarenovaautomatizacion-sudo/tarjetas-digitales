@@ -4,11 +4,24 @@ import { tarjetaService } from '../services/tarjeta.service';
 import { api } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 
+interface TarjetaData {
+  tarjetaclienteid: number;
+  plantillaid: number;
+  plantilla_nombre: string;
+  nombre_tarjeta: string;
+  slug: string;
+  visibilidad: 'publico' | 'privado';
+  visitas: number;
+  creado: string;
+  actualizado?: string;
+  datos: Record<string, string> | string;
+}
+
 const EditarTarjetaPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [tarjeta, setTarjeta] = useState<any>(null);
+  const [tarjeta, setTarjeta] = useState<TarjetaData | null>(null);
   const [plantilla, setPlantilla] = useState<any>(null);
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [nombreTarjeta, setNombreTarjeta] = useState('');
@@ -20,7 +33,6 @@ const EditarTarjetaPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [saveSuccess, setSaveSuccess] = useState('');
   const [showFullscreenModal, setShowFullscreenModal] = useState(false);
 
-  // Obtener ID directamente de la URL
   const getTarjetaId = () => {
     const path = window.location.pathname;
     const match = path.match(/\/editar-tarjeta\/(\d+)/);
@@ -45,13 +57,13 @@ const EditarTarjetaPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const tarjetaRes = await tarjetaService.obtener(tarjetaId);
         
         if (tarjetaRes.data) {
-          const tarjetaData = tarjetaRes.data;
+          const tarjetaData = tarjetaRes.data as TarjetaData;
           
           setTarjeta(tarjetaData);
           setNombreTarjeta(tarjetaData.nombre_tarjeta);
           setVisibilidad(tarjetaData.visibilidad);
           
-          let datosObj = {};
+          let datosObj: Record<string, string> = {};
           try {
             datosObj = typeof tarjetaData.datos === 'string' 
               ? JSON.parse(tarjetaData.datos) 
@@ -118,11 +130,9 @@ const EditarTarjetaPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setSaveError(response.error);
       } else {
         setSaveSuccess('Tarjeta actualizada correctamente');
-        // Actualizar los datos locales después de guardar
         if (response.data) {
-          setTarjeta(response.data);
+          setTarjeta(response.data as TarjetaData);
         }
-        // Limpiar mensaje de éxito después de 3 segundos
         setTimeout(() => {
           setSaveSuccess('');
         }, 3000);
@@ -247,7 +257,6 @@ const EditarTarjetaPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           </div>
           
           <div className="edit-split-layout">
-            {/* Panel de edición - con scroll vertical */}
             <div className="edit-form-panel">
               <div className="edit-form-card">
                 <div className="edit-form-header">
@@ -369,7 +378,6 @@ const EditarTarjetaPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               </div>
             </div>
             
-            {/* Panel de vista previa - con botón de pantalla completa */}
             <div className="edit-preview-panel">
               <div className="preview-card">
                 <div className="preview-header">
@@ -404,45 +412,44 @@ const EditarTarjetaPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         </div>
       </div>
 
-{/* Modal de pantalla completa */}
-{showFullscreenModal && (
-  <div className="fullscreen-modal-overlay" onClick={() => setShowFullscreenModal(false)}>
-    <div className="fullscreen-modal-content" onClick={(e) => e.stopPropagation()}>
-      <div className="fullscreen-modal-header">
-        <h2>Vista Previa - {nombreTarjeta}</h2>
-        <button className="modal-close-btn" onClick={() => setShowFullscreenModal(false)}>✕</button>
-      </div>
-      <div className="fullscreen-modal-body">
-        {previewHtml ? (
-          <div className="fullscreen-preview">
-            <style dangerouslySetInnerHTML={{ __html: previewCss }} />
-            <div dangerouslySetInnerHTML={{ __html: previewHtml }} />
+      {showFullscreenModal && (
+        <div className="fullscreen-modal-overlay" onClick={() => setShowFullscreenModal(false)}>
+          <div className="fullscreen-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="fullscreen-modal-header">
+              <h2>Vista Previa - {nombreTarjeta}</h2>
+              <button className="modal-close-btn" onClick={() => setShowFullscreenModal(false)}>✕</button>
+            </div>
+            <div className="fullscreen-modal-body">
+              {previewHtml ? (
+                <div className="fullscreen-preview">
+                  <style dangerouslySetInnerHTML={{ __html: previewCss }} />
+                  <div dangerouslySetInnerHTML={{ __html: previewHtml }} />
+                </div>
+              ) : (
+                <div className="preview-placeholder">
+                  <span>🎴</span>
+                  <p>Completa los campos para ver la vista previa</p>
+                </div>
+              )}
+            </div>
+            <div className="fullscreen-modal-footer">
+              <button 
+                className="btn-modal-save" 
+                onClick={handleSave}
+                disabled={saving}
+              >
+                {saving ? 'Guardando...' : '💾 Guardar Cambios'}
+              </button>
+              <button 
+                className="btn-modal-close" 
+                onClick={() => setShowFullscreenModal(false)}
+              >
+                Cerrar
+              </button>
+            </div>
           </div>
-        ) : (
-          <div className="preview-placeholder">
-            <span>🎴</span>
-            <p>Completa los campos para ver la vista previa</p>
-          </div>
-        )}
-      </div>
-      <div className="fullscreen-modal-footer">
-        <button 
-          className="btn-modal-save" 
-          onClick={handleSave}
-          disabled={saving}
-        >
-          {saving ? 'Guardando...' : '💾 Guardar Cambios'}
-        </button>
-        <button 
-          className="btn-modal-close" 
-          onClick={() => setShowFullscreenModal(false)}
-        >
-          Cerrar
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+        </div>
+      )}
     </>
   );
 };
