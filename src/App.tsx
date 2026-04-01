@@ -6,6 +6,7 @@ import PlantillasPage from './pages/PlantillasPage';
 import PricingPlans from './components/PricingPlans';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import RegisterAdminPage from './pages/RegisterAdminPage';
 import DashboardPage from './pages/DashboardPage';
 import PlantillaDetailPage from './pages/PlantillaDetailPage';
 import TarjetaPublicaPage from './pages/TarjetaPublicaPage';
@@ -49,6 +50,7 @@ const AppContent: React.FC = () => {
     else if (page === 'precios') navigate('/precios');
     else if (page === 'login') navigate('/login');
     else if (page === 'register') navigate('/register');
+    else if (page === 'registerAdmin') navigate('/register-admin');
     else if (page === 'dashboard') navigate('/dashboard');
     else if (page === 'admin-plantillas') navigate('/admin/plantillas');
     else if (page === 'perfil') navigate('/perfil');
@@ -84,7 +86,9 @@ const AppContent: React.FC = () => {
     if (location.pathname === '/register') {
       return <RegisterPage onRegisterSuccess={() => navigate('/login')} />;
     }
-    
+    if (location.pathname === '/registro-admin') {
+      return <RegisterAdminPage onRegisterSuccess={() => navigate('/login')} />;
+    }
     if (matchResetAdmin) {
       return <ResetPasswordPage tipo="admin" />;
     }
