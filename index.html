@@ -2,52 +2,42 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/Icon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#0DB8D3" />
-    <meta name="description" content="Crea tarjetas digitales profesionales con plantillas personalizables. Diseños modernos para negocios y profesionales." />
-    <meta name="keywords" content="tarjetas digitales, plantillas, negocios, diseño web, tarjetas virtuales" />
-    <meta name="author" content="Tarjetas Renova" />
+    <meta name="description" content="TapCards - Crea tarjetas digitales profesionales con plantillas personalizables. Diseños modernos para negocios y profesionales." />
+    <meta name="keywords" content="tarjetas digitales, plantillas, negocios, diseño web, tarjetas virtuales, TapCards" />
+    <meta name="author" content="TapCards" />
     <meta name="robots" content="index, follow" />
     
-    <title>Tarjetas Renova - Plantillas Profesionales para Tarjetas Digitales</title>
+    <title>TapCards - Plantillas Profesionales para Tarjetas Digitales</title>
     
-    <!-- Preconnect a Google Fonts para mejor rendimiento -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     
-    <!-- Google Fonts - Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
     
-    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://tarjetas-renova.vercel.app/" />
-    <meta property="og:title" content="Tarjetas Renova - Plantillas Profesionales" />
+    <meta property="og:url" content="https://tapcards.vercel.app/" />
+    <meta property="og:title" content="TapCards - Plantillas Profesionales para Tarjetas Digitales" />
     <meta property="og:description" content="Crea tarjetas digitales profesionales con plantillas personalizables. Diseños modernos para negocios y profesionales." />
-    <meta property="og:image" content="https://tarjetas-renova.vercel.app/og-image.jpg" />
+    <meta property="og:image" content="https://tapcards.vercel.app/og-image.jpg" />
     
-    <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://tarjetas-renova.vercel.app/" />
-    <meta property="twitter:title" content="Tarjetas Renova - Plantillas Profesionales" />
+    <meta property="twitter:url" content="https://tapcards.vercel.app/" />
+    <meta property="twitter:title" content="TapCards - Plantillas Profesionales para Tarjetas Digitales" />
     <meta property="twitter:description" content="Crea tarjetas digitales profesionales con plantillas personalizables." />
-    <meta property="twitter:image" content="https://tarjetas-renova.vercel.app/og-image.jpg" />
+    <meta property="twitter:image" content="https://tapcards.vercel.app/og-image.jpg" />
     
-    <!-- Apple Touch Icon -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    
-    <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="manifest" href="/site.webmanifest" />
     
-    <!-- Preload critical assets -->
     <link rel="preload" href="/src/styles/global.css" as="style" />
     <link rel="preload" href="/src/styles/custom-bootstrap.scss" as="style" />
     
-    <!-- Estilos críticos inline para evitar FOUC (Flash of Unstyled Content) -->
     <style>
-      /* Estilos críticos para renderizado inicial */
       * {
         margin: 0;
         padding: 0;
@@ -71,7 +61,6 @@
         min-height: 100vh;
       }
       
-      /* Loading spinner crítico */
       .initial-loading {
         position: fixed;
         top: 0;
@@ -80,9 +69,17 @@
         bottom: 0;
         background: #0a0e1a;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
         z-index: 9999;
+        gap: 1rem;
+      }
+      
+      .initial-loading .logo-loading {
+        width: 64px;
+        height: 64px;
+        animation: pulse 1.5s ease-in-out infinite;
       }
       
       .initial-loading .spinner {
@@ -94,11 +91,21 @@
         animation: spin 0.8s linear infinite;
       }
       
+      .initial-loading .loading-text {
+        color: #9ca3af;
+        font-size: 0.875rem;
+        margin-top: 1rem;
+      }
+      
       @keyframes spin {
         to { transform: rotate(360deg); }
       }
       
-      /* Prevenir scroll cuando se carga */
+      @keyframes pulse {
+        0%, 100% { opacity: 0.6; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.05); }
+      }
+      
       .no-scroll {
         overflow: hidden;
       }
@@ -106,16 +113,13 @@
     
     <script>
       (function() {
-        // Prevenir FOUC
         document.documentElement.classList.add('no-scroll');
         
-        // Tema oscuro por defecto
         const theme = localStorage.getItem('theme');
         if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
           document.documentElement.classList.add('dark');
         }
         
-        // Marcar cuando el DOM está listo
         window.addEventListener('DOMContentLoaded', () => {
           setTimeout(() => {
             document.body.classList.add('loaded');
@@ -127,21 +131,34 @@
   </head>
   <body>
     <div id="root">
-      <!-- Loading inicial para mejor experiencia de usuario -->
       <div class="initial-loading" id="initial-loading">
+        <svg class="logo-loading" width="64" height="64" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="45" stroke="rgba(13, 184, 211, 0.2)" stroke-width="2" fill="none"/>
+          <circle cx="50" cy="50" r="45" stroke="url(#gradient)" stroke-width="3" stroke-dasharray="283" stroke-dashoffset="70" fill="none"/>
+          <defs>
+            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#0DB8D3"/>
+              <stop offset="100%" stop-color="#1B7FDC"/>
+            </linearGradient>
+          </defs>
+          <text x="50" y="68" text-anchor="middle" fill="#0DB8D3" font-size="32" font-weight="bold" font-family="Inter, sans-serif">T</text>
+        </svg>
         <div class="spinner"></div>
+        <div class="loading-text">Cargando TapCards...</div>
       </div>
     </div>
     
-    <!-- Script principal - Vite se encarga de importar los estilos correctamente -->
     <script type="module">
-      // Importar la aplicación principal
       import('./src/main.tsx').catch((error) => {
         console.error('Error al cargar la aplicación:', error);
         const loadingElement = document.getElementById('initial-loading');
         if (loadingElement) {
           loadingElement.innerHTML = `
             <div style="text-align: center; padding: 2rem;">
+              <svg width="64" height="64" viewBox="0 0 100 100" fill="none" style="margin-bottom: 1rem;">
+                <circle cx="50" cy="50" r="45" stroke="#ef4444" stroke-width="2" fill="none"/>
+                <text x="50" y="68" text-anchor="middle" fill="#ef4444" font-size="32" font-weight="bold">!</text>
+              </svg>
               <h2 style="color: #ef4444;">Error al cargar la aplicación</h2>
               <p style="color: #9ca3af;">Por favor, recarga la página</p>
               <button onclick="location.reload()" style="
@@ -160,9 +177,7 @@
       });
     </script>
     
-    <!-- Script para ocultar el loading cuando la app esté lista -->
     <script>
-      // Observer para detectar cuando React ha montado la app
       const observer = new MutationObserver((mutations) => {
         const root = document.getElementById('root');
         if (root && root.children.length > 1) {
@@ -181,7 +196,6 @@
       
       observer.observe(document.getElementById('root'), { childList: true, subtree: true });
       
-      // Timeout de seguridad para remover loading después de 5 segundos
       setTimeout(() => {
         const loadingElement = document.getElementById('initial-loading');
         if (loadingElement && loadingElement.parentNode) {

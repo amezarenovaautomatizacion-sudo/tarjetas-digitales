@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plantilla, PlantillaDetalle } from '../types';
 import { tarjetaService } from '../services/tarjeta.service';
 import { api } from '../services/api';
+import { X, Eye, Save } from 'lucide-react';
 
 interface CrearTarjetaModalProps {
   isOpen: boolean;
@@ -108,7 +109,9 @@ const CrearTarjetaModal: React.FC<CrearTarjetaModalProps> = ({ isOpen, onClose, 
       <div className="modal-content modal-large">
         <div className="modal-header">
           <h2>Crear Nueva Tarjeta</h2>
-          <button className="modal-close" onClick={onClose}>×</button>
+          <button className="modal-close" onClick={onClose}>
+            <X size={20} />
+          </button>
         </div>
         <div className="modal-body modal-split">
           <div className="modal-form-section">
@@ -225,14 +228,14 @@ const CrearTarjetaModal: React.FC<CrearTarjetaModalProps> = ({ isOpen, onClose, 
               {error && <div className="error-message">{error}</div>}
 
               <button type="submit" className="btn-primary btn-block" disabled={loading}>
-                {loading ? 'Creando...' : 'Crear Tarjeta'}
+                {loading ? 'Creando...' : <><Save size={16} /> Crear Tarjeta</>}
               </button>
             </form>
           </div>
 
           <div className="modal-preview-section">
             <div className="preview-header">
-              <h3>Vista Previa en Vivo</h3>
+              <h3><Eye size={16} /> Vista Previa en Vivo</h3>
               {generatingPreview && <div className="preview-loading">Actualizando...</div>}
             </div>
             <div className="preview-content">

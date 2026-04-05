@@ -15,6 +15,7 @@ import {
   Settings,
   HelpCircle
 } from 'lucide-react';
+import LogoSvg from '/Logo.svg';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -244,8 +245,17 @@ const Layout: React.FC<LayoutProps> = ({
               }
             }}
           >
-            <span className="brand-gradient">Tarjetas</span>
-            <span className="brand-light"> Renova</span>
+            <img 
+              src={LogoSvg} 
+              alt="TapCards" 
+              className="navbar-logo"
+              height="40"
+              width="auto"
+            />
+            <span className="brand-text">
+              <span className="brand-tap">Tap</span>
+              <span className="brand-cards">Cards</span>
+            </span>
             <span className="brand-badge">Beta</span>
           </Navbar.Brand>
           
@@ -330,8 +340,17 @@ const Layout: React.FC<LayoutProps> = ({
         <Offcanvas.Header className="sidebar-header">
           <Offcanvas.Title>
             <div className="sidebar-logo">
-              <span className="brand-gradient">Tarjetas</span>
-              <span className="brand-light"> Renova</span>
+              <img 
+                src={LogoSvg} 
+                alt="TapCards" 
+                className="sidebar-logo-img"
+                height="32"
+                width="auto"
+              />
+              <span className="sidebar-brand-text">
+                <span className="sidebar-brand-tap">Tap</span>
+                <span className="sidebar-brand-cards">Cards</span>
+              </span>
             </div>
           </Offcanvas.Title>
           <button 

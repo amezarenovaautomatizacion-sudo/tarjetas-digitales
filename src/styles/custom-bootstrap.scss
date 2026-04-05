@@ -1,16 +1,13 @@
-// Variables personalizadas (sobrescribir después de importar)
 $primary: #0DB8D3;
 $primary-dark: #1B7FDC;
 $dark-bg: #0a0e1a;
 $card-bg: rgba(17, 24, 39, 0.95);
 
-// Estilos del Layout
 .app-wrapper {
   min-height: 100vh;
   background: $dark-bg;
 }
 
-// ========== NAVBAR MEJORADO ==========
 .top-navbar {
   background: rgba(5, 7, 15, 0.95) !important;
   backdrop-filter: blur(12px);
@@ -38,31 +35,50 @@ $card-bg: rgba(17, 24, 39, 0.95);
     position: relative;
     flex-shrink: 0;
     transition: transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
     
     &:hover {
       transform: scale(1.02);
     }
-    
-    .brand-gradient {
-      background: linear-gradient(135deg, #0DB8D3, #1B7FDC);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-    
-    .brand-light {
-      color: white;
-    }
-    
-    .brand-badge {
-      font-size: 0.6rem;
-      background: rgba(13, 184, 211, 0.2);
-      padding: 0.15rem 0.5rem;
-      border-radius: 20px;
-      margin-left: 0.5rem;
-      vertical-align: middle;
-      font-weight: 500;
-    }
+  }
+  
+  .navbar-logo {
+    height: 40px;
+    width: auto;
+    display: block;
+    transition: transform 0.2s ease;
+  }
+  
+  .navbar-brand-custom:hover .navbar-logo {
+    transform: scale(1.05);
+  }
+  
+  .brand-text {
+    display: inline-flex;
+    align-items: baseline;
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  
+  .brand-tap {
+    color: var(--primary-light);
+  }
+  
+  .brand-cards {
+    color: var(--text-secondary);
+  }
+  
+  .brand-badge {
+    font-size: 0.6rem;
+    background: rgba(13, 184, 211, 0.2);
+    padding: 0.15rem 0.5rem;
+    border-radius: 20px;
+    margin-left: 0.25rem;
+    font-weight: 500;
+    color: var(--primary-light);
   }
   
   .navbar-nav {
@@ -86,13 +102,13 @@ $card-bg: rgba(17, 24, 39, 0.95);
     white-space: nowrap;
     
     &:hover {
-      color: #0DB8D3;
+      color: $primary;
       background: rgba(13, 184, 211, 0.1);
     }
   }
   
   .btn-register-nav {
-    background: linear-gradient(135deg, #0DB8D3, #1B7FDC);
+    background: linear-gradient(135deg, $primary, $primary-dark);
     padding: 0.5rem 1.5rem;
     border-radius: 50px;
     color: white !important;
@@ -120,7 +136,7 @@ $card-bg: rgba(17, 24, 39, 0.95);
     
     &:hover {
       background: rgba(13, 184, 211, 0.2);
-      color: #0DB8D3;
+      color: $primary;
       transform: scale(1.05);
     }
   }
@@ -141,7 +157,7 @@ $card-bg: rgba(17, 24, 39, 0.95);
     .user-avatar {
       width: 36px;
       height: 36px;
-      background: linear-gradient(135deg, #0DB8D3, #1B7FDC);
+      background: linear-gradient(135deg, $primary, $primary-dark);
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -222,7 +238,7 @@ $card-bg: rgba(17, 24, 39, 0.95);
   .menu-trigger {
     background: rgba(13, 184, 211, 0.15);
     border: 1px solid rgba(13, 184, 211, 0.3);
-    color: #0DB8D3;
+    color: $primary;
     padding: 0.5rem;
     border-radius: 50%;
     display: flex;
@@ -240,7 +256,7 @@ $card-bg: rgba(17, 24, 39, 0.95);
     }
     
     &:hover {
-      background: linear-gradient(135deg, #0DB8D3, #1B7FDC);
+      background: linear-gradient(135deg, $primary, $primary-dark);
       color: white;
       transform: scale(1.05);
       box-shadow: 0 0 15px rgba(13, 184, 211, 0.5);
@@ -257,7 +273,6 @@ $card-bg: rgba(17, 24, 39, 0.95);
   }
 }
 
-// ========== SIDEBAR OFFCANVAS ==========
 .sidebar-offcanvas {
   background: #0f172a !important;
   width: 320px !important;
@@ -269,22 +284,32 @@ $card-bg: rgba(17, 24, 39, 0.95);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    
-    .offcanvas-title {
-      font-size: 1.5rem;
-      font-weight: 800;
-      
-      .brand-gradient {
-        background: linear-gradient(135deg, #0DB8D3, #1B7FDC);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-      }
-      
-      .brand-light {
-        color: white;
-      }
-    }
+  }
+  
+  .sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .sidebar-logo-img {
+    height: 32px;
+    width: auto;
+    display: block;
+  }
+  
+  .sidebar-brand-text {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  
+  .sidebar-brand-tap {
+    color: var(--primary-light);
+  }
+  
+  .sidebar-brand-cards {
+    color: var(--text-secondary);
   }
   
   .btn-close-custom {
@@ -301,7 +326,7 @@ $card-bg: rgba(17, 24, 39, 0.95);
     
     &:hover {
       background: rgba(13, 184, 211, 0.2);
-      color: #0DB8D3;
+      color: $primary;
       transform: rotate(90deg);
     }
   }
@@ -354,7 +379,7 @@ $card-bg: rgba(17, 24, 39, 0.95);
     
     &.active {
       background: linear-gradient(135deg, rgba(13, 184, 211, 0.2), rgba(27, 127, 220, 0.2));
-      color: #0DB8D3;
+      color: $primary;
       
       .sidebar-active-indicator {
         opacity: 1;
@@ -389,7 +414,7 @@ $card-bg: rgba(17, 24, 39, 0.95);
     }
     
     .sidebar-badge {
-      background: linear-gradient(135deg, #0DB8D3, #1B7FDC);
+      background: linear-gradient(135deg, $primary, $primary-dark);
       font-size: 0.65rem;
       padding: 0.2rem 0.5rem;
       border-radius: 20px;
@@ -399,7 +424,7 @@ $card-bg: rgba(17, 24, 39, 0.95);
     .sidebar-active-indicator {
       opacity: 0;
       transition: opacity 0.3s ease;
-      color: #0DB8D3;
+      color: $primary;
     }
   }
   
@@ -425,7 +450,7 @@ $card-bg: rgba(17, 24, 39, 0.95);
       gap: 0.5rem;
       font-size: 0.75rem;
       margin-bottom: 1rem;
-      color: #0DB8D3;
+      color: $primary;
     }
     
     .sidebar-version {
@@ -446,74 +471,6 @@ $card-bg: rgba(17, 24, 39, 0.95);
   transition: all 0.3s ease;
 }
 
-// ========== RESPONSIVE ==========
-@media (max-width: 768px) {
-  .top-navbar {
-    .navbar-brand-custom {
-      font-size: 1.2rem;
-      
-      .brand-badge {
-        display: none;
-      }
-    }
-    
-    .navbar-nav {
-      gap: 0.5rem;
-    }
-    
-    .nav-link-custom {
-      padding: 0.4rem 0.75rem;
-      font-size: 0.9rem;
-    }
-    
-    .btn-register-nav {
-      padding: 0.4rem 1rem;
-      font-size: 0.9rem;
-    }
-    
-    .nav-icon-link {
-      width: 32px;
-      height: 32px;
-    }
-    
-    .user-dropdown .user-avatar {
-      width: 32px;
-      height: 32px;
-    }
-    
-    .menu-trigger {
-      width: 36px;
-      height: 36px;
-    }
-  }
-  
-  .sidebar-offcanvas {
-    width: 280px !important;
-  }
-  
-  .main-content {
-    margin-top: 65px;
-  }
-}
-
-@media (max-width: 480px) {
-  .top-navbar {
-    .navbar-brand-custom {
-      font-size: 1rem;
-    }
-    
-    .nav-link-custom {
-      display: none;
-    }
-    
-    .btn-register-nav {
-      padding: 0.3rem 0.8rem;
-      font-size: 0.8rem;
-    }
-  }
-}
-
-// ========== PRICING PLANS ==========
 .pricing-plans-page {
   min-height: calc(100vh - 80px);
 }
@@ -528,7 +485,7 @@ $card-bg: rgba(17, 24, 39, 0.95);
 .pricing-title {
   font-size: clamp(2rem, 5vw, 3rem);
   margin-bottom: 1rem;
-  background: linear-gradient(135deg, #0DB8D3, #1B7FDC);
+  background: linear-gradient(135deg, $primary, $primary-dark);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -554,12 +511,12 @@ $card-bg: rgba(17, 24, 39, 0.95);
     
     &:hover {
       background: rgba(13, 184, 211, 0.1);
-      border-color: #0DB8D3;
-      color: #0DB8D3;
+      border-color: $primary;
+      color: $primary;
     }
     
     &.active {
-      background: linear-gradient(135deg, #0DB8D3, #1B7FDC);
+      background: linear-gradient(135deg, $primary, $primary-dark);
       border-color: transparent;
       color: white;
     }
@@ -582,7 +539,7 @@ $card-bg: rgba(17, 24, 39, 0.95);
   }
   
   &.popular-card {
-    border: 2px solid #0DB8D3;
+    border: 2px solid $primary;
     box-shadow: 0 0 20px rgba(13, 184, 211, 0.3);
   }
   
@@ -593,7 +550,7 @@ $card-bg: rgba(17, 24, 39, 0.95);
   }
   
   .plan-icon {
-    color: #0DB8D3;
+    color: $primary;
   }
   
   .plan-name {
@@ -631,12 +588,12 @@ $card-bg: rgba(17, 24, 39, 0.95);
   }
   
   .btn-popular {
-    background: #0DB8D3;
+    background: $primary;
     border: none;
     color: white;
     
     &:hover {
-      background: #1B7FDC;
+      background: $primary-dark;
       transform: translateY(-2px);
     }
   }
@@ -682,7 +639,7 @@ $card-bg: rgba(17, 24, 39, 0.95);
     .comparison-header {
       background: rgba(13, 184, 211, 0.1);
       font-weight: 600;
-      color: #0DB8D3;
+      color: $primary;
     }
     
     .comparison-row {
@@ -709,7 +666,7 @@ $card-bg: rgba(17, 24, 39, 0.95);
   }
   
   .benefit-icon {
-    color: #0DB8D3;
+    color: $primary;
     margin-bottom: 1rem;
   }
   
@@ -731,8 +688,90 @@ $card-bg: rgba(17, 24, 39, 0.95);
     }
     
     h6 {
-      color: #0DB8D3;
+      color: $primary;
       margin-bottom: 0.5rem;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .top-navbar {
+    .navbar-brand-custom {
+      font-size: 1.2rem;
+      
+      .brand-badge {
+        display: none;
+      }
+    }
+    
+    .navbar-logo {
+      height: 32px;
+    }
+    
+    .brand-text {
+      font-size: 1.2rem;
+    }
+    
+    .navbar-nav {
+      gap: 0.5rem;
+    }
+    
+    .nav-link-custom {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.9rem;
+    }
+    
+    .btn-register-nav {
+      padding: 0.4rem 1rem;
+      font-size: 0.9rem;
+    }
+    
+    .nav-icon-link {
+      width: 32px;
+      height: 32px;
+    }
+    
+    .user-dropdown .user-avatar {
+      width: 32px;
+      height: 32px;
+    }
+    
+    .menu-trigger {
+      width: 36px;
+      height: 36px;
+    }
+  }
+  
+  .sidebar-offcanvas {
+    width: 280px !important;
+    
+    .sidebar-logo-img {
+      height: 24px;
+    }
+    
+    .sidebar-brand-text {
+      font-size: 1rem;
+    }
+  }
+  
+  .main-content {
+    margin-top: 65px;
+  }
+}
+
+@media (max-width: 480px) {
+  .top-navbar {
+    .navbar-brand-custom {
+      font-size: 1rem;
+    }
+    
+    .nav-link-custom {
+      display: none;
+    }
+    
+    .btn-register-nav {
+      padding: 0.3rem 0.8rem;
+      font-size: 0.8rem;
     }
   }
 }

@@ -1,5 +1,5 @@
-// src/components/PlantillaCard.tsx
 import React from 'react';
+import { Eye, Calendar, Layers, Sparkles } from 'lucide-react';
 import { Plantilla } from '../types';
 
 interface PlantillaCardProps {
@@ -14,7 +14,11 @@ const PlantillaCard: React.FC<PlantillaCardProps> = ({ plantilla, onClick }) => 
     <div className="plantilla-card" onClick={onClick}>
       <div className="plantilla-card-header">
         <h3 className="plantilla-card-title">{plantilla.nombre}</h3>
-        {plantilla.categoria_nombre && <span className="plantilla-category">{plantilla.categoria_nombre}</span>}
+        {plantilla.categoria_nombre && (
+          <span className="plantilla-category">
+            <Sparkles size={12} /> {plantilla.categoria_nombre}
+          </span>
+        )}
       </div>
       <div className="plantilla-card-body">
         <div className="plantilla-preview-placeholder">
@@ -22,12 +26,13 @@ const PlantillaCard: React.FC<PlantillaCardProps> = ({ plantilla, onClick }) => 
         </div>
         <p className="plantilla-description">{plantilla.descripcion || 'Sin descripción disponible'}</p>
         <div className="plantilla-stats">
-          <span>📊 {plantilla.total_variables} variables</span>
-          <span>👁️ {plantilla.visitas} visitas</span>
+          <span><Layers size={14} /> {plantilla.total_variables} variables</span>
+          <span><Eye size={14} /> {plantilla.visitas} visitas</span>
+          <span><Calendar size={14} /> {formatDate(plantilla.creado)}</span>
         </div>
       </div>
       <div className="plantilla-card-footer">
-        <small>Desde: {formatDate(plantilla.creado)}</small>
+        <button className="btn-preview-sm">Ver Detalles →</button>
       </div>
     </div>
   );

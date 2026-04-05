@@ -1,4 +1,3 @@
-// src/hooks/usePlantillas.ts
 import { useState, useEffect } from 'react';
 import { Plantilla, PlantillaDetalle, PreviewResponse } from '../types';
 import { api } from '../services/api';

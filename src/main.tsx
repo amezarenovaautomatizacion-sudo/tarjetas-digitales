@@ -6,7 +6,6 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './styles/global.css';
 import './styles/custom-bootstrap.scss';
 
-// Registrar Service Worker para PWA (opcional)
 const isProduction = import.meta.env.PROD;
 if ('serviceWorker' in navigator && isProduction) {
   window.addEventListener('load', () => {
@@ -14,10 +13,8 @@ if ('serviceWorker' in navigator && isProduction) {
   });
 }
 
-// Prevenir scroll en body cuando se abre modal
 const rootElement = document.getElementById('root');
 if (rootElement) {
-  // Observer para manejar modales
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       if (mutation.type === 'childList') {

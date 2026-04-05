@@ -1,4 +1,3 @@
-// src/components/PricingPlans.tsx
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Badge, Button, Tab, Tabs } from 'react-bootstrap';
 import { 

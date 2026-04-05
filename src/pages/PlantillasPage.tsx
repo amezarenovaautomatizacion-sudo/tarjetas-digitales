@@ -1,7 +1,6 @@
-// src/pages/PlantillasPage.tsx
 import React, { useState } from 'react';
-import { Container, Row, Col, Card, Form, InputGroup, Badge, Pagination } from 'react-bootstrap';
-import { Search, Filter, Grid3x3, List, TrendingUp, Clock, Star } from 'lucide-react';
+import { Container, Row, Col, Card, Form, InputGroup, Badge } from 'react-bootstrap';
+import { Search, Grid3x3, List, TrendingUp, Clock, Star } from 'lucide-react';
 import { usePlantillas } from '../hooks/usePlantillas';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -43,7 +42,7 @@ const PlantillasPage: React.FC<PlantillasPageProps> = ({ onPlantillaClick }) => 
         <Row className="mb-4">
           <Col md={6} lg={5}>
             <InputGroup>
-              <InputGroup.Text className="bg-dark border-secondary">
+              <InputGroup.Text className="search-input-group">
                 <Search size={18} />
               </InputGroup.Text>
               <Form.Control
@@ -51,7 +50,7 @@ const PlantillasPage: React.FC<PlantillasPageProps> = ({ onPlantillaClick }) => 
                 placeholder="Buscar plantillas..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-dark border-secondary text-white"
+                className="search-input"
               />
             </InputGroup>
           </Col>
@@ -111,12 +110,12 @@ const PlantillasPage: React.FC<PlantillasPageProps> = ({ onPlantillaClick }) => 
                     </Badge>
                   </div>
                   <Card.Body>
-                    <Card.Title className="plantilla-card-title">
+                    <h3 className="plantilla-card-title">
                       {plantilla.nombre}
-                    </Card.Title>
-                    <Card.Text className="plantilla-card-description">
+                    </h3>
+                    <p className="plantilla-card-description">
                       {plantilla.descripcion || 'Sin descripción disponible'}
-                    </Card.Text>
+                    </p>
                     <div className="plantilla-meta">
                       <span className="meta-item">
                         📊 {plantilla.total_variables} variables
@@ -149,10 +148,10 @@ const PlantillasPage: React.FC<PlantillasPageProps> = ({ onPlantillaClick }) => 
                     <Card.Body>
                       <div className="d-flex justify-content-between align-items-start">
                         <div>
-                          <Card.Title>{plantilla.nombre}</Card.Title>
-                          <Card.Text className="text-muted small">
+                          <h4 className="plantilla-list-title">{plantilla.nombre}</h4>
+                          <p className="plantilla-list-description text-muted small">
                             {plantilla.descripcion?.substring(0, 100) || 'Sin descripción'}
-                          </Card.Text>
+                          </p>
                         </div>
                         <div className="list-stats">
                           <span className="stat">👁️ {plantilla.visitas}</span>
