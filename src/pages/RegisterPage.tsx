@@ -9,24 +9,22 @@ interface RegisterPageProps {
 
 const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess }) => {
   const [formData, setFormData] = useState({
-    nombre: '', email: '', password: '', telefono: '', calle: '', 
+    nombre: '', email: '', password: '', telefono: '', calle: '',
     numero_exterior: '', colonia: '', ciudad: '', estado: '', codigo_postal: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    
     const ip = await obtenerIpPublica();
-    
-    const response = await authService.registerCliente({ 
-      ...formData, 
-      ip_registro: ip 
-    });
-    
+    const response = await authService.registerCliente({ ...formData, ip_registro: ip });
     if (response.error) {
       setError(response.error);
     } else {
@@ -37,59 +35,136 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess }) => {
 
   return (
     <div className="auth-page">
-      <div className="auth-container">
+      {/* ↓ auth-container más ancho para que form-row respire */}
+      <div className="auth-container" style={{ maxWidth: '680px' }}>
         <h2>Registro de Cliente</h2>
-        <form onSubmit={handleSubmit}>
+
+        <form onSubmit={handleSubmit} noValidate>
+
+          {/* ── Sección: Datos de acceso ── */}
+          <p className="form-section-label">Datos de acceso</p>
+
           <div className="form-row">
             <div className="form-group">
-              <label>Nombre*</label>
-              <input value={formData.nombre} onChange={(e) => setFormData({...formData, nombre: e.target.value})} required />
+              <label>Nombre <span className="required">*</span></label>
+              <input
+                name="nombre"
+                value={formData.nombre}
+                onChange={handleChange}
+                placeholder="Tu nombre completo"
+                required
+              />
             </div>
             <div className="form-group">
-              <label>Email*</label>
-              <input type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} required />
+              <label>Email <span className="required">*</span></label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="tu@email.com"
+                required
+              />
             </div>
           </div>
-          <div className="form-group">
-            <label>Contraseña*</label>
-            <input type="password" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} required minLength={6} />
+
+          <div className="form-row">
+            <div className="form-group">
+              <label>Contraseña <span className="required">*</span></label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="••••••"
+                required
+                minLength={6}
+              />
+              <small className="form-help">Mínimo 6 caracteres</small>
+            </div>
+            <div className="form-group">
+              <label>Teléfono</label>
+              <input
+                name="telefono"
+                value={formData.telefono}
+                onChange={handleChange}
+                placeholder="10 dígitos"
+              />
+            </div>
           </div>
-          <div className="form-group">
-            <label>Teléfono</label>
-            <input value={formData.telefono} onChange={(e) => setFormData({...formData, telefono: e.target.value})} />
-          </div>
+
+          {/* ── Sección: Dirección ── */}
+          <p className="form-section-label">Dirección</p>
+
           <div className="form-row">
             <div className="form-group">
               <label>Calle</label>
-              <input value={formData.calle} onChange={(e) => setFormData({...formData, calle: e.target.value})} />
+              <input
+                name="calle"
+                value={formData.calle}
+                onChange={handleChange}
+                placeholder="Nombre de la calle"
+              />
             </div>
             <div className="form-group">
               <label>Número Exterior</label>
-              <input value={formData.numero_exterior} onChange={(e) => setFormData({...formData, numero_exterior: e.target.value})} />
+              <input
+                name="numero_exterior"
+                value={formData.numero_exterior}
+                onChange={handleChange}
+                placeholder="Ej. 123"
+              />
             </div>
           </div>
+
           <div className="form-row">
             <div className="form-group">
               <label>Colonia</label>
-              <input value={formData.colonia} onChange={(e) => setFormData({...formData, colonia: e.target.value})} />
+              <input
+                name="colonia"
+                value={formData.colonia}
+                onChange={handleChange}
+                placeholder="Nombre de la colonia"
+              />
             </div>
             <div className="form-group">
               <label>Ciudad</label>
-              <input value={formData.ciudad} onChange={(e) => setFormData({...formData, ciudad: e.target.value})} />
+              <input
+                name="ciudad"
+                value={formData.ciudad}
+                onChange={handleChange}
+                placeholder="Tu ciudad"
+              />
             </div>
           </div>
+
           <div className="form-row">
             <div className="form-group">
               <label>Estado</label>
-              <input value={formData.estado} onChange={(e) => setFormData({...formData, estado: e.target.value})} />
+              <input
+                name="estado"
+                value={formData.estado}
+                onChange={handleChange}
+                placeholder="Tu estado"
+              />
             </div>
             <div className="form-group">
               <label>Código Postal</label>
-              <input value={formData.codigo_postal} onChange={(e) => setFormData({...formData, codigo_postal: e.target.value})} />
+              <input
+                name="codigo_postal"
+                value={formData.codigo_postal}
+                onChange={handleChange}
+                placeholder="00000"
+              />
             </div>
           </div>
+
           {error && <div className="error-message">{error}</div>}
-          <button type="submit" disabled={loading}>{loading ? 'Registrando...' : 'Registrarse'}</button>
+
+          <button type="submit" className="btn-primary btn-block" disabled={loading}>
+            {loading ? 'Registrando...' : 'Registrarse'}
+          </button>
+
         </form>
       </div>
     </div>

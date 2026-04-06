@@ -772,14 +772,28 @@ $input-btn-focus-width: 0;
     .navbar-brand-custom {
       font-size: 1rem;
     }
-    
-    .nav-link-custom {
-      display: none;
+
+    .nav-auth-link,
+    .nav-auth-register {
+      display: none !important;
     }
-    
-    .btn-register-nav {
-      padding: 0.3rem 0.8rem;
-      font-size: 0.8rem;
+  }
+}
+
+.sidebar-offcanvas {
+  .sidebar-item--register {
+    background: linear-gradient(135deg, rgba(13, 184, 211, 0.15), rgba(27, 127, 220, 0.15));
+    color: $primary !important;
+    border: 1px solid rgba(13, 184, 211, 0.25);
+
+    &:hover {
+      background: linear-gradient(135deg, rgba(13, 184, 211, 0.3), rgba(27, 127, 220, 0.3));
+      color: white !important;
+      border-color: rgba(13, 184, 211, 0.5);
+    }
+
+    .sidebar-icon {
+      color: $primary;
     }
   }
 }

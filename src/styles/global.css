@@ -463,6 +463,7 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.5rem); color: var(--text-primary); }
 
 .auth-container {
   background: var(--bg-card);
+  color: var(--text-primary) !important;
   backdrop-filter: blur(16px);
   padding: var(--spacing-2xl);
   border-radius: var(--radius-2xl);
@@ -971,6 +972,18 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.5rem); color: var(--text-primary); }
   .dashboard-stats { grid-template-columns: 1fr; gap: var(--spacing-md); }
   .modal-form-section { max-height: 50vh; }
   .form-row { grid-template-columns: 1fr; }
+  .form-section-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: calc(var(--spacing-sm) * -1); /* compensa el gap del form */
+    padding-bottom: var(--spacing-xs);
+    border-bottom: 1px solid var(--border-color);
+  }
+  .form-row .form-group {
+    margin-bottom: 0;
+    }
   .color-input-wrapper { flex-direction: column; align-items: flex-start; }
   .color-picker { width: 100%; height: 40px; }
   .color-text { width: 100%; }
