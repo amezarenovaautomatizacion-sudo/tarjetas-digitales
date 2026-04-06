@@ -62,7 +62,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
   return (
     <div className="dashboard-page">
       <div className="dashboard-header">
-        <div className="container">
+        <div className="container plantilla-card-title mb-4 text-center">
           <h1>Mi Cuenta</h1>
           <p>Bienvenido, {userData.nombre || userData.email}</p>
           <button className="btn-primary btn-create" onClick={() => setModalOpen(true)}>
@@ -87,7 +87,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
         </div>
 
-        <div className="section-header">
+        <div className="section-header plantilla-card-title mb-4 text-center">
           <h2>Mis Tarjetas</h2>
           <button className="btn-secondary btn-sm" onClick={() => setModalOpen(true)}>
             + Nueva Tarjeta
@@ -104,7 +104,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
             </button>
           </div>
         ) : (
-          <div className="tarjetas-grid">
+          <div className="tarjetas-grid tarjeta-card-body">
             {tarjetas.map(t => (
               <TarjetaCard
                 key={t.tarjetaclienteid}

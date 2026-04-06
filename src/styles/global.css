@@ -285,7 +285,7 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.5rem); color: var(--text-primary); }
   color: white;
 }
 
-.plantilla-card-body, .tarjeta-card-body { padding: var(--spacing-lg); }
+.plantilla-card-body, .tarjeta-card-body { padding: var(--spacing-lg); color: var(--text-primary);}
 
 .plantilla-preview-placeholder {
   background: linear-gradient(135deg, #1f2937, #111827);
@@ -486,7 +486,7 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.5rem); color: var(--text-primary); }
   background: rgba(31, 41, 55, 0.6);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  color: var(--text-primary);
+  color: var(--text-primary) !important;
   font-size: 0.95rem;
   transition: all var(--transition-fast);
 }
@@ -535,7 +535,7 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.5rem); color: var(--text-primary); }
   animation: modalSlideIn 0.3s ease;
 }
 
-@keyframes modalSlideIn { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes modalSlideIn { from { opacity: 0; transform: translateY(-30px); -webkit-transform: translateY(-30px); -moz-transform: translateY(-30px); -ms-transform: translateY(-30px); -o-transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
 
 .modal-large { max-width: 1200px; }
 
@@ -547,7 +547,6 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.5rem); color: var(--text-primary); }
   align-items: center;
   position: sticky;
   top: 0;
-  background: var(--bg-modal);
   border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
 }
 

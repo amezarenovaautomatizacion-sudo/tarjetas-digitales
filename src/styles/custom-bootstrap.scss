@@ -3,6 +3,14 @@ $primary-dark: #1B7FDC;
 $dark-bg: #0a0e1a;
 $card-bg: rgba(17, 24, 39, 0.95);
 
+// ── Neutralizar focus de Bootstrap en inputs ──
+// Bootstrap genera un box-shadow azul/cyan grueso por defecto.
+// Lo reemplazamos con none para que global.css controle el focus.
+$input-focus-box-shadow: none;
+$input-focus-border-color: #0DB8D3;
+$input-btn-focus-box-shadow: none;
+$input-btn-focus-width: 0;
+
 .app-wrapper {
   min-height: 100vh;
   background: $dark-bg;
