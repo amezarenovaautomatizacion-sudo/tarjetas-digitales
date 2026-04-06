@@ -1,4 +1,3 @@
-// src/pages/TarjetaPublicaPage.tsx
 import React, { useState, useEffect } from 'react';
 import { Eye, FileText, Link, ArrowLeft } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -46,7 +45,6 @@ const TarjetaPublicaPage: React.FC<TarjetaPublicaPageProps> = ({ slug, onBack })
     );
   }
 
-  // ── Vista solo tarjeta (no autenticado) ──────────────────────────────
   if (!isAuthenticated) {
     return (
       <div className="tarjeta-publica-page" style={{ 
@@ -70,7 +68,6 @@ const TarjetaPublicaPage: React.FC<TarjetaPublicaPageProps> = ({ slug, onBack })
     );
   }
 
-  // ── Vista completa (autenticado) ─────────────────────────────────────
   return (
     <div className="tarjeta-publica-page">
       <div className="container">
@@ -80,7 +77,6 @@ const TarjetaPublicaPage: React.FC<TarjetaPublicaPageProps> = ({ slug, onBack })
 
         <div className="public-card">
 
-          {/* Header con meta info */}
           <div className="public-card-header plantillas-title">
             <h1>{tarjeta.nombre_tarjeta}</h1>
             <div className="public-meta">
@@ -105,7 +101,6 @@ const TarjetaPublicaPage: React.FC<TarjetaPublicaPageProps> = ({ slug, onBack })
             </div>
           </div>
 
-          {/* Tarjeta renderizada */}
           <div className="public-card-content">
             <div className="tarjeta-render">
               <style dangerouslySetInnerHTML={{ __html: tarjeta.renderizado?.css || '' }} />
