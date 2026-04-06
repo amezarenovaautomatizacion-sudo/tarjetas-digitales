@@ -37,6 +37,7 @@ const PricingPlans: React.FC = () => {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
 
   const plans: Plan[] = [
+    /*
     {
       id: 'free',
       name: 'Básico',
@@ -54,11 +55,12 @@ const PricingPlans: React.FC = () => {
         'Estadísticas básicas',
       ],
     },
+    */
     {
       id: 'premium',
       name: 'Premium',
       segment: 'B2C',
-      price: 130,
+      price: 40,
       priceLabel: '/mes',
       icon: <Sparkles size={28} strokeWidth={1.5} />,
       popular: true,
@@ -66,12 +68,11 @@ const PricingPlans: React.FC = () => {
       buttonText: 'Contratar Ahora',
       annualDiscount: 'Ahorra 2 meses',
       features: [
-        'Tarjetas ilimitadas',
+        '1 Tarjeta personalizable',
         'Todas las plantillas',
-        'Análisis avanzado',
         'Soporte prioritario 24/7',
         'Personalización completa',
-        'Exportar a PDF',
+        'Edicion de informacion 24/7',
         'Códigos QR personalizados',
         'Sin publicidad',
       ],
@@ -80,23 +81,24 @@ const PricingPlans: React.FC = () => {
       id: 'business',
       name: 'Negocios',
       segment: 'SMB',
-      price: 200,
+      price: 150,
       priceLabel: '/mes',
       icon: <Users size={28} strokeWidth={1.5} />,
       badge: 'Para Equipos',
       buttonText: 'Contratar Ahora',
       annualDiscount: 'Ahorra 2 meses',
       features: [
-        'Hasta 50 tarjetas',
-        '5 usuarios incluidos',
-        'Gestión de equipo',
-        'API de integración',
-        'Reportes ejecutivos',
-        'Branding personalizado',
-        'Soporte 24/7 prioritario',
-        'Análisis por equipo',
+        '10 Tarjeta personalizable',
+        'Todas las plantillas',
+        'Branding Personalizado',
+        'Soporte prioritario 24/7',
+        'Personalización completa',
+        'Edicion de informacion 24/7',
+        'Códigos QR personalizados',
+        'Sin publicidad',
       ],
     },
+    /*
     {
       id: 'business-pro',
       name: 'Negocios Pro',
@@ -117,6 +119,7 @@ const PricingPlans: React.FC = () => {
         'SLA garantizado',
       ],
     },
+    */
   ];
 
   const getSegmentPlans = (segment: 'B2C' | 'SMB' | 'B2B') =>
@@ -212,14 +215,12 @@ const PricingPlans: React.FC = () => {
 
   const renderComparisonTable = () => {
     const rows = [
-      { feature: 'Tarjetas digitales',       basic: '3',        premium: 'Ilimitadas',         business: '50+' },
-      { feature: 'Plantillas disponibles',   basic: '5',        premium: 'Todas',              business: 'Todas + Exclusivas' },
-      { feature: 'Usuarios incluidos',       basic: '1',        premium: '1',                  business: '5' },
-      { feature: 'Análisis avanzado',        basic: '✗',        premium: '✓',                  business: '✓' },
-      { feature: 'Soporte prioritario',      basic: '✗',        premium: '✓ 24/7',             business: '✓ Dedicado' },
-      { feature: 'API de integración',       basic: '✗',        premium: '✗',                  business: '✓' },
-      { feature: 'Branding personalizado',   basic: '✗',        premium: 'Básico',             business: 'Completo' },
-      { feature: 'Códigos QR personalizados',basic: '✗',        premium: '✓',                  business: '✓' },
+      { feature: 'Tarjetas digitales',               premium: '10',                 Negocios: '50+' },
+      { feature: 'Plantillas disponibles',           premium: 'Todas',              Negocios: 'Todas + Exclusivas' },
+      { feature: 'Análisis avanzado',                premium: '✓',                  Negocios: '✓' },
+      { feature: 'Soporte prioritario',              premium: '✓ 24/7',             Negocios: '✓ Dedicado' },
+      { feature: 'Branding personalizado',           premium: 'Básico',             Negocios: 'Completo' },
+      { feature: 'Códigos QR personalizados',        premium: '✓',                  Negocios: '✓' },
     ];
 
     return (
@@ -236,16 +237,14 @@ const PricingPlans: React.FC = () => {
             <div className="comparison-card">
               <div className="comparison-header">
                 <span>Característica</span>
-                <span className="text-center">Básico</span>
                 <span className="text-center">Premium</span>
                 <span className="text-center">Negocios</span>
               </div>
               {rows.map((row, idx) => (
                 <div key={idx} className="comparison-row">
                   <span className="fw-medium">{row.feature}</span>
-                  <span className="text-center">{row.basic}</span>
                   <span className="text-center">{row.premium}</span>
-                  <span className="text-center">{row.business}</span>
+                  <span className="text-center">{row.Negocios}</span>
                 </div>
               ))}
             </div>
@@ -260,7 +259,6 @@ const PricingPlans: React.FC = () => {
       { icon: Shield,     title: 'Seguridad Empresarial',    desc: 'Encriptación avanzada y cumplimiento ISO 27001' },
       { icon: Zap,        title: 'Escalabilidad Automática', desc: 'Infraestructura que crece con tu negocio' },
       { icon: Headphones, title: 'Soporte Dedicado 24/7',    desc: 'Gerente de cuenta exclusivo, respuesta < 1 h' },
-      { icon: BarChart,   title: 'Analytics Avanzado',       desc: 'Dashboards personalizados y KPIs a medida' },
       { icon: Clock,      title: '99.9% Uptime',             desc: 'SLA garantizado con compensación por downtime' },
       { icon: FileText,   title: 'Cumplimiento Legal',       desc: 'Contratos personalizados y GDPR compliant' },
     ];
