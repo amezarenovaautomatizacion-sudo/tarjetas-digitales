@@ -116,7 +116,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       <div className="auth-page">
         <div className="auth-container">
           <h2>🔐 Verificación de dos pasos</h2>
-          <p style={{ marginBottom: '1rem' }}>
+          <p className="plantillas-title">
             Se ha enviado un código de verificación a <strong>{tempData.email}</strong>
           </p>
 
