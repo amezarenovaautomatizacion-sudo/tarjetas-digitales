@@ -63,7 +63,6 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
     <div className="dashboard-page">
       <div className="dashboard-header">
         <div className="container plantilla-card-title mb-4 text-center">
-          <h1>Mi Cuenta</h1>
           <p>Bienvenido, {userData.nombre || userData.email}</p>
           <button className="btn-primary btn-create" onClick={() => setModalOpen(true)}>
             + Crear Nueva Tarjeta

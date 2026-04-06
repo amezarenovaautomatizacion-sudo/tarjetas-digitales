@@ -628,6 +628,12 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.5rem); color: var(--text-primary); }
   height: 200%;
   background: radial-gradient(circle, rgba(13,184,211,0.1) 0%, transparent 70%);
   animation: rotate 30s linear infinite;
+  -webkit-animation: rotate 30s linear infinite;
+}
+  
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .dashboard-header h1 { margin-bottom: var(--spacing-sm); position: relative; z-index: 1; }
