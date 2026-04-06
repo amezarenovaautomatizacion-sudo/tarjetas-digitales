@@ -200,7 +200,7 @@ const PricingPlans: React.FC = () => {
               {plan.features.map((feature, idx) => (
                 <div key={idx} className="feature-item">
                   <CheckCircle size={15} className="feature-check" />
-                  <span>{feature}</span>
+                  <span className="text-muted">{feature}</span>
                 </div>
               ))}
             </div>

@@ -385,6 +385,18 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.5rem); color: var(--text-primary); }
 
 .btn-secondary:hover { background: #4b5563; transform: translateY(-1px); }
 
+.btn-danger {
+  background: rgba(55, 65, 81, 0.8);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.75rem;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-danger:hover { background: #4b5563; transform: translateY(-1px); }
+
 .btn-small {
   padding: 0.4rem 1rem;
   font-size: 0.8rem;
@@ -544,6 +556,7 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.5rem); color: var(--text-primary); }
   border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
+  color: var(--primary);
   align-items: center;
   position: sticky;
   top: 0;
