@@ -167,7 +167,7 @@ const Layout: React.FC<LayoutProps> = ({
             </div>
             <div 
               className="sidebar-item support-item"
-              onClick={() => window.open('https://wa.me/5213339205098', '_blank')}
+              onClick={() => window.open('https://wa.me/5213326239790', '_blank')}
               role="button"
               tabIndex={0}
             >
@@ -308,6 +308,11 @@ const Layout: React.FC<LayoutProps> = ({
       <main className="main-content">
         {children}
       </main>
+      <footer>
+        <a className='footer_link' href="https://tuweb.com" target="_blank" rel="noopener noreferrer">
+          https://renova-automatizacion.com
+        </a><p>Derechos reservados para Renova 2026</p>
+      </footer>
     </div>
   );
 };

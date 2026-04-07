@@ -15,7 +15,9 @@
   text-align: center;
   border-bottom: 1px solid var(--border-color);
 }
-
+.h1_pricing{
+  color: #fff;
+}
 /* h1 ya tiene el gradiente en global.css — sólo ajustamos el subtítulo */
 .pricing-subtitle {
   color: var(--text-secondary);
