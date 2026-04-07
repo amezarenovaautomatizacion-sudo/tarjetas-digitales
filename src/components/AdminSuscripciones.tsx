@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { suscripcionService } from '../services/suscripcion.service';
-import { Search, RefreshCw, CheckCircle, XCircle, Clock, AlertCircle, UserPlus, Bell } from 'lucide-react';
+import { Search, RefreshCw, CheckCircle, XCircle, Clock, AlertCircle, UserPlus, Bell, Send, Calendar, CreditCard, Users } from 'lucide-react';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 interface Suscripcion {
   suscripcionid: number;
@@ -55,6 +56,8 @@ const AdminSuscripciones: React.FC = () => {
   const [busqueda, setBusqueda]           = useState('');
   const [renovandoId, setRenovandoId]     = useState<number | null>(null);
   const [notificandoId, setNotificandoId] = useState<number | null>(null);
+  const [enviandoGlobal, setEnviandoGlobal] = useState(false);
+  const [resultadoGlobal, setResultadoGlobal] = useState<{ total: number; exitosos: number; fallidos: number; detalles: any[] } | null>(null);
   const [modalSuscribir, setModalSuscribir] = useState(emptyModalSuscribir);
   const [modalRenovar, setModalRenovar]     = useState(emptyModalRenovar);
   const [formSuscripcion, setFormSuscripcion] = useState({
@@ -138,14 +141,90 @@ const AdminSuscripciones: React.FC = () => {
     setNotificandoId(null);
   };
 
+  const handleEnviarNotificacionesGlobal = async () => {
+    if (!confirm('¿Enviar notificaciones a todos los clientes cuya suscripción vence mañana (1 día restante)?')) return;
+    
+    setEnviandoGlobal(true);
+    setResultadoGlobal(null);
+    
+    try {
+      const res = await suscripcionService.getAllSuscripciones({ estado: 'activa', limite: 500 });
+      const data = res.data as SuscripcionResponse;
+      const suscripcionesActivas = data.suscripciones || [];
+      
+      const suscripcionesPorNotificar = suscripcionesActivas.filter(suscripcion => {
+        const diasRestantes = getDiasRestantes(suscripcion.fecha_fin);
+        return diasRestantes === 1;
+      });
+      
+      if (suscripcionesPorNotificar.length === 0) {
+        alert('No hay suscripciones que venzan mañana (1 día restante)');
+        setEnviandoGlobal(false);
+        return;
+      }
+      
+      const resultados = [];
+      let exitosos = 0;
+      let fallidos = 0;
+      
+      for (const suscripcion of suscripcionesPorNotificar) {
+        try {
+          const notificacionRes = await suscripcionService.enviarNotificacionVencimiento(suscripcion.suscripcionid);
+          if (notificacionRes.data) {
+            exitosos++;
+            resultados.push({
+              suscripcionid: suscripcion.suscripcionid,
+              email: suscripcion.usuario_email,
+              nombre: suscripcion.usuario_nombre,
+              estado: 'exitoso'
+            });
+          } else {
+            fallidos++;
+            resultados.push({
+              suscripcionid: suscripcion.suscripcionid,
+              email: suscripcion.usuario_email,
+              nombre: suscripcion.usuario_nombre,
+              estado: 'fallido',
+              error: notificacionRes.error
+            });
+          }
+        } catch (error) {
+          fallidos++;
+          resultados.push({
+            suscripcionid: suscripcion.suscripcionid,
+            email: suscripcion.usuario_email,
+            nombre: suscripcion.usuario_nombre,
+            estado: 'fallido',
+            error: String(error)
+          });
+        }
+      }
+      
+      setResultadoGlobal({
+        total: suscripcionesPorNotificar.length,
+        exitosos,
+        fallidos,
+        detalles: resultados
+      });
+      
+      alert(`Notificaciones enviadas:\n✅ Exitosas: ${exitosos}\n❌ Fallidas: ${fallidos}\n📧 Total: ${suscripcionesPorNotificar.length}`);
+      
+    } catch (error) {
+      console.error('Error en envío global:', error);
+      alert('Error al procesar las notificaciones globales');
+    } finally {
+      setEnviandoGlobal(false);
+    }
+  };
+
   if (loading) {
-    return (
-      <div className="loading-spinner-simple">
-        <div className="spinner"></div>
-        <p>Cargando suscripciones...</p>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
+
+  const suscripcionesPorVencerManana = suscripciones.filter(s => {
+    const dias = getDiasRestantes(s.fecha_fin);
+    return dias === 1 && s.estado === 'activa';
+  }).length;
 
   return (
     <div className="admin-page">
@@ -153,7 +232,7 @@ const AdminSuscripciones: React.FC = () => {
 
         <div className="admin-header">
           <h1>Gestión de Suscripciones</h1>
-          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <div className="filtros">
             <div className="search-box">
               <Search size={16} />
               <input
@@ -166,13 +245,6 @@ const AdminSuscripciones: React.FC = () => {
             <select
               value={filtroEstado}
               onChange={e => setFiltroEstado(e.target.value)}
-              style={{
-                padding: '0.5rem 1rem',
-                borderRadius: 'var(--radius-md)',
-                background: 'rgba(31,41,55,0.6)',
-                border: '1px solid var(--border-color)',
-                color: 'var(--text-primary)',
-              }}
             >
               <option value="">Todos los estados</option>
               <option value="activa">Activas</option>
@@ -188,8 +260,69 @@ const AdminSuscripciones: React.FC = () => {
             >
               <UserPlus size={16} /> Suscribir Cliente
             </button>
+            <button
+              className="btn-warning"
+              onClick={handleEnviarNotificacionesGlobal}
+              disabled={enviandoGlobal}
+            >
+              {enviandoGlobal ? (
+                <>
+                  <RefreshCw size={16} className="spinning" /> Enviando...
+                </>
+              ) : (
+                <>
+                  <Send size={16} /> Notificar Vencimiento (1 día)
+                </>
+              )}
+              {suscripcionesPorVencerManana > 0 && !enviandoGlobal && (
+                <span className="notification-badge">
+                  {suscripcionesPorVencerManana}
+                </span>
+              )}
+            </button>
           </div>
         </div>
+
+        {resultadoGlobal && (
+          <div className="perfil-section" style={{ marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+              <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--primary-light)' }}>Resultado de notificaciones masivas</h3>
+              <button
+                onClick={() => setResultadoGlobal(null)}
+                className="modal-close"
+                style={{ position: 'static', width: 'auto', height: 'auto' }}
+              >
+                ×
+              </button>
+            </div>
+            <div className="dashboard-stats" style={{ marginBottom: '1rem', gap: '1rem' }}>
+              <div className="stat-card" style={{ padding: '0.75rem' }}>
+                <span className="stat-number" style={{ fontSize: '1.5rem' }}>{resultadoGlobal.total}</span>
+                <span className="stat-label">Total</span>
+              </div>
+              <div className="stat-card" style={{ padding: '0.75rem', background: 'rgba(16, 185, 129, 0.1)' }}>
+                <span className="stat-number" style={{ fontSize: '1.5rem', color: '#10b981' }}>{resultadoGlobal.exitosos}</span>
+                <span className="stat-label">Exitosos</span>
+              </div>
+              <div className="stat-card" style={{ padding: '0.75rem', background: 'rgba(239, 68, 68, 0.1)' }}>
+                <span className="stat-number" style={{ fontSize: '1.5rem', color: '#f87171' }}>{resultadoGlobal.fallidos}</span>
+                <span className="stat-label">Fallidos</span>
+              </div>
+            </div>
+            {resultadoGlobal.fallidos > 0 && (
+              <details style={{ fontSize: '0.875rem' }}>
+                <summary style={{ cursor: 'pointer', color: 'var(--text-secondary)' }}>Ver detalles de fallos</summary>
+                <div style={{ marginTop: '0.5rem', maxHeight: '200px', overflowY: 'auto' }}>
+                  {resultadoGlobal.detalles.filter(d => d.estado === 'fallido').map((detalle, idx) => (
+                    <div key={idx} className="error-message" style={{ marginBottom: '0.25rem', padding: '0.5rem' }}>
+                      <strong>{detalle.nombre || detalle.email}</strong>: {detalle.error}
+                    </div>
+                  ))}
+                </div>
+              </details>
+            )}
+          </div>
+        )}
 
         <div className="perfil-section" style={{ padding: 0, overflow: 'hidden' }}>
           <div className="suscripciones-table-container">
@@ -220,14 +353,7 @@ const AdminSuscripciones: React.FC = () => {
                           {s.usuario_email}
                         </td>
                         <td>
-                          <span style={{
-                            background: 'rgba(13,184,211,0.12)',
-                            color: 'var(--primary)',
-                            padding: '0.2rem 0.6rem',
-                            borderRadius: 'var(--radius-full)',
-                            fontSize: '0.8rem',
-                            fontWeight: 600,
-                          }}>
+                          <span className="plan-badge">
                             {s.plan_nombre}
                           </span>
                         </td>
@@ -274,13 +400,14 @@ const AdminSuscripciones: React.FC = () => {
 
       </div>
 
+      {/* Modal Suscribir */}
       {modalSuscribir.show && (
         <div
           className="modal-overlay"
           ref={overlaySuscribirRef}
           onClick={e => { if (e.target === overlaySuscribirRef.current) setModalSuscribir(emptyModalSuscribir); }}
         >
-          <div className="modal-content" style={{ maxWidth: 500 }}>
+          <div className="modal-content modal-small">
             <div className="modal-header">
               <h2>Suscribir Cliente</h2>
               <button className="modal-close" onClick={() => setModalSuscribir(emptyModalSuscribir)}>×</button>
@@ -310,13 +437,7 @@ const AdminSuscripciones: React.FC = () => {
 
               {modalSuscribir.clienteId > 0 && (
                 <>
-                  <div style={{
-                    background: 'rgba(13,184,211,0.07)',
-                    border: '1px solid var(--border-glow)',
-                    borderRadius: 'var(--radius-lg)',
-                    padding: '0.875rem 1rem',
-                    marginBottom: '1rem',
-                  }}>
+                  <div className="perfil-section" style={{ padding: '1rem', marginBottom: '1rem' }}>
                     <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-primary)' }}>{modalSuscribir.clienteNombre}</p>
                     <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{modalSuscribir.clienteEmail}</p>
                   </div>
@@ -372,26 +493,21 @@ const AdminSuscripciones: React.FC = () => {
         </div>
       )}
 
+      {/* Modal Renovar */}
       {modalRenovar.show && (
         <div
           className="modal-overlay"
           ref={overlayRenovarRef}
           onClick={e => { if (e.target === overlayRenovarRef.current) setModalRenovar(emptyModalRenovar); }}
         >
-          <div className="modal-content" style={{ maxWidth: 420 }}>
+          <div className="modal-content modal-small">
             <div className="modal-header">
               <h2>Renovar Suscripción</h2>
               <button className="modal-close" onClick={() => setModalRenovar(emptyModalRenovar)}>×</button>
             </div>
 
             <div className="modal-body">
-              <div style={{
-                background: 'rgba(13,184,211,0.07)',
-                border: '1px solid var(--border-glow)',
-                borderRadius: 'var(--radius-lg)',
-                padding: '0.875rem 1rem',
-                marginBottom: '1rem',
-              }}>
+              <div className="perfil-section" style={{ padding: '1rem', marginBottom: '1rem' }}>
                 <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-primary)' }}>{modalRenovar.nombre}</p>
                 <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{modalRenovar.email}</p>
               </div>

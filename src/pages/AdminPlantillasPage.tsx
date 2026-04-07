@@ -14,7 +14,7 @@ interface Variable {
   variableid: number;
   nombre: string;
   etiqueta: string;
-  descripcion?: string;
+  descripcion: string | null;
   orden: number;
 }
 
