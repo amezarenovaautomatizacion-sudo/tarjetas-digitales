@@ -22,6 +22,14 @@ interface Cliente {
   email: string;
 }
 
+interface SuscripcionResponse {
+  suscripciones: Suscripcion[];
+}
+
+interface ClientesResponse {
+  clientes: Cliente[];
+}
+
 const emptyModalSuscribir = { show: false, clienteId: 0, clienteNombre: '', clienteEmail: '' };
 const emptyModalRenovar   = { show: false, suscripcionid: 0, nombre: '', email: '' };
 
@@ -58,13 +66,14 @@ const AdminSuscripciones: React.FC = () => {
   const overlaySuscribirRef = useRef<HTMLDivElement>(null);
   const overlayRenovarRef   = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { cargarSuscripciones(); cargarClientes(); }, [filtroEstado]);
+  useEffect(() => { cargarSuscripciones(); cargarClientes(); }, [filtroEstado, busqueda]);
 
   const cargarSuscripciones = async () => {
     setLoading(true);
     const res = await suscripcionService.getAllSuscripciones({ estado: filtroEstado || undefined, limite: 100 });
     if (res.data) {
-      let data: Suscripcion[] = res.data.suscripciones || [];
+      const responseData = res.data as SuscripcionResponse;
+      let data: Suscripcion[] = responseData.suscripciones || [];
       if (busqueda) {
         const q = busqueda.toLowerCase();
         data = data.filter(s =>
@@ -84,7 +93,7 @@ const AdminSuscripciones: React.FC = () => {
         `${import.meta.env.VITE_API_URL || 'https://api-tarjetas.vercel.app'}/api/admin/clientes`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      const data = await res.json();
+      const data = await res.json() as ClientesResponse;
       if (data.clientes) setClientes(data.clientes);
     } catch (e) {
       console.error('Error cargando clientes:', e);
@@ -152,7 +161,6 @@ const AdminSuscripciones: React.FC = () => {
                 placeholder="Buscar por nombre o email…"
                 value={busqueda}
                 onChange={e => setBusqueda(e.target.value)}
-                onKeyUp={() => cargarSuscripciones()}
               />
             </div>
             <select

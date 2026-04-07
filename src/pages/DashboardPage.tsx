@@ -70,7 +70,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
       setStatsLoading(true);
       const response = await suscripcionService.getDashboardStats();
       if (response?.data) {
-        setDashboardStats(response.data);
+        setDashboardStats(response.data as DashboardStats);
       }
     } catch (err) {
       console.error('Error loading dashboard stats:', err);
