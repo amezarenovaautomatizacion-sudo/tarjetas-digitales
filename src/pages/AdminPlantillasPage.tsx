@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Edit2, Trash2, RefreshCw, Eye } from 'lucide-react';
+import { Plus, Edit2, Trash2, RefreshCw, Eye, X } from 'lucide-react';
 import { Plantilla } from '../types';
 import { api } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -8,6 +8,14 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api-tarjetas.verce
 
 interface AdminPlantillasPageProps {
   onPlantillaClick: (id: number) => void;
+}
+
+interface Variable {
+  variableid: number;
+  nombre: string;
+  etiqueta: string;
+  descripcion?: string;
+  orden: number;
 }
 
 const emptyForm = {
@@ -24,26 +32,34 @@ const emptyForm = {
 };
 
 const AdminPlantillasPage: React.FC<AdminPlantillasPageProps> = ({ onPlantillaClick }) => {
-  const [plantillas, setPlantillas]           = useState<Plantilla[]>([]);
-  const [variables, setVariables]             = useState<any[]>([]);
-  const [loading, setLoading]                 = useState(true);
-  const [modalOpen, setModalOpen]             = useState(false);
+  const [plantillas, setPlantillas] = useState<Plantilla[]>([]);
+  const [variables, setVariables] = useState<Variable[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
   const [editingPlantilla, setEditingPlantilla] = useState<any>(null);
-  const [formData, setFormData]               = useState(emptyForm);
-  const [saving, setSaving]                   = useState(false);
-  const overlayRef                            = useRef<HTMLDivElement>(null);
+  const [formData, setFormData] = useState(emptyForm);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { loadData(); }, []);
 
   const loadData = async () => {
     setLoading(true);
-    const [plantillasRes, variablesRes] = await Promise.all([
-      api.getPlantillas({ activo: undefined }),
-      api.getVariables(),
-    ]);
-    if (plantillasRes.data) setPlantillas(plantillasRes.data.plantillas);
-    if (variablesRes.data) setVariables(variablesRes.data.variables);
-    setLoading(false);
+    setError(null);
+    try {
+      const [plantillasRes, variablesRes] = await Promise.all([
+        api.getPlantillas({ activo: undefined }),
+        api.getVariables(),
+      ]);
+      if (plantillasRes.data) setPlantillas(plantillasRes.data.plantillas);
+      if (variablesRes.data) setVariables(variablesRes.data.variables);
+    } catch (err) {
+      console.error('Error loading data:', err);
+      setError('Error al cargar los datos');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const abrirCrear = () => {
@@ -52,32 +68,80 @@ const AdminPlantillasPage: React.FC<AdminPlantillasPageProps> = ({ onPlantillaCl
     setModalOpen(true);
   };
 
-  const abrirEditar = (p: any) => {
-    setEditingPlantilla(p);
-    setFormData({
-      nombre: p.nombre,
-      descripcion: p.descripcion || '',
-      html_content: p.html_content,
-      css_content: p.css_content || '',
-      preview_image: p.preview_image || '',
-      categoriaid: p.categoriaid || '',
-      usa_bootstrap: p.usa_bootstrap === 1,
-      usa_bootstrap_icons: p.usa_bootstrap_icons === 1,
-      bootstrap_version: p.bootstrap_version || '5.3',
-      variables_requeridas: [],
-    });
-    setModalOpen(true);
+  const abrirEditar = async (p: any) => {
+    // Cargar las variables requeridas actuales de la plantilla
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE_URL}/api/plantillas/${p.plantillaid}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const plantillaCompleta = data.plantilla;
+        
+        setEditingPlantilla(p);
+        setFormData({
+          nombre: p.nombre,
+          descripcion: p.descripcion || '',
+          html_content: p.html_content,
+          css_content: p.css_content || '',
+          preview_image: p.preview_image || '',
+          categoriaid: p.categoriaid || '',
+          usa_bootstrap: p.usa_bootstrap === 1,
+          usa_bootstrap_icons: p.usa_bootstrap_icons === 1,
+          bootstrap_version: p.bootstrap_version || '5.3',
+          variables_requeridas: plantillaCompleta.variables_requeridas?.map((v: any) => v.variableid) || [],
+        });
+        setModalOpen(true);
+      } else {
+        alert('Error al cargar las variables de la plantilla');
+      }
+    } catch (err) {
+      console.error('Error loading plantilla details:', err);
+      alert('Error al cargar los detalles de la plantilla');
+    }
   };
 
-  const cerrarModal = () => { setModalOpen(false); setEditingPlantilla(null); };
+  const cerrarModal = () => { 
+    setModalOpen(false); 
+    setEditingPlantilla(null); 
+    setError(null);
+  };
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === overlayRef.current) cerrarModal();
   };
 
+  const handleVariableToggle = (variableId: number) => {
+    setFormData(prev => {
+      const current = prev.variables_requeridas;
+      if (current.includes(variableId)) {
+        return { ...prev, variables_requeridas: current.filter(id => id !== variableId) };
+      } else {
+        return { ...prev, variables_requeridas: [...current, variableId] };
+      }
+    });
+  };
+
+  const handleSelectAll = () => {
+    setFormData(prev => ({
+      ...prev,
+      variables_requeridas: variables.map(v => v.variableid)
+    }));
+  };
+
+  const handleDeselectAll = () => {
+    setFormData(prev => ({
+      ...prev,
+      variables_requeridas: []
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    setError(null);
+    
     const token = localStorage.getItem('token');
     const url = editingPlantilla
       ? `${API_BASE_URL}/api/plantillas/${editingPlantilla.plantillaid}`
@@ -86,29 +150,46 @@ const AdminPlantillasPage: React.FC<AdminPlantillasPageProps> = ({ onPlantillaCl
     try {
       const res = await fetch(url, {
         method: editingPlantilla ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 
+          'Content-Type': 'application/json', 
+          'Authorization': `Bearer ${token}` 
+        },
         body: JSON.stringify(formData),
       });
-      if (res.ok) { cerrarModal(); loadData(); }
-      else {
-        const err = await res.json();
-        alert(err.error || 'Error al guardar plantilla');
+      
+      const data = await res.json();
+      
+      if (res.ok) { 
+        cerrarModal(); 
+        loadData(); 
+      } else {
+        setError(data.error || 'Error al guardar plantilla');
+        if (data.variables_faltantes) {
+          setError(`Variables faltantes: ${data.variables_faltantes.join(', ')}`);
+        }
       }
-    } catch {
-      alert('Error de conexión');
+    } catch (err) {
+      console.error('Error saving plantilla:', err);
+      setError('Error de conexión');
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm('¿Eliminar esta plantilla? Esta acción no se puede deshacer.')) return;
     const token = localStorage.getItem('token');
-    const res = await fetch(`${API_BASE_URL}/api/plantillas/${id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (res.ok) loadData();
-    else alert('Error al eliminar la plantilla');
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/plantillas/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) loadData();
+      else alert('Error al eliminar la plantilla');
+    } catch (err) {
+      console.error('Error deleting plantilla:', err);
+      alert('Error de conexión');
+    }
   };
 
   if (loading) return <LoadingSpinner />;
@@ -128,6 +209,12 @@ const AdminPlantillasPage: React.FC<AdminPlantillasPageProps> = ({ onPlantillaCl
             </button>
           </div>
         </div>
+
+        {error && !modalOpen && (
+          <div className="error-message" style={{ marginBottom: '1rem' }}>
+            {error}
+          </div>
+        )}
 
         {plantillas.length === 0 ? (
           <div className="perfil-section" style={{ textAlign: 'center', padding: '3rem' }}>
@@ -172,7 +259,7 @@ const AdminPlantillasPage: React.FC<AdminPlantillasPageProps> = ({ onPlantillaCl
 
       {modalOpen && (
         <div className="modal-overlay" ref={overlayRef} onClick={handleOverlayClick}>
-          <div className="modal-content" style={{ maxWidth: 720 }}>
+          <div className="modal-content" style={{ maxWidth: 800 }}>
             <div className="modal-header">
               <h2>{editingPlantilla ? 'Editar Plantilla' : 'Nueva Plantilla'}</h2>
               <button className="modal-close" onClick={cerrarModal}>×</button>
@@ -280,25 +367,142 @@ const AdminPlantillasPage: React.FC<AdminPlantillasPageProps> = ({ onPlantillaCl
 
                 <div className="form-group">
                   <label>Variables Requeridas</label>
-                  <select
-                    multiple
-                    value={formData.variables_requeridas.map(String)}
-                    onChange={e => setFormData({
-                      ...formData,
-                      variables_requeridas: Array.from(e.target.selectedOptions, o => parseInt(o.value)),
-                    })}
-                    style={{ minHeight: 100 }}
-                  >
-                    {variables.map(v => (
-                      <option key={v.variableid} value={v.variableid}>
-                        {v.etiqueta} ({v.nombre})
-                      </option>
-                    ))}
-                  </select>
-                  <span className="form-help">Ctrl + Click para seleccionar múltiples</span>
+                  <div style={{ 
+                    border: '1px solid var(--border-color)', 
+                    borderRadius: '8px',
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{
+                      padding: '0.75rem',
+                      backgroundColor: 'var(--bg-secondary)',
+                      borderBottom: '1px solid var(--border-color)',
+                      display: 'flex',
+                      gap: '0.5rem',
+                      flexWrap: 'wrap'
+                    }}>
+                      <button
+                        type="button"
+                        onClick={handleSelectAll}
+                        style={{
+                          padding: '0.25rem 0.75rem',
+                          fontSize: '0.75rem',
+                          backgroundColor: 'var(--primary)',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Seleccionar todas
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleDeselectAll}
+                        style={{
+                          padding: '0.25rem 0.75rem',
+                          fontSize: '0.75rem',
+                          backgroundColor: 'var(--bg-tertiary)',
+                          color: 'var(--text-secondary)',
+                          border: '1px solid var(--border-color)',
+                          borderRadius: '4px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Deseleccionar todas
+                      </button>
+                      <span style={{
+                        fontSize: '0.75rem',
+                        color: 'var(--text-muted)',
+                        marginLeft: 'auto',
+                        alignSelf: 'center'
+                      }}>
+                        {formData.variables_requeridas.length} / {variables.length} seleccionadas
+                      </span>
+                    </div>
+                    <div style={{
+                      maxHeight: '250px',
+                      overflowY: 'auto',
+                      padding: '0.5rem'
+                    }}>
+                      {variables.length === 0 ? (
+                        <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '1rem' }}>
+                          No hay variables disponibles
+                        </p>
+                      ) : (
+                        variables.map(variable => (
+                          <label
+                            key={variable.variableid}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'flex-start',
+                              gap: '0.75rem',
+                              padding: '0.5rem',
+                              cursor: 'pointer',
+                              borderRadius: '4px',
+                              transition: 'background-color 0.2s',
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = 'var(--bg-hover)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = 'transparent';
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={formData.variables_requeridas.includes(variable.variableid)}
+                              onChange={() => handleVariableToggle(variable.variableid)}
+                              style={{
+                                width: '18px',
+                                height: '18px',
+                                marginTop: '2px',
+                                cursor: 'pointer',
+                                accentColor: 'var(--primary)'
+                              }}
+                            />
+                            <div style={{ flex: 1 }}>
+                              <div style={{ 
+                                fontWeight: 500, 
+                                color: 'var(--text-primary)',
+                                fontSize: '0.875rem'
+                              }}>
+                                {variable.etiqueta}
+                                <span style={{
+                                  fontSize: '0.75rem',
+                                  color: 'var(--text-muted)',
+                                  marginLeft: '0.5rem',
+                                  fontFamily: 'monospace'
+                                }}>
+                                  ($_{variable.nombre}_$)
+                                </span>
+                              </div>
+                              {variable.descripcion && (
+                                <div style={{
+                                  fontSize: '0.75rem',
+                                  color: 'var(--text-secondary)',
+                                  marginTop: '2px'
+                                }}>
+                                  {variable.descripcion}
+                                </div>
+                              )}
+                            </div>
+                          </label>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                  <span className="form-help">
+                    Selecciona las variables que son requeridas en esta plantilla
+                  </span>
                 </div>
 
-                <div className="modal-footer" style={{ padding: '1rem 0 0', border: 'none' }}>
+                {error && (
+                  <div className="error-message" style={{ marginTop: '1rem' }}>
+                    {error}
+                  </div>
+                )}
+
+                <div className="modal-footer" style={{ padding: '1rem 0 0', border: 'none', marginTop: '1rem' }}>
                   <button type="button" className="btn-secondary" onClick={cerrarModal}>Cancelar</button>
                   <button type="submit" className="btn-primary" disabled={saving}>
                     {saving ? 'Guardando...' : (editingPlantilla ? 'Actualizar' : 'Crear')}
