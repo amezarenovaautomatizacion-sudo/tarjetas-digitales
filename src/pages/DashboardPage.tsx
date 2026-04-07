@@ -13,37 +13,70 @@ interface DashboardPageProps {
   onTarjetaPublicaClick: (slug: string) => void;
 }
 
+interface Tarjeta {
+  tarjetaclienteid: number;
+  slug: string;
+  visibilidad: 'publico' | 'privado';
+  visitas?: number;
+  [key: string]: any;
+}
+
+interface DashboardStats {
+  suscripcion: {
+    activa: boolean;
+    plan?: {
+      nombre: string;
+    };
+    dias_restantes: number;
+    tarjetas_restantes: number;
+  };
+}
+
 const DashboardPage: React.FC<DashboardPageProps> = ({ 
   onPlantillaClick, 
   onTarjetaPublicaClick 
 }) => {
   const navigate = useNavigate();
-  const [tarjetas, setTarjetas] = useState<any[]>([]);
+  const [tarjetas, setTarjetas] = useState<Tarjeta[]>([]);
   const [plantillas, setPlantillas] = useState<Plantilla[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
-  const [dashboardStats, setDashboardStats] = useState<any>(null);
+  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
   const userData = JSON.parse(localStorage.getItem('userData') || '{}');
 
   const loadData = async () => {
-    setLoading(true);
-    const [tarjetasRes, plantillasRes] = await Promise.all([
-      tarjetaService.listar(),
-      api.getPlantillas({ activo: true })
-    ]);
-    if (tarjetasRes.data) setTarjetas(tarjetasRes.data.tarjetas || []);
-    if (plantillasRes.data) setPlantillas(plantillasRes.data.plantillas);
-    setLoading(false);
+    try {
+      setError(null);
+      setLoading(true);
+      const [tarjetasRes, plantillasRes] = await Promise.all([
+        tarjetaService.listar(),
+        api.getPlantillas({ activo: true })
+      ]);
+      if (tarjetasRes?.data) setTarjetas(tarjetasRes.data.tarjetas || []);
+      if (plantillasRes?.data) setPlantillas(plantillasRes.data.plantillas || []);
+    } catch (err) {
+      console.error('Error loading data:', err);
+      setError('Error al cargar los datos. Por favor, intenta de nuevo.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const loadDashboardStats = async () => {
-    setStatsLoading(true);
-    const response = await suscripcionService.getDashboardStats();
-    if (response.data) {
-      setDashboardStats(response.data);
+    try {
+      setStatsLoading(true);
+      const response = await suscripcionService.getDashboardStats();
+      if (response?.data) {
+        setDashboardStats(response.data);
+      }
+    } catch (err) {
+      console.error('Error loading dashboard stats:', err);
+    } finally {
+      setStatsLoading(false);
     }
-    setStatsLoading(false);
   };
 
   useEffect(() => {
@@ -52,17 +85,27 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
   }, []);
 
   const handleDelete = async (id: number) => {
-    if (confirm('¿Eliminar esta tarjeta?')) {
+    if (!confirm('¿Eliminar esta tarjeta?')) return;
+    
+    try {
       await tarjetaService.eliminar(id);
-      loadData();
+      await loadData();
+    } catch (err) {
+      console.error('Error deleting tarjeta:', err);
+      alert('Error al eliminar la tarjeta. Por favor, intenta de nuevo.');
     }
   };
 
   const handleToggleVisibility = async (id: number, current: string) => {
-    await tarjetaService.actualizar(id, {
-      visibilidad: current === 'publico' ? 'privado' : 'publico'
-    });
-    loadData();
+    try {
+      await tarjetaService.actualizar(id, {
+        visibilidad: current === 'publico' ? 'privado' : 'publico'
+      });
+      await loadData();
+    } catch (err) {
+      console.error('Error toggling visibility:', err);
+      alert('Error al cambiar la visibilidad. Por favor, intenta de nuevo.');
+    }
   };
 
   const handleEditTarjeta = (tarjetaId: number) => {
@@ -70,22 +113,44 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
     navigate(`/editar-tarjeta/${tarjetaId}`);
   };
 
+  const handleCreateSuccess = () => {
+    setModalOpen(false);
+    loadData();
+  };
+
   if (loading) return <LoadingSpinner />;
+
+  if (error) {
+    return (
+      <div className="dashboard-page">
+        <div className="container">
+          <div className="error-state">
+            <div className="error-icon">⚠️</div>
+            <h3>{error}</h3>
+            <button className="btn-primary" onClick={loadData}>
+              Reintentar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-page">
       <div className="dashboard-header">
         <div className="container">
           <h1>Mi Dashboard</h1>
-          <p>Bienvenido, {userData.nombre || userData.email}</p>
+          <p>Bienvenido, {userData.nombre || userData.email || 'Usuario'}</p>
           <button className="btn-primary btn-create" onClick={() => setModalOpen(true)}>
             + Crear Nueva Tarjeta
           </button>
         </div>
       </div>
-<br /><br />
+      <br /><br />
+
       <div className="container">
-        {dashboardStats && dashboardStats.suscripcion && (
+        {!statsLoading && dashboardStats?.suscripcion && (
           <div className="suscripcion-resumen">
             <div className={`suscripcion-badge ${dashboardStats.suscripcion.activa ? 'activa' : 'inactiva'}`}>
               {dashboardStats.suscripcion.activa ? (
@@ -99,7 +164,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
                     </div>
                     <div className="suscripcion-text">
                       <span className="suscripcion-plan">
-                        Plan <strong>{dashboardStats.suscripcion.plan?.nombre}</strong>
+                        Plan <strong>{dashboardStats.suscripcion.plan?.nombre || 'Básico'}</strong>
                       </span>
                       <div className="suscripcion-dias">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -221,7 +286,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
         isOpen={modalOpen} 
         onClose={() => setModalOpen(false)} 
         plantillas={plantillas}
-        onSuccess={loadData}
+        onSuccess={handleCreateSuccess}
       />
     </div>
   );
