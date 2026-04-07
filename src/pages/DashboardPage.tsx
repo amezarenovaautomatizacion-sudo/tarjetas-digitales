@@ -83,23 +83,86 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           </button>
         </div>
       </div>
-
+<br /><br />
       <div className="container">
         {dashboardStats && dashboardStats.suscripcion && (
           <div className="suscripcion-resumen">
             <div className={`suscripcion-badge ${dashboardStats.suscripcion.activa ? 'activa' : 'inactiva'}`}>
               {dashboardStats.suscripcion.activa ? (
                 <>
-                  <span>✅ Plan Activo: {dashboardStats.suscripcion.plan?.nombre}</span>
-                  <span>📅 {dashboardStats.suscripcion.dias_restantes} días restantes</span>
-                  <span>📇 {dashboardStats.suscripcion.tarjetas_restantes} tarjetas disponibles</span>
+                  <div className="suscripcion-info">
+                    <div className="suscripcion-icon">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                        <polyline points="22 4 12 14.01 9 11.01" />
+                      </svg>
+                    </div>
+                    <div className="suscripcion-text">
+                      <span className="suscripcion-plan">
+                        Plan <strong>{dashboardStats.suscripcion.plan?.nombre}</strong>
+                      </span>
+                      <div className="suscripcion-dias">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10" />
+                          <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                        <span>{dashboardStats.suscripcion.dias_restantes} días restantes</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="suscripcion-info">
+                    <div className="suscripcion-icon">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="2" y="4" width="20" height="16" rx="2" />
+                        <path d="M16 2v4" />
+                        <path d="M8 2v4" />
+                        <path d="M4 10h16" />
+                      </svg>
+                    </div>
+                    <div className="suscripcion-text">
+                      <div className="suscripcion-tarjetas">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" />
+                          <path d="M4 6v12c0 1.1.9 2 2 2h14v-4" />
+                          <path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z" />
+                        </svg>
+                        <span>{dashboardStats.suscripcion.tarjetas_restantes} tarjetas disponibles</span>
+                      </div>
+                    </div>
+                  </div>
                 </>
               ) : (
                 <>
-                  <span>⚠️ Sin suscripción activa</span>
+                  <div className="suscripcion-info">
+                    <div className="suscripcion-icon">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                      </svg>
+                    </div>
+                    <div className="suscripcion-text">
+                      <span className="suscripcion-plan">
+                        <strong>⚠️ Sin suscripción activa</strong>
+                      </span>
+                      <span className="suscripcion-dias" style={{ color: 'var(--text-muted)' }}>
+                        Activa un plan para crear tarjetas
+                      </span>
+                    </div>
+                  </div>
                   <button 
                     className="btn-small btn-primary"
                     onClick={() => navigate('/planes')}
+                    style={{
+                      background: 'var(--primary-gradient)',
+                      border: 'none',
+                      padding: '0.5rem 1.25rem',
+                      borderRadius: 'var(--radius-full)',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      color: 'white',
+                      transition: 'var(--transition-base)',
+                    }}
                   >
                     Ver Planes
                   </button>
@@ -124,11 +187,8 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
         </div>
 
-        <div className="section-header">
+        <div className="plantillas-title">
           <h2>Mis Tarjetas</h2>
-          <button className="btn-secondary btn-sm" onClick={() => setModalOpen(true)}>
-            + Nueva Tarjeta
-          </button>
         </div>
 
         {tarjetas.length === 0 ? (

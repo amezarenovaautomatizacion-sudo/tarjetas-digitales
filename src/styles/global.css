@@ -637,7 +637,7 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.5rem); color: var(--text-primary); }
   to { transform: rotate(360deg); }
 }
 
-.dashboard-header h1 { margin-bottom: var(--spacing-sm); position: relative; z-index: 1; }
+.dashboard-header h1 { margin-bottom: var(--spacing-sm); color: var(--primary); position: relative; z-index: 1; }
 .dashboard-header p { color: var(--text-secondary); position: relative; z-index: 1; }
 .btn-create { margin-top: var(--spacing-lg); position: relative; z-index: 1; }
 
@@ -1788,5 +1788,134 @@ select.form-control { cursor: pointer; }
 
   .admin-header h1 {
     font-size: 1.4rem;
+  }
+}
+
+.suscripcion-resumen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.suscripcion-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--spacing-lg);
+  background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-glow);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg) var(--spacing-2xl);
+  width: auto;
+  min-width: 320px;
+  max-width: 800px;
+  box-shadow: var(--shadow-glow);
+  transition: var(--transition-base);
+}
+
+.suscripcion-badge.activa {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(13, 184, 211, 0.05));
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.suscripcion-badge.inactiva {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(220, 38, 38, 0.05));
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.suscripcion-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.suscripcion-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(13, 184, 211, 0.15);
+  border-radius: var(--radius-full);
+  color: var(--primary);
+}
+
+.suscripcion-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.suscripcion-plan {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.suscripcion-plan strong {
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.suscripcion-dias {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.suscripcion-dias svg {
+  width: 14px;
+  height: 14px;
+  color: var(--warning);
+}
+
+.suscripcion-tarjetas {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.suscripcion-tarjetas svg {
+  width: 14px;
+  height: 14px;
+  color: var(--success);
+}
+
+.suscripcion-badge.inactiva .suscripcion-plan {
+  color: var(--warning);
+}
+
+.suscripcion-badge.inactiva .suscripcion-plan strong {
+  color: var(--warning);
+}
+
+.suscripcion-badge.inactiva .suscripcion-icon {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--warning);
+}
+
+@media (max-width: 640px) {
+  .suscripcion-badge {
+    padding: var(--spacing-md) var(--spacing-lg);
+    min-width: 280px;
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .suscripcion-info {
+    justify-content: center;
+  }
+  
+  .suscripcion-text {
+    align-items: center;
   }
 }
