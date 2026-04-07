@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Badge, Button, Tab, Tabs } from 'react-bootstrap';
 import {
   CheckCircle,
@@ -16,7 +16,9 @@ import {
   HelpCircle,
   Mail,
   MessageCircle,
+  Crown
 } from 'lucide-react';
+import { suscripcionService } from '../services/suscripcion.service';
 
 interface Plan {
   id: string;
@@ -30,32 +32,29 @@ interface Plan {
   badge?: string;
   buttonText?: string;
   annualDiscount?: string;
+  max_tarjetas: number;
+  duracion_dias: number;
 }
 
-const PricingPlans: React.FC = () => {
+const SuscripcionPlans: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('b2c');
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
+  const [suscripcionActiva, setSuscripcionActiva] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    cargarSuscripcionActiva();
+  }, []);
+
+  const cargarSuscripcionActiva = async () => {
+    const response = await suscripcionService.getMiSuscripcion();
+    if (response.data) {
+      setSuscripcionActiva(response.data);
+    }
+    setLoading(false);
+  };
 
   const plans: Plan[] = [
-    /*
-    {
-      id: 'free',
-      name: 'Básico',
-      segment: 'B2C',
-      price: 0,
-      priceLabel: 'Gratis',
-      icon: <Star size={28} strokeWidth={1.5} />,
-      buttonText: 'Comenzar Gratis',
-      features: [
-        '3 tarjetas digitales',
-        'Plantillas esenciales',
-        'Visibilidad pública',
-        'Soporte por email',
-        'Compartir en redes',
-        'Estadísticas básicas',
-      ],
-    },
-    */
     {
       id: 'premium',
       name: 'Premium',
@@ -65,14 +64,16 @@ const PricingPlans: React.FC = () => {
       icon: <Sparkles size={28} strokeWidth={1.5} />,
       popular: true,
       badge: 'Más Popular',
-      buttonText: 'Contratar Ahora',
+      buttonText: 'Solicitar por WhatsApp',
       annualDiscount: 'Ahorra 2 meses',
+      max_tarjetas: 1,
+      duracion_dias: 30,
       features: [
         '1 Tarjeta personalizable',
         'Todas las plantillas',
         'Soporte prioritario 24/7',
         'Personalización completa',
-        'Edicion de informacion 24/7',
+        'Edición de información 24/7',
         'Códigos QR personalizados',
         'Sin publicidad',
       ],
@@ -85,42 +86,30 @@ const PricingPlans: React.FC = () => {
       priceLabel: '/mes',
       icon: <Users size={28} strokeWidth={1.5} />,
       badge: 'Para Equipos',
-      buttonText: 'Contratar Ahora',
+      buttonText: 'Solicitar por WhatsApp',
       annualDiscount: 'Ahorra 2 meses',
+      max_tarjetas: 10,
+      duracion_dias: 30,
       features: [
-        '10 Tarjeta personalizable',
+        '10 Tarjetas personalizables',
         'Todas las plantillas',
         'Branding Personalizado',
         'Soporte prioritario 24/7',
         'Personalización completa',
-        'Edicion de informacion 24/7',
+        'Edición de información 24/7',
         'Códigos QR personalizados',
         'Sin publicidad',
       ],
     },
-    /*
-    {
-      id: 'business-pro',
-      name: 'Negocios Pro',
-      segment: 'SMB',
-      price: 300,
-      priceLabel: '/mes',
-      icon: <Rocket size={28} strokeWidth={1.5} />,
-      buttonText: 'Contratar Ahora',
-      annualDiscount: 'Ahorra 2 meses',
-      features: [
-        'Tarjetas ilimitadas',
-        '10 usuarios incluidos',
-        'Todo lo de Negocios',
-        'Automatización avanzada',
-        'Integración CRM',
-        'Diseños exclusivos',
-        'Training incluido',
-        'SLA garantizado',
-      ],
-    },
-    */
   ];
+
+  const handleSolicitarPlan = (plan: Plan) => {
+    const userData = localStorage.getItem('userData');
+    const email = userData ? JSON.parse(userData).email : '';
+    const mensaje = `Hola, estoy interesado en el plan ${plan.name}. Mi correo registrado es: ${email}`;
+    const whatsappUrl = `https://wa.me/5213312345678?text=${encodeURIComponent(mensaje)}`;
+    window.open(whatsappUrl, '_blank');
+  };
 
   const getSegmentPlans = (segment: 'B2C' | 'SMB' | 'B2B') =>
     plans.filter((p) => p.segment === segment);
@@ -129,9 +118,10 @@ const PricingPlans: React.FC = () => {
     Math.round(monthlyPrice * 10);
 
   const renderPlanCard = (plan: Plan, fullWidth = false) => {
-    const showAnnual =
-      billingCycle === 'annual' && plan.price > 0 && plan.id !== 'enterprise';
+    const showAnnual = billingCycle === 'annual' && plan.price > 0;
     const annualPrice = getAnnualPrice(plan.price);
+    const tieneSuscripcionActiva = suscripcionActiva?.tiene_suscripcion === true;
+    const planActivo = suscripcionActiva?.suscripcion?.plan_nombre?.toLowerCase() === plan.name.toLowerCase();
 
     return (
       <Col
@@ -140,8 +130,15 @@ const PricingPlans: React.FC = () => {
         md={fullWidth ? 12 : 6}
         className="mb-4"
       >
-        <Card className={`pricing-card h-100${plan.popular ? ' popular-card' : ''}`}>
-          {plan.badge && (
+        <Card className={`pricing-card h-100${plan.popular ? ' popular-card' : ''}${planActivo ? ' plan-activo' : ''}`}>
+          {planActivo && (
+            <div className="plan-activo-badge">
+              <Badge bg="success" className="px-3 py-2 rounded-pill">
+                Tu plan actual
+              </Badge>
+            </div>
+          )}
+          {plan.badge && !planActivo && (
             <div className="plan-badge">
               <Badge
                 bg={plan.popular ? 'warning' : 'info'}
@@ -158,17 +155,7 @@ const PricingPlans: React.FC = () => {
             <Card.Title className="plan-name mb-2">{plan.name}</Card.Title>
 
             <div className="plan-price my-4">
-              {plan.price === 0 && plan.id !== 'enterprise' ? (
-                <>
-                  <span className="price-amount">Gratis</span>
-                  <span className="price-period d-block mt-1">para siempre</span>
-                </>
-              ) : plan.id === 'enterprise' ? (
-                <>
-                  <span className="price-custom">Personalizado</span>
-                  <span className="price-period d-block mt-1">{plan.priceLabel}</span>
-                </>
-              ) : showAnnual ? (
+              {showAnnual ? (
                 <>
                   <span className="price-currency">$</span>
                   <span className="price-amount">{annualPrice}</span>
@@ -188,12 +175,19 @@ const PricingPlans: React.FC = () => {
               )}
             </div>
 
+            <div className="plan-limits mb-3">
+              <small className="text-muted">
+                📇 {plan.max_tarjetas === 0 ? 'Tarjetas ilimitadas' : `${plan.max_tarjetas} tarjeta${plan.max_tarjetas > 1 ? 's' : ''}`}
+              </small>
+            </div>
+
             <Button
               variant={plan.popular ? 'primary' : 'outline-primary'}
               className={`w-100 py-2 rounded-pill fw-semibold${plan.popular ? ' btn-popular' : ''}`}
-              onClick={() => alert(`Funcionalidad de contratación — ${plan.name}`)}
+              onClick={() => handleSolicitarPlan(plan)}
+              disabled={planActivo}
             >
-              {plan.buttonText ?? (plan.price === 0 ? 'Comenzar Gratis' : 'Contratar Ahora')}
+              {planActivo ? 'Plan Activo' : (plan.buttonText ?? 'Solicitar por WhatsApp')}
             </Button>
           </Card.Body>
 
@@ -215,16 +209,17 @@ const PricingPlans: React.FC = () => {
 
   const renderComparisonTable = () => {
     const rows = [
-      { feature: 'Tarjetas digitales',               premium: '10',                 Negocios: '50+' },
-      { feature: 'Plantillas disponibles',           premium: 'Todas',              Negocios: 'Todas + Exclusivas' },
-      { feature: 'Análisis avanzado',                premium: '✓',                  Negocios: '✓' },
-      { feature: 'Soporte prioritario',              premium: '✓ 24/7',             Negocios: '✓ Dedicado' },
-      { feature: 'Branding personalizado',           premium: 'Básico',             Negocios: 'Completo' },
-      { feature: 'Códigos QR personalizados',        premium: '✓',                  Negocios: '✓' },
+      { feature: 'Tarjetas digitales', premium: '1', negocios: '10' },
+      { feature: 'Plantillas disponibles', premium: 'Todas', negocios: 'Todas + Exclusivas' },
+      { feature: 'QR dinámico', premium: '✓', negocios: '✓' },
+      { feature: 'Soporte prioritario', premium: '✓ 24/7', negocios: '✓ Dedicado' },
+      { feature: 'Branding personalizado', premium: '✗', negocios: '✓' },
+      { feature: 'Analítica avanzada', premium: '✗', negocios: '✓' },
+      { feature: 'Sin publicidad', premium: '✓', negocios: '✓' },
     ];
 
     return (
-      <div className="comparison-table">
+      <div className="comparison-table mt-5">
         <div className="text-center mb-4">
           <h3 className="mb-2">Comparativa de características</h3>
           <p style={{ color: 'var(--text-secondary)' }}>
@@ -244,7 +239,7 @@ const PricingPlans: React.FC = () => {
                 <div key={idx} className="comparison-row">
                   <span className="fw-medium">{row.feature}</span>
                   <span className="text-center">{row.premium}</span>
-                  <span className="text-center">{row.Negocios}</span>
+                  <span className="text-center">{row.negocios}</span>
                 </div>
               ))}
             </div>
@@ -256,11 +251,11 @@ const PricingPlans: React.FC = () => {
 
   const renderEnterpriseSection = () => {
     const benefits = [
-      { icon: Shield,     title: 'Seguridad Empresarial',    desc: 'Encriptación avanzada y cumplimiento ISO 27001' },
-      { icon: Zap,        title: 'Escalabilidad Automática', desc: 'Infraestructura que crece con tu negocio' },
-      { icon: Headphones, title: 'Soporte Dedicado 24/7',    desc: 'Gerente de cuenta exclusivo, respuesta < 1 h' },
-      { icon: Clock,      title: '99.9% Uptime',             desc: 'SLA garantizado con compensación por downtime' },
-      { icon: FileText,   title: 'Cumplimiento Legal',       desc: 'Contratos personalizados y GDPR compliant' },
+      { icon: Shield, title: 'Seguridad Empresarial', desc: 'Encriptación avanzada y cumplimiento ISO 27001' },
+      { icon: Zap, title: 'Escalabilidad Automática', desc: 'Infraestructura que crece con tu negocio' },
+      { icon: Headphones, title: 'Soporte Dedicado 24/7', desc: 'Gerente de cuenta exclusivo, respuesta < 1 h' },
+      { icon: Clock, title: '99.9% Uptime', desc: 'SLA garantizado con compensación por downtime' },
+      { icon: FileText, title: 'Cumplimiento Legal', desc: 'Contratos personalizados y GDPR compliant' },
     ];
 
     return (
@@ -279,11 +274,11 @@ const PricingPlans: React.FC = () => {
                   tu empresa. Contáctanos y diseñaremos una solución a tu medida.
                 </p>
                 <div className="d-flex gap-3 justify-content-center flex-wrap">
-                  <Button variant="primary" size="lg" className="rounded-pill px-4">
+                  <Button variant="primary" size="lg" className="rounded-pill px-4" onClick={() => window.open('https://wa.me/5213312345678', '_blank')}>
                     <Mail size={18} className="me-2" />
                     Contactar a Ventas
                   </Button>
-                  <Button variant="outline-primary" size="lg" className="rounded-pill px-4">
+                  <Button variant="outline-primary" size="lg" className="rounded-pill px-4" onClick={() => window.open('https://wa.me/5213312345678', '_blank')}>
                     <MessageCircle size={18} className="me-2" />
                     Solicitar Demo
                   </Button>
@@ -294,7 +289,7 @@ const PricingPlans: React.FC = () => {
         </Row>
 
         <Row className="mt-5">
-          <Col xs={12} className="plantilla-card-title mb-4 text-center">
+          <Col xs={12} className="text-center mb-4">
             <h3>Beneficios Corporativos</h3>
           </Col>
           {benefits.map(({ icon: Icon, title, desc }, idx) => (
@@ -303,7 +298,7 @@ const PricingPlans: React.FC = () => {
                 <div className="benefit-icon">
                   <Icon size={36} />
                 </div>
-                <h5 className="plantilla-card-title mb-4 text-center">{title}</h5>
+                <h5>{title}</h5>
                 <p className="mb-0" style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
                   {desc}
                 </p>
@@ -318,34 +313,34 @@ const PricingPlans: React.FC = () => {
   const renderFAQ = () => {
     const faqs = [
       {
+        q: '¿Cómo contrato un plan?',
+        a: 'Para contratar un plan, haz clic en "Solicitar por WhatsApp" en el plan deseado. Un asesor se pondrá en contacto contigo para activar tu suscripción.',
+      },
+      {
+        q: '¿Cómo se activa mi suscripción?',
+        a: 'Una vez que contactes a nuestro equipo de ventas, ellos te guiarán en el proceso de pago y activarán tu suscripción manualmente desde el panel de administración.',
+      },
+      {
         q: '¿Puedo cambiar de plan en cualquier momento?',
-        a: 'Sí, puedes actualizar o cancelar tu plan cuando lo necesites. Los cambios se aplican en tu próximo ciclo de facturación sin costo adicional.',
+        a: 'Sí, puedes actualizar tu plan cuando lo necesites. Contáctanos y ajustaremos tu suscripción según tus necesidades.',
       },
       {
         q: '¿Ofrecen descuentos por pago anual?',
         a: 'Sí, ofrecemos 2 meses gratis al contratar el plan anual. El ahorro es automático al seleccionar facturación anual.',
       },
       {
-        q: '¿Hay período de prueba?',
-        a: 'Ofrecemos 14 días de prueba gratuita en todos los planes (excepto el plan Básico que ya es gratuito). No necesitas tarjeta de crédito.',
-      },
-      {
         q: '¿Qué métodos de pago aceptan?',
-        a: 'Aceptamos tarjetas de crédito/débito (Visa, Mastercard, Amex), transferencia bancaria, PayPal y criptomonedas seleccionadas.',
-      },
-      {
-        q: '¿Puedo exportar mis datos?',
-        a: 'Todos los planes permiten exportar en PDF, CSV y JSON. Los planes Premium y superiores incluyen exportación masiva.',
+        a: 'Aceptamos transferencia bancaria, tarjetas de crédito/débito y PayPal. Nuestro equipo de ventas te proporcionará los detalles al contactarnos.',
       },
       {
         q: '¿Ofrecen soporte técnico?',
-        a: 'Todos los planes incluyen soporte por email. Los planes Premium y superiores tienen soporte prioritario 24/7 vía chat y teléfono.',
+        a: 'Todos los planes incluyen soporte por email. Los planes Premium y Negocios tienen soporte prioritario 24/7 vía WhatsApp.',
       },
     ];
 
     return (
       <div className="faq-section mt-5 pt-4">
-        <div className="plantilla-card-title mb-4 text-center">
+        <div className="text-center mb-4">
           <h3 className="mb-2">Preguntas frecuentes</h3>
           <p style={{ color: 'var(--text-secondary)' }}>
             ¿Tienes más dudas? Estamos aquí para ayudarte
@@ -383,9 +378,18 @@ const PricingPlans: React.FC = () => {
     );
   };
 
+  if (loading) {
+    return (
+      <div className="loading-spinner-simple">
+        <div className="spinner"></div>
+        <p>Cargando planes...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="pricing-plans-page">
-      <div className="pricing-hero plantilla-card-title text-center">
+      <div className="pricing-hero text-center">
         <Container>
           <h1>Planes y Precios</h1>
           <p className="pricing-subtitle">
@@ -396,31 +400,29 @@ const PricingPlans: React.FC = () => {
       </div>
 
       <Container className="py-5">
-        {activeTab !== 'b2b' && (
-          <div className="text-center mb-5">
-            <div className="billing-toggle-wrapper">
-              <button
-                className={`btn rounded-pill px-4 py-2 fw-semibold ${
-                  billingCycle === 'monthly' ? 'btn-primary' : 'btn-link text-secondary'
-                }`}
-                onClick={() => setBillingCycle('monthly')}
-              >
-                Mensual
-              </button>
-              <button
-                className={`btn rounded-pill px-4 py-2 fw-semibold ${
-                  billingCycle === 'annual' ? 'btn-primary' : 'btn-link text-secondary'
-                }`}
-                onClick={() => setBillingCycle('annual')}
-              >
-                Anual
-                <Badge bg="success" className="ms-2" style={{ fontSize: '0.7rem' }}>
-                  Ahorra 2 meses
-                </Badge>
-              </button>
-            </div>
+        <div className="text-center mb-5">
+          <div className="billing-toggle-wrapper">
+            <button
+              className={`btn rounded-pill px-4 py-2 fw-semibold ${
+                billingCycle === 'monthly' ? 'btn-primary' : 'btn-link text-secondary'
+              }`}
+              onClick={() => setBillingCycle('monthly')}
+            >
+              Mensual
+            </button>
+            <button
+              className={`btn rounded-pill px-4 py-2 fw-semibold ${
+                billingCycle === 'annual' ? 'btn-primary' : 'btn-link text-secondary'
+              }`}
+              onClick={() => setBillingCycle('annual')}
+            >
+              Anual
+              <Badge bg="success" className="ms-2" style={{ fontSize: '0.7rem' }}>
+                Ahorra 2 meses
+              </Badge>
+            </button>
           </div>
-        )}
+        </div>
 
         <Tabs
           activeKey={activeTab}
@@ -448,7 +450,21 @@ const PricingPlans: React.FC = () => {
             <div className="mt-4">
               <Row className="justify-content-center mb-5">
                 <Col md={8} lg={5}>
-                  {getSegmentPlans('B2B').map((p) => renderPlanCard(p, false))}
+                  <Card className="enterprise-card text-center">
+                    <Card.Body className="p-5">
+                      <Building2 size={48} className="mb-3" style={{ color: 'var(--primary)' }} />
+                      <h2 className="mb-3">Plan Corporativo</h2>
+                      <p className="mb-4" style={{ color: 'var(--text-secondary)' }}>
+                        Solución personalizada para tu empresa
+                      </p>
+                      <div className="d-flex gap-3 justify-content-center flex-wrap">
+                        <Button variant="primary" size="lg" className="rounded-pill px-4" onClick={() => window.open('https://wa.me/5213312345678', '_blank')}>
+                          <Mail size={18} className="me-2" />
+                          Contactar a Ventas
+                        </Button>
+                      </div>
+                    </Card.Body>
+                  </Card>
                 </Col>
               </Row>
               {renderEnterpriseSection()}
@@ -457,22 +473,9 @@ const PricingPlans: React.FC = () => {
         </Tabs>
 
         {renderFAQ()}
-
-        <div className="text-center mt-5 pt-4">
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-            ¿Necesitas ayuda para elegir?{' '}
-            <Button
-              variant="link"
-              className="p-0 ms-1 fw-semibold"
-              style={{ color: 'var(--primary)' }}
-            >
-              Habla con un asesor
-            </Button>
-          </p>
-        </div>
       </Container>
     </div>
   );
 };
 
-export default PricingPlans;
+export default SuscripcionPlans;

@@ -1,10 +1,11 @@
+// src/pages/LoginPage.tsx (actualizado)
 import React, { useState } from 'react';
 import { authService } from '../services/auth.service';
 import { twoFactorService } from '../services/twoFactor.service';
 import { obtenerIpPublica } from '../utils/ipUtils';
 
 interface LoginPageProps {
-  onLoginSuccess: (userType: string) => void;
+  onLoginSuccess: (userType: string, rolid: number) => void;
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
@@ -54,7 +55,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       }
 
       if (response.data?.token) {
-        onLoginSuccess(tipo);
+        const rolid = response.data.usuario?.rolid || (tipo === 'admin' ? 3 : 4);
+        onLoginSuccess(tipo, rolid);
       }
     } catch (err) {
       setError('Error de conexión');
@@ -87,7 +89,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       if (response.data?.token) {
         setShowTwoFactor(false);
         setTwoFactorCode('');
-        onLoginSuccess(tempData.tipo);
+        const rolid = response.data.usuario?.rolid || (tempData.tipo === 'admin' ? 3 : 4);
+        onLoginSuccess(tempData.tipo, rolid);
       }
     } catch {
       setError('Error de conexión');
@@ -123,14 +126,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           <form onSubmit={handleTwoFactorSubmit}>
             <div className="form-group">
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={useBackupCode}
-                  onChange={(e) => {
-                    setUseBackupCode(e.target.checked);
-                    setTwoFactorCode('');
-                  }}
-                />
+                <input type="checkbox" checked={useBackupCode} onChange={(e) => { setUseBackupCode(e.target.checked); setTwoFactorCode(''); }} />
                 Usar código de respaldo
               </label>
             </div>
@@ -144,19 +140,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 placeholder={useBackupCode ? 'XXXX-XXXX-XXXX' : '000000'}
                 required
                 maxLength={useBackupCode ? 16 : 6}
-                style={{
-                  textAlign: 'center',
-                  fontSize: '1.5rem',
-                  letterSpacing: '4px',
-                  fontFamily: 'monospace'
-                }}
+                style={{ textAlign: 'center', fontSize: '1.5rem', letterSpacing: '4px', fontFamily: 'monospace' }}
                 autoFocus
               />
-              <small className="form-help">
-                {useBackupCode
-                  ? 'Ingresa uno de los códigos de respaldo que guardaste'
-                  : 'Ingresa el código de 6 dígitos que recibiste por correo'}
-              </small>
             </div>
 
             {error && <div className="error-message">{error}</div>}
@@ -168,30 +154,14 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
           {!useBackupCode && (
             <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-              <button
-                type="button"
-                onClick={handleResendCode}
-                disabled={loading}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#0DB8D3',
-                  cursor: 'pointer',
-                  textDecoration: 'underline'
-                }}
-              >
+              <button type="button" onClick={handleResendCode} disabled={loading} style={{ background: 'none', border: 'none', color: '#0DB8D3', cursor: 'pointer', textDecoration: 'underline' }}>
                 ¿No recibiste el código? Reenviar
               </button>
             </div>
           )}
 
           <div className="auth-links" style={{ marginTop: '1.5rem' }}>
-            <a href="#" onClick={(e) => {
-              e.preventDefault();
-              setShowTwoFactor(false);
-              setTwoFactorCode('');
-              setUseBackupCode(false);
-            }}>
+            <a href="#" onClick={(e) => { e.preventDefault(); setShowTwoFactor(false); setTwoFactorCode(''); setUseBackupCode(false); }}>
               ← Volver al inicio de sesión
             </a>
           </div>
@@ -214,23 +184,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           </div>
           <div className="form-group">
             <label>Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="tu@email.com"
-            />
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="tu@email.com" />
           </div>
           <div className="form-group">
             <label>Contraseña</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="••••••"
-            />
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="••••••" />
           </div>
           {error && <div className="error-message">{error}</div>}
           <button type="submit" className="btn-primary btn-block" disabled={loading}>
@@ -238,10 +196,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           </button>
         </form>
         <div className="auth-links">
-          <a href="#" onClick={(e) => {
-            e.preventDefault();
-            window.location.href = tipo === 'admin' ? '/forgot-password' : '/cliente/forgot-password';
-          }}>
+          <a href="#" onClick={(e) => { e.preventDefault(); window.location.href = tipo === 'admin' ? '/forgot-password' : '/cliente/forgot-password'; }}>
             ¿Olvidaste tu contraseña?
           </a>
         </div>

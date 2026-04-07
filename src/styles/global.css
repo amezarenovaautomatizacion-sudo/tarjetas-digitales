@@ -1340,3 +1340,453 @@ select.form-control { cursor: pointer; }
   }
 }
 
+.suscripcion-plans {
+  padding: 2rem 0;
+}
+
+.suscripcion-activa-card {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.1));
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.suscripcion-activa-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  color: var(--success);
+}
+
+.suscripcion-activa-header h3 {
+  margin: 0;
+  color: var(--success);
+}
+
+.suscripcion-activa-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.suscripcion-activa-body p {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.suscripcion-activa-body p strong {
+  color: var(--text-primary);
+}
+
+.planes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.plan-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.plan-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-glow);
+  box-shadow: var(--shadow-glow);
+}
+
+.plan-card.popular {
+  border: 2px solid var(--primary);
+  box-shadow: var(--shadow-glow);
+}
+
+.plan-popular-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: var(--primary-gradient);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.plan-header h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.plan-description {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.plan-price {
+  margin: 1.5rem 0;
+  padding: 1rem 0;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.plan-price .price-amount {
+  font-size: 2rem;
+  font-weight: 800;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.plan-price .price-period {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.plan-features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.plan-features .feature {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.plan-features .feature svg {
+  color: var(--success);
+  flex-shrink: 0;
+}
+
+.btn-plan {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: none;
+}
+
+.btn-solicitar {
+  background: var(--primary-gradient);
+  color: white;
+}
+
+.btn-solicitar:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
+
+.btn-contact {
+  background: rgba(13, 184, 211, 0.15);
+  color: var(--primary-light);
+  border: 1px solid rgba(13, 184, 211, 0.3);
+}
+
+.btn-contact:hover {
+  background: rgba(13, 184, 211, 0.25);
+}
+
+.contact-info-card {
+  background: linear-gradient(135deg, rgba(13, 184, 211, 0.1), rgba(27, 127, 220, 0.05));
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.contact-info-card h4 {
+  margin: 1rem 0 0.5rem;
+}
+
+.contact-info-card p {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.btn-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #25D366;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+.btn-whatsapp:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(37, 211, 102, 0.4);
+  color: white;
+}
+
+.admin-suscripciones {
+  padding: 1rem 0;
+}
+
+.admin-suscripciones-header {
+  margin-bottom: 1.5rem;
+}
+
+.admin-suscripciones-header h2 {
+  margin-bottom: 1rem;
+}
+
+.filtros {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filtros select, .filtros input {
+  padding: 0.5rem 1rem;
+  background: rgba(31, 41, 55, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(31, 41, 55, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0 0.75rem;
+}
+
+.search-box input {
+  background: transparent;
+  border: none;
+  padding: 0.5rem 0;
+}
+
+.search-box input:focus {
+  outline: none;
+}
+
+.btn-refresh {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(55, 65, 81, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.suscripciones-table-container {
+  overflow-x: auto;
+}
+
+.suscripciones-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.suscripciones-table th,
+.suscripciones-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.suscripciones-table th {
+  background: rgba(13, 184, 211, 0.1);
+  color: var(--primary-light);
+  font-weight: 600;
+}
+
+.suscripciones-table td {
+  color: var(--text-secondary);
+}
+
+.suscripciones-table td.urgente {
+  color: #f87171;
+  font-weight: 600;
+}
+
+.estado-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.estado-badge.activa {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+
+.estado-badge.vencida {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.estado-badge.cancelada {
+  background: rgba(107, 114, 128, 0.15);
+  color: #9ca3af;
+}
+
+.btn-renovar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0.75rem;
+  background: rgba(13, 184, 211, 0.15);
+  border: 1px solid rgba(13, 184, 211, 0.3);
+  border-radius: var(--radius-full);
+  color: var(--primary-light);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-renovar:hover:not(:disabled) {
+  background: rgba(13, 184, 211, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn-renovar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.no-data {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-muted);
+}
+
+.modal-small {
+  max-width: 450px;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  padding: 1rem 1.5rem 1.5rem;
+}
+
+.btn-cancel {
+  padding: 0.5rem 1rem;
+  background: rgba(55, 65, 81, 0.6);
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.planes-page {
+  min-height: calc(100vh - 80px);
+}
+
+.planes-hero {
+  background: linear-gradient(135deg, rgba(13, 184, 211, 0.1) 0%, rgba(27, 127, 220, 0.1) 100%);
+  padding: 3rem 0;
+  text-align: center;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.planes-hero h1 {
+  margin-bottom: 0.5rem;
+}
+
+.planes-hero p {
+  color: var(--text-secondary);
+}
+
+/* Oculta columnas secundarias en mobile */
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+
+  /* Admin header apila en columna en pantallas muy pequeñas */
+  .admin-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* Filtros en columna */
+  .filtros {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .filtros .search-box,
+  .filtros select {
+    width: 100%;
+  }
+
+  /* Tabla: celdas más compactas */
+  .suscripciones-table th,
+  .suscripciones-table td {
+    padding: 0.65rem 0.75rem;
+    font-size: 0.825rem;
+  }
+
+  /* Grid de plantillas: 1 columna */
+  .plantillas-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Dashboard stats: 2 columnas mínimo */
+  .dashboard-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Modales: casi fullscreen */
+  .modal-content {
+    width: 98% !important;
+    max-width: 98% !important;
+    max-height: 95vh;
+    border-radius: var(--radius-xl) !important;
+  }
+
+  /* form-row colapsa a 1 columna */
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  /* Botones de acción no se desborden */
+  .suscripciones-table .btn-small {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-header h1 {
+    font-size: 1.4rem;
+  }
+}

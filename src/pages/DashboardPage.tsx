@@ -6,6 +6,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { tarjetaService } from '../services/tarjeta.service';
 import { api } from '../services/api';
 import { Plantilla } from '../types';
+import { suscripcionService } from '../services/suscripcion.service';
 
 interface DashboardPageProps {
   onPlantillaClick: (id: number) => void;
@@ -21,6 +22,8 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
   const [plantillas, setPlantillas] = useState<Plantilla[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+  const [dashboardStats, setDashboardStats] = useState<any>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
   const userData = JSON.parse(localStorage.getItem('userData') || '{}');
 
   const loadData = async () => {
@@ -34,8 +37,18 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
     setLoading(false);
   };
 
+  const loadDashboardStats = async () => {
+    setStatsLoading(true);
+    const response = await suscripcionService.getDashboardStats();
+    if (response.data) {
+      setDashboardStats(response.data);
+    }
+    setStatsLoading(false);
+  };
+
   useEffect(() => {
     loadData();
+    loadDashboardStats();
   }, []);
 
   const handleDelete = async (id: number) => {
@@ -62,7 +75,8 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
   return (
     <div className="dashboard-page">
       <div className="dashboard-header">
-        <div className="container plantilla-card-title mb-4 text-center">
+        <div className="container">
+          <h1>Mi Dashboard</h1>
           <p>Bienvenido, {userData.nombre || userData.email}</p>
           <button className="btn-primary btn-create" onClick={() => setModalOpen(true)}>
             + Crear Nueva Tarjeta
@@ -71,6 +85,30 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
       </div>
 
       <div className="container">
+        {dashboardStats && dashboardStats.suscripcion && (
+          <div className="suscripcion-resumen">
+            <div className={`suscripcion-badge ${dashboardStats.suscripcion.activa ? 'activa' : 'inactiva'}`}>
+              {dashboardStats.suscripcion.activa ? (
+                <>
+                  <span>✅ Plan Activo: {dashboardStats.suscripcion.plan?.nombre}</span>
+                  <span>📅 {dashboardStats.suscripcion.dias_restantes} días restantes</span>
+                  <span>📇 {dashboardStats.suscripcion.tarjetas_restantes} tarjetas disponibles</span>
+                </>
+              ) : (
+                <>
+                  <span>⚠️ Sin suscripción activa</span>
+                  <button 
+                    className="btn-small btn-primary"
+                    onClick={() => navigate('/planes')}
+                  >
+                    Ver Planes
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="dashboard-stats">
           <div className="stat-card">
             <span className="stat-number">{tarjetas.length}</span>
@@ -86,7 +124,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
         </div>
 
-        <div className="section-header plantilla-card-title mb-4 text-center">
+        <div className="section-header">
           <h2>Mis Tarjetas</h2>
           <button className="btn-secondary btn-sm" onClick={() => setModalOpen(true)}>
             + Nueva Tarjeta
@@ -103,7 +141,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
             </button>
           </div>
         ) : (
-          <div className="tarjetas-grid tarjeta-card-body">
+          <div className="tarjetas-grid">
             {tarjetas.map(t => (
               <TarjetaCard
                 key={t.tarjetaclienteid}
