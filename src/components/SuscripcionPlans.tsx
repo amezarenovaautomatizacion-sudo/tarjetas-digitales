@@ -249,8 +249,6 @@ const SuscripcionPlans: React.FC = () => {
 
   const renderEnterpriseSection = () => {
     const benefits = [
-      { icon: Shield, title: 'Seguridad Empresarial', desc: 'Encriptación avanzada y cumplimiento ISO 27001' },
-      { icon: Zap, title: 'Escalabilidad Automática', desc: 'Infraestructura que crece con tu negocio' },
       { icon: Headphones, title: 'Soporte Dedicado 24/7', desc: 'Gerente de cuenta exclusivo, respuesta < 1 h' },
       { icon: Clock, title: '99.9% Uptime', desc: 'SLA garantizado con compensación por downtime' },
       { icon: FileText, title: 'Cumplimiento Legal', desc: 'Contratos personalizados y GDPR compliant' },
