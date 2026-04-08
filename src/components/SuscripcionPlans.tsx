@@ -287,7 +287,7 @@ const SuscripcionPlans: React.FC = () => {
         </Row>
 
         <Row className="mt-5">
-          <Col xs={12} className="text-center mb-4">
+          <Col xs={12} className="text-center plantillas-title mb-4">
             <h3>Beneficios Corporativos</h3>
           </Col>
           {benefits.map(({ icon: Icon, title, desc }, idx) => (
@@ -296,7 +296,7 @@ const SuscripcionPlans: React.FC = () => {
                 <div className="benefit-icon">
                   <Icon size={36} />
                 </div>
-                <h5>{title}</h5>
+                <h5 style={{ color: 'var(--primary)', fontSize: '1.2rem' }}>{title}</h5>
                 <p className="mb-0" style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
                   {desc}
                 </p>
