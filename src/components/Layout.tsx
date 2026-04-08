@@ -308,11 +308,20 @@ const Layout: React.FC<LayoutProps> = ({
       <main className="main-content">
         {children}
       </main>
-      <footer>
-        <a className='footer_link' href="https://tuweb.com" target="_blank" rel="noopener noreferrer">
-          https://renova-automatizacion.com
-        </a><p>Derechos reservados para Renova 2026</p>
-      </footer>
+        <footer className="footer">
+          <p className="footer_text">
+            &copy; 2026 Derechos reservados para{' '}
+            <a
+              className="footer_link"
+              href="https://renova-automatizacion.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Visitar el sitio web de Renova Automatización"
+            >
+              <span>Renova Automatización</span>
+            </a>{' '}
+          </p>
+        </footer>
     </div>
   );
 };

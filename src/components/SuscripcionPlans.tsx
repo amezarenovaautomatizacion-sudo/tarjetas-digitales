@@ -9,16 +9,14 @@ import {
   Shield,
   Clock,
   FileText,
-  BarChart,
   Headphones,
   Sparkles,
-  Rocket,
   HelpCircle,
   Mail,
-  MessageCircle,
-  Crown
+  MessageCircle
 } from 'lucide-react';
 import { suscripcionService } from '../services/suscripcion.service';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 interface Plan {
   id: string;
@@ -220,7 +218,7 @@ const SuscripcionPlans: React.FC = () => {
 
     return (
       <div className="comparison-table mt-5">
-        <div className="text-center mb-4">
+        <div className="text-center plantillas-title mb-4">
           <h3 className="mb-2">Comparativa de características</h3>
           <p style={{ color: 'var(--text-secondary)' }}>
             Encuentra el plan que mejor se adapta a tus necesidades
@@ -340,7 +338,7 @@ const SuscripcionPlans: React.FC = () => {
 
     return (
       <div className="faq-section mt-5 pt-4">
-        <div className="text-center mb-4">
+        <div className="text-center plantillas-title mb-4">
           <h3 className="mb-2">Preguntas frecuentes</h3>
           <p style={{ color: 'var(--text-secondary)' }}>
             ¿Tienes más dudas? Estamos aquí para ayudarte
@@ -380,9 +378,9 @@ const SuscripcionPlans: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="loading-spinner-simple">
-        <div className="spinner"></div>
-        <p>Cargando planes...</p>
+      <div className="text-center py-5">
+        <LoadingSpinner />
+        <p className="mt-3">Cargando planes...</p>
       </div>
     );
   }
