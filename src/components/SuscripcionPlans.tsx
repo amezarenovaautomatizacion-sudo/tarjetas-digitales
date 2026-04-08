@@ -107,7 +107,7 @@ const SuscripcionPlans: React.FC = () => {
     const userData = localStorage.getItem('userData');
     const email = userData ? JSON.parse(userData).email : '';
     const mensaje = `Hola, estoy interesado en el plan ${plan.name}. Mi correo registrado es: ${email}`;
-    const whatsappUrl = `https://wa.me/5213312345678?text=${encodeURIComponent(mensaje)}`;
+    const whatsappUrl = `https://wa.me/523326239790?text=${encodeURIComponent(mensaje)}`;
     window.open(whatsappUrl, '_blank');
   };
 
@@ -274,11 +274,11 @@ const SuscripcionPlans: React.FC = () => {
                   tu empresa. Contáctanos y diseñaremos una solución a tu medida.
                 </p>
                 <div className="d-flex gap-3 justify-content-center flex-wrap">
-                  <Button variant="primary" size="lg" className="rounded-pill px-4" onClick={() => window.open('https://wa.me/5213312345678', '_blank')}>
+                  <Button variant="primary" size="lg" className="rounded-pill px-4" onClick={() => window.open('https://wa.me/523326239790', '_blank')}>
                     <Mail size={18} className="me-2" />
                     Contactar a Ventas
                   </Button>
-                  <Button variant="outline-primary" size="lg" className="rounded-pill px-4" onClick={() => window.open('https://wa.me/5213312345678', '_blank')}>
+                  <Button variant="outline-primary" size="lg" className="rounded-pill px-4" onClick={() => window.open('https://wa.me/523326239790', '_blank')}>
                     <MessageCircle size={18} className="me-2" />
                     Solicitar Demo
                   </Button>
@@ -391,7 +391,7 @@ const SuscripcionPlans: React.FC = () => {
     <div className="pricing-plans-page">
       <div className="pricing-hero text-center">
         <Container>
-          <h1>Planes y Precios</h1>
+          <h1 className='h1_pricing'>Planes y Precios</h1>
           <p className="pricing-subtitle">
             Elige el plan perfecto para tus necesidades. Todos los planes incluyen
             acceso a nuestras plantillas profesionales y actualizaciones continuas.
@@ -458,7 +458,7 @@ const SuscripcionPlans: React.FC = () => {
                         Solución personalizada para tu empresa
                       </p>
                       <div className="d-flex gap-3 justify-content-center flex-wrap">
-                        <Button variant="primary" size="lg" className="rounded-pill px-4" onClick={() => window.open('https://wa.me/5213312345678', '_blank')}>
+                        <Button variant="primary" size="lg" className="rounded-pill px-4" onClick={() => window.open('https://wa.me/523326239790', '_blank')}>
                           <Mail size={18} className="me-2" />
                           Contactar a Ventas
                         </Button>
