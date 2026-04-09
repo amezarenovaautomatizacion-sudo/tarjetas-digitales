@@ -23,6 +23,7 @@ import PlanesPage from './pages/PlanesPage';
 import AdminSuscripciones from './components/AdminSuscripciones';
 import ErrorBoundary from './components/ErrorBoundary';
 import useSessionTimeout from './hooks/useSessionTimeout';
+import { NotificationProvider } from './contexts/NotificationContext';
 import './styles/global.css';
 import './styles/custom-bootstrap.scss';
 
@@ -268,7 +269,9 @@ const App: React.FC = () => {
   return (
     <ErrorBoundary>
       <BrowserRouter>
-        <AppContent />
+        <NotificationProvider>
+          <AppContent />
+        </NotificationProvider>
       </BrowserRouter>
     </ErrorBoundary>
   );
