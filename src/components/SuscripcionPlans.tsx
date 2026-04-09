@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { suscripcionService } from '../services/suscripcion.service';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { useNotification } from '../contexts/NotificationContext';
 
 interface Plan {
   id: string;
@@ -35,6 +36,7 @@ interface Plan {
 }
 
 const SuscripcionPlans: React.FC = () => {
+  const { showSuccess, showError, showInfo, showWarning } = useNotification();
   const [activeTab, setActiveTab] = useState<string>('b2c');
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const [suscripcionActiva, setSuscripcionActiva] = useState<any>(null);
@@ -107,6 +109,7 @@ const SuscripcionPlans: React.FC = () => {
     const mensaje = `Hola, estoy interesado en el plan ${plan.name}. Mi correo registrado es: ${email}`;
     const whatsappUrl = `https://wa.me/523326239790?text=${encodeURIComponent(mensaje)}`;
     window.open(whatsappUrl, '_blank');
+    showInfo(`Serás redirigido a WhatsApp para solicitar el plan ${plan.name}`, 'Solicitud');
   };
 
   const getSegmentPlans = (segment: 'B2C' | 'SMB' | 'B2B') =>

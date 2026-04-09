@@ -1,13 +1,14 @@
-// src/pages/RegisterPage.tsx
 import React, { useState } from 'react';
 import { authService } from '../services/auth.service';
 import { obtenerIpPublica } from '../utils/ipUtils';
+import { useNotification } from '../contexts/NotificationContext';
 
 interface RegisterPageProps {
   onRegisterSuccess: () => void;
 }
 
 const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess }) => {
+  const { showSuccess, showError, showInfo, showWarning } = useNotification();
   const [formData, setFormData] = useState({
     nombre: '', email: '', password: '', telefono: '', calle: '',
     numero_exterior: '', colonia: '', ciudad: '', estado: '', codigo_postal: ''
@@ -27,7 +28,9 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess }) => {
     const response = await authService.registerCliente({ ...formData, ip_registro: ip });
     if (response.error) {
       setError(response.error);
+      showError(response.error, 'Error de registro');
     } else {
+      showSuccess('Cuenta creada exitosamente. Ahora puedes iniciar sesión.', 'Registro exitoso');
       onRegisterSuccess();
     }
     setLoading(false);
@@ -35,13 +38,11 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess }) => {
 
   return (
     <div className="auth-page">
-      {/* ↓ auth-container más ancho para que form-row respire */}
       <div className="auth-container" style={{ maxWidth: '680px' }}>
         <h2>Registro de Cliente</h2>
 
         <form onSubmit={handleSubmit} noValidate>
 
-          {/* ── Sección: Datos de acceso ── */}
           <p className="form-section-label">Datos de acceso</p>
 
           <div className="form-row">
@@ -93,7 +94,6 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess }) => {
             </div>
           </div>
 
-          {/* ── Sección: Dirección ── */}
           <p className="form-section-label">Dirección</p>
 
           <div className="form-row">

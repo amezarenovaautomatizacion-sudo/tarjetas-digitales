@@ -12,7 +12,6 @@ const PlantillaCard: React.FC<PlantillaCardProps> = ({ plantilla, onClick }) => 
 
   return (
     <div className="plantilla-card" onClick={onClick}>
-
       <div className="plantilla-card-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)', flex: 1, minWidth: 0 }}>
           <h3 className="plantilla-card-title" style={{
@@ -32,7 +31,6 @@ const PlantillaCard: React.FC<PlantillaCardProps> = ({ plantilla, onClick }) => 
       </div>
 
       <div className="plantilla-card-body">
-
         <div className="plantilla-preview-placeholder">
           <span>🎴</span>
         </div>
@@ -51,7 +49,6 @@ const PlantillaCard: React.FC<PlantillaCardProps> = ({ plantilla, onClick }) => 
           borderTop: '1px solid var(--border-color)',
           marginTop: 'var(--spacing-sm)',
         }}>
-
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
             <Layers size={13} style={{ color: 'var(--primary)' }} />
             <span style={{
@@ -91,14 +88,12 @@ const PlantillaCard: React.FC<PlantillaCardProps> = ({ plantilla, onClick }) => 
           }}>
             <Calendar size={10} /> {formatDate(plantilla.creado)}
           </span>
-
         </div>
       </div>
 
       <div className="plantilla-card-footer">
         <button className="btn-preview-sm">Ver Detalles →</button>
       </div>
-
     </div>
   );
 };

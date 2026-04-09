@@ -1,14 +1,15 @@
-// src/pages/LoginPage.tsx (actualizado)
 import React, { useState } from 'react';
 import { authService } from '../services/auth.service';
 import { twoFactorService } from '../services/twoFactor.service';
 import { obtenerIpPublica } from '../utils/ipUtils';
+import { useNotification } from '../contexts/NotificationContext';
 
 interface LoginPageProps {
   onLoginSuccess: (userType: string, rolid: number) => void;
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
+  const { showSuccess, showError, showInfo, showWarning } = useNotification();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [tipo, setTipo] = useState('cliente');
@@ -50,16 +51,19 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
       if (response.error) {
         setError(response.error);
+        showError(response.error, 'Error de inicio de sesión');
         setLoading(false);
         return;
       }
 
       if (response.data?.token) {
         const rolid = response.data.usuario?.rolid || (tipo === 'admin' ? 3 : 4);
+        showSuccess(`Bienvenido ${response.data.usuario?.nombre || email}`, 'Inicio de sesión exitoso');
         onLoginSuccess(tipo, rolid);
       }
     } catch (err) {
       setError('Error de conexión');
+      showError('Error de conexión con el servidor', 'Error');
     }
 
     setLoading(false);
@@ -82,6 +86,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
       if (response.error) {
         setError(response.error);
+        showError(response.error, 'Error de verificación');
         setLoading(false);
         return;
       }
@@ -90,10 +95,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         setShowTwoFactor(false);
         setTwoFactorCode('');
         const rolid = response.data.usuario?.rolid || (tempData.tipo === 'admin' ? 3 : 4);
+        showSuccess('Verificación exitosa', 'Bienvenido');
         onLoginSuccess(tempData.tipo, rolid);
       }
     } catch {
       setError('Error de conexión');
+      showError('Error de conexión con el servidor', 'Error');
     }
 
     setLoading(false);
@@ -105,11 +112,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       const response = await twoFactorService.sendCode(tempData.email, tempData.tipo);
       if (response.error) {
         setError(response.error);
+        showError(response.error, 'Error');
       } else {
-        alert('Nuevo código enviado a tu correo electrónico');
+        showSuccess('Nuevo código enviado a tu correo electrónico', 'Código reenviado');
       }
     } catch {
       setError('Error al reenviar el código');
+      showError('Error al reenviar el código', 'Error');
     }
     setLoading(false);
   };

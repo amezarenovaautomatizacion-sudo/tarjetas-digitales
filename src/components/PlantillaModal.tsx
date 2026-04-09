@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PlantillaDetalle } from '../types';
 import { usePreview } from '../hooks/usePlantillas';
+import { useNotification } from '../contexts/NotificationContext';
 
 interface PlantillaModalProps {
   plantilla: PlantillaDetalle | null;
@@ -9,6 +10,7 @@ interface PlantillaModalProps {
 }
 
 const PlantillaModal: React.FC<PlantillaModalProps> = ({ plantilla, isOpen, onClose }) => {
+  const { showSuccess, showError, showInfo, showWarning } = useNotification();
   const [formData, setFormData] = useState<Record<string, string>>({});
   const { preview, loading, error, generatePreview } = usePreview();
 
@@ -30,6 +32,7 @@ const PlantillaModal: React.FC<PlantillaModalProps> = ({ plantilla, isOpen, onCl
 
   const handlePreview = () => {
     generatePreview(plantilla.plantillaid, formData);
+    showInfo('Generando vista previa...', 'Procesando');
   };
 
   const handleOverlayClick = (e: React.MouseEvent) => {

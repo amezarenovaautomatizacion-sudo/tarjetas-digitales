@@ -1,13 +1,14 @@
-// src/pages/RegisterPage.tsx
 import React, { useState } from 'react';
 import { authService } from '../services/auth.service';
 import { obtenerIpPublica } from '../utils/ipUtils';
+import { useNotification } from '../contexts/NotificationContext';
 
 interface RegisterPageProps {
   onRegisterSuccess: () => void;
 }
 
 const RegisterAdminPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess }) => {
+  const { showSuccess, showError, showInfo, showWarning } = useNotification();
   const [formData, setFormData] = useState({
     nombre: '', email: '', password: ''
   });
@@ -28,7 +29,9 @@ const RegisterAdminPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess }) =
     
     if (response.error) {
       setError(response.error);
+      showError(response.error, 'Error de registro');
     } else {
+      showSuccess('Administrador registrado exitosamente. Ahora puede iniciar sesión.', 'Registro exitoso');
       onRegisterSuccess();
     }
     setLoading(false);
