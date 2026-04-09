@@ -3,6 +3,8 @@ import { Plus, Edit2, Trash2, RefreshCw, Eye, X } from 'lucide-react';
 import { Plantilla } from '../types';
 import { api } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { useNotification } from '../contexts/NotificationContext';
+import { useConfirm } from '../hooks/useConfirm';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api-tarjetas.vercel.app';
 
@@ -32,6 +34,8 @@ const emptyForm = {
 };
 
 const AdminPlantillasPage: React.FC<AdminPlantillasPageProps> = ({ onPlantillaClick }) => {
+  const { showSuccess, showError, showInfo, showWarning } = useNotification();
+  const { confirm, ConfirmModal } = useConfirm();
   const [plantillas, setPlantillas] = useState<Plantilla[]>([]);
   const [variables, setVariables] = useState<Variable[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,6 +61,7 @@ const AdminPlantillasPage: React.FC<AdminPlantillasPageProps> = ({ onPlantillaCl
     } catch (err) {
       console.error('Error loading data:', err);
       setError('Error al cargar los datos');
+      showError('Error al cargar los datos', 'Error');
     } finally {
       setLoading(false);
     }
@@ -69,7 +74,6 @@ const AdminPlantillasPage: React.FC<AdminPlantillasPageProps> = ({ onPlantillaCl
   };
 
   const abrirEditar = async (p: any) => {
-    // Cargar las variables requeridas actuales de la plantilla
     try {
       const token = localStorage.getItem('token');
       const res = await fetch(`${API_BASE_URL}/api/plantillas/${p.plantillaid}`, {
@@ -94,11 +98,11 @@ const AdminPlantillasPage: React.FC<AdminPlantillasPageProps> = ({ onPlantillaCl
         });
         setModalOpen(true);
       } else {
-        alert('Error al cargar las variables de la plantilla');
+        showError('Error al cargar las variables de la plantilla', 'Error');
       }
     } catch (err) {
       console.error('Error loading plantilla details:', err);
-      alert('Error al cargar los detalles de la plantilla');
+      showError('Error al cargar los detalles de la plantilla', 'Error');
     }
   };
 
@@ -160,35 +164,50 @@ const AdminPlantillasPage: React.FC<AdminPlantillasPageProps> = ({ onPlantillaCl
       const data = await res.json();
       
       if (res.ok) { 
+        showSuccess(editingPlantilla ? 'Plantilla actualizada correctamente' : 'Plantilla creada correctamente', 'Éxito');
         cerrarModal(); 
         loadData(); 
       } else {
         setError(data.error || 'Error al guardar plantilla');
+        showError(data.error || 'Error al guardar plantilla', 'Error');
         if (data.variables_faltantes) {
-          setError(`Variables faltantes: ${data.variables_faltantes.join(', ')}`);
+          showError(`Variables faltantes: ${data.variables_faltantes.join(', ')}`, 'Error');
         }
       }
     } catch (err) {
       console.error('Error saving plantilla:', err);
       setError('Error de conexión');
+      showError('Error de conexión', 'Error');
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('¿Eliminar esta plantilla? Esta acción no se puede deshacer.')) return;
+  const handleDelete = async (id: number, nombre: string) => {
+    const confirmed = await confirm({
+      title: 'Eliminar plantilla',
+      message: `¿Eliminar la plantilla "${nombre}"? Esta acción no se puede deshacer.`,
+      confirmText: 'Eliminar',
+      type: 'danger',
+    });
+
+    if (!confirmed) return;
+
     const token = localStorage.getItem('token');
     try {
       const res = await fetch(`${API_BASE_URL}/api/plantillas/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (res.ok) loadData();
-      else alert('Error al eliminar la plantilla');
+      if (res.ok) {
+        showSuccess(`Plantilla "${nombre}" eliminada correctamente`, 'Eliminada');
+        loadData();
+      } else {
+        showError('Error al eliminar la plantilla', 'Error');
+      }
     } catch (err) {
       console.error('Error deleting plantilla:', err);
-      alert('Error de conexión');
+      showError('Error de conexión', 'Error');
     }
   };
 
@@ -246,7 +265,7 @@ const AdminPlantillasPage: React.FC<AdminPlantillasPageProps> = ({ onPlantillaCl
                   <button className="btn-small" onClick={() => abrirEditar(p)} title="Editar">
                     <Edit2 size={13} /> Editar
                   </button>
-                  <button className="btn-small btn-danger" onClick={() => handleDelete(p.plantillaid)} title="Eliminar">
+                  <button className="btn-small btn-danger" onClick={() => handleDelete(p.plantillaid, p.nombre)} title="Eliminar">
                     <Trash2 size={13} />
                   </button>
                 </div>
@@ -514,6 +533,8 @@ const AdminPlantillasPage: React.FC<AdminPlantillasPageProps> = ({ onPlantillaCl
           </div>
         </div>
       )}
+
+      <ConfirmModal />
     </div>
   );
 };

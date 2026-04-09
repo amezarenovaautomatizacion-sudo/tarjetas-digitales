@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Edit2, Trash2, RefreshCw } from 'lucide-react';
 import { adminService } from '../services/admin.service';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { useNotification } from '../contexts/NotificationContext';
+import { useConfirm } from '../hooks/useConfirm';
 
 interface Variable {
   variableid: number;
@@ -32,6 +34,8 @@ const TIPOS = [
 ];
 
 const AdminVariablesPage: React.FC = () => {
+  const { showSuccess, showError, showInfo, showWarning } = useNotification();
+  const { confirm, ConfirmModal } = useConfirm();
   const [variables, setVariables] = useState<Variable[]>([]);
   const [loading, setLoading]     = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -72,26 +76,41 @@ const AdminVariablesPage: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!formData.nombre.trim() || !formData.etiqueta.trim())
-      return alert('Nombre y etiqueta son obligatorios');
+    if (!formData.nombre.trim() || !formData.etiqueta.trim()) {
+      showError('Nombre y etiqueta son obligatorios', 'Error');
+      return;
+    }
     setSaving(true);
     const res = editando
       ? await adminService.updateVariable(editando.variableid, formData)
       : await adminService.createVariable(formData);
     if (res.data) {
+      showSuccess(editando ? 'Variable actualizada correctamente' : 'Variable creada correctamente', 'Éxito');
       cerrarModal();
       cargarVariables();
     } else {
-      alert(res.error || 'Error al guardar');
+      showError(res.error || 'Error al guardar', 'Error');
     }
     setSaving(false);
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('¿Eliminar esta variable? Si está en uso, no se podrá eliminar.')) return;
+  const handleDelete = async (id: number, nombre: string) => {
+    const confirmed = await confirm({
+      title: 'Eliminar variable',
+      message: `¿Eliminar la variable "${nombre}"? Si está en uso, no se podrá eliminar.`,
+      confirmText: 'Eliminar',
+      type: 'danger',
+    });
+
+    if (!confirmed) return;
+
     const res = await adminService.deleteVariable(id);
-    if (res.data) cargarVariables();
-    else alert(res.error || 'Error al eliminar');
+    if (res.data) {
+      showSuccess(`Variable "${nombre}" eliminada correctamente`, 'Eliminada');
+      cargarVariables();
+    } else {
+      showError(res.error || 'Error al eliminar', 'Error');
+    }
   };
 
   if (loading) {
@@ -169,7 +188,7 @@ const AdminVariablesPage: React.FC = () => {
                           </button>
                           <button
                             className="btn-small btn-danger"
-                            onClick={() => handleDelete(v.variableid)}
+                            onClick={() => handleDelete(v.variableid, v.nombre)}
                             title="Eliminar"
                           >
                             <Trash2 size={13} />
@@ -275,6 +294,8 @@ const AdminVariablesPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      <ConfirmModal />
     </div>
   );
 };

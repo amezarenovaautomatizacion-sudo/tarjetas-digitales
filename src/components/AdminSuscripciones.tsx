@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { suscripcionService } from '../services/suscripcion.service';
 import { Search, RefreshCw, CheckCircle, XCircle, Clock, AlertCircle, UserPlus, Bell, Send, Calendar, CreditCard, Users } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { useNotification } from '../contexts/NotificationContext';
+import { useConfirm } from '../hooks/useConfirm';
 
 interface Suscripcion {
   suscripcionid: number;
@@ -49,6 +51,8 @@ const EstadoBadge: React.FC<{ estado: string }> = ({ estado }) => {
 };
 
 const AdminSuscripciones: React.FC = () => {
+  const { showSuccess, showError, showInfo, showWarning } = useNotification();
+  const { confirm, ConfirmModal } = useConfirm();
   const [suscripciones, setSuscripciones] = useState<Suscripcion[]>([]);
   const [clientes, setClientes]           = useState<Cliente[]>([]);
   const [loading, setLoading]             = useState(true);
@@ -113,10 +117,11 @@ const AdminSuscripciones: React.FC = () => {
       formSuscripcion.renovar_automatico
     );
     if (res.data) {
+      showSuccess(`Suscripción creada para ${modalSuscribir.clienteNombre}`, 'Éxito');
       setModalSuscribir(emptyModalSuscribir);
       cargarSuscripciones();
     } else {
-      alert(res.error || 'Error al crear suscripción');
+      showError(res.error || 'Error al crear suscripción', 'Error');
     }
     setRenovandoId(null);
   };
@@ -126,10 +131,11 @@ const AdminSuscripciones: React.FC = () => {
     setRenovandoId(modalRenovar.suscripcionid);
     const res = await suscripcionService.renovarSuscripcionAdmin(modalRenovar.suscripcionid, 30);
     if (res.data) {
+      showSuccess(`Suscripción renovada para ${modalRenovar.nombre}`, 'Renovación exitosa');
       setModalRenovar(emptyModalRenovar);
       cargarSuscripciones();
     } else {
-      alert(res.error || 'Error al renovar');
+      showError(res.error || 'Error al renovar', 'Error');
     }
     setRenovandoId(null);
   };
@@ -137,12 +143,23 @@ const AdminSuscripciones: React.FC = () => {
   const handleEnviarNotificacion = async (s: Suscripcion) => {
     setNotificandoId(s.suscripcionid);
     const res = await suscripcionService.enviarNotificacionVencimiento(s.suscripcionid);
-    if (!res.data) alert(res.error || 'Error al enviar notificación');
+    if (!res.data) {
+      showError(res.error || 'Error al enviar notificación', 'Error');
+    } else {
+      showSuccess(`Notificación enviada a ${s.usuario_nombre}`, 'Enviado');
+    }
     setNotificandoId(null);
   };
 
   const handleEnviarNotificacionesGlobal = async () => {
-    if (!confirm('¿Enviar notificaciones a todos los clientes cuya suscripción vence mañana (1 día restante)?')) return;
+    const confirmed = await confirm({
+      title: 'Confirmar envío masivo',
+      message: '¿Enviar notificaciones a todos los clientes cuya suscripción vence mañana (1 día restante)?',
+      confirmText: 'Sí, enviar',
+      type: 'warning',
+    });
+
+    if (!confirmed) return;
     
     setEnviandoGlobal(true);
     setResultadoGlobal(null);
@@ -158,7 +175,7 @@ const AdminSuscripciones: React.FC = () => {
       });
       
       if (suscripcionesPorNotificar.length === 0) {
-        alert('No hay suscripciones que venzan mañana (1 día restante)');
+        showInfo('No hay suscripciones que venzan mañana (1 día restante)', 'Información');
         setEnviandoGlobal(false);
         return;
       }
@@ -207,13 +224,26 @@ const AdminSuscripciones: React.FC = () => {
         detalles: resultados
       });
       
-      alert(`Notificaciones enviadas:\n✅ Exitosas: ${exitosos}\n❌ Fallidas: ${fallidos}\n📧 Total: ${suscripcionesPorNotificar.length}`);
+      showSuccess(`Notificaciones enviadas: ${exitosos} exitosas, ${fallidos} fallidas`, 'Envío completado');
       
     } catch (error) {
       console.error('Error en envío global:', error);
-      alert('Error al procesar las notificaciones globales');
+      showError('Error al procesar las notificaciones globales', 'Error');
     } finally {
       setEnviandoGlobal(false);
+    }
+  };
+
+  const handleAbrirModalRenovar = async (s: Suscripcion) => {
+    const confirmed = await confirm({
+      title: 'Renovar suscripción',
+      message: `¿Renovar la suscripción de ${s.usuario_nombre || s.usuario_email} por 30 días?`,
+      confirmText: 'Renovar',
+      type: 'info',
+    });
+
+    if (confirmed) {
+      setModalRenovar({ show: true, suscripcionid: s.suscripcionid, nombre: s.usuario_nombre || s.usuario_email, email: s.usuario_email });
     }
   };
 
@@ -372,7 +402,7 @@ const AdminSuscripciones: React.FC = () => {
                           <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
                             <button
                               className="btn-renovar"
-                              onClick={() => setModalRenovar({ show: true, suscripcionid: s.suscripcionid, nombre: s.usuario_nombre || s.usuario_email, email: s.usuario_email })}
+                              onClick={() => handleAbrirModalRenovar(s)}
                               disabled={s.estado !== 'activa' && s.estado !== 'vencida'}
                             >
                               <RefreshCw size={13} /> Renovar
@@ -400,7 +430,6 @@ const AdminSuscripciones: React.FC = () => {
 
       </div>
 
-      {/* Modal Suscribir */}
       {modalSuscribir.show && (
         <div
           className="modal-overlay"
@@ -493,7 +522,6 @@ const AdminSuscripciones: React.FC = () => {
         </div>
       )}
 
-      {/* Modal Renovar */}
       {modalRenovar.show && (
         <div
           className="modal-overlay"
@@ -529,6 +557,8 @@ const AdminSuscripciones: React.FC = () => {
           </div>
         </div>
       )}
+
+      <ConfirmModal />
     </div>
   );
 };
