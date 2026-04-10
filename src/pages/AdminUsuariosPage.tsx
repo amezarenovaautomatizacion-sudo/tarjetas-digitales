@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Search, RefreshCw, UserCheck, UserX, Edit2, Trash2, Shield, Users } from 'lucide-react';
 import { adminService } from '../services/admin.service';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { useNotification } from '../contexts/NotificationContext';
+import { useConfirm } from '../hooks/useConfirm';
 
 interface Usuario {
   usuarioid: number;
@@ -27,6 +29,8 @@ const ROL_INFO: Record<number, { label: string; color: string }> = {
 const getRolInfo = (rolid: number) => ROL_INFO[rolid] ?? { label: 'Desconocido', color: '#9ca3af' };
 
 const AdminUsuariosPage: React.FC = () => {
+  const { showSuccess, showError, showInfo, showWarning } = useNotification();
+  const { confirm, ConfirmModal } = useConfirm();
   const [usuarios, setUsuarios]   = useState<{ admins: Usuario[]; clientes: Usuario[] }>({ admins: [], clientes: [] });
   const [loading, setLoading]     = useState(true);
   const [filtro, setFiltro]       = useState<'todos' | 'admin' | 'cliente'>('todos');
@@ -64,8 +68,13 @@ const AdminUsuariosPage: React.FC = () => {
     if (!modal.usuario) return;
     setAccionLoading(true);
     const res = await adminService.updateUsuarioRol(modal.usuario.usuarioid, nuevoRol, modal.usuario.tipo_usuario);
-    if (res.data) { cerrarModal(); cargarUsuarios(); }
-    else alert(res.error || 'Error al actualizar rol');
+    if (res.data) {
+      showSuccess(`Rol de ${modal.usuario.nombre} actualizado correctamente`, 'Éxito');
+      cerrarModal();
+      cargarUsuarios();
+    } else {
+      showError(res.error || 'Error al actualizar rol', 'Error');
+    }
     setAccionLoading(false);
   };
 
@@ -74,18 +83,39 @@ const AdminUsuariosPage: React.FC = () => {
     setAccionLoading(true);
     const nuevoEstado = modal.usuario.activo === 1 ? 0 : 1;
     const res = await adminService.updateUsuarioEstado(modal.usuario.usuarioid, nuevoEstado, modal.usuario.tipo_usuario);
-    if (res.data) { cerrarModal(); cargarUsuarios(); }
-    else alert(res.error || 'Error al cambiar estado');
+    if (res.data) {
+      showSuccess(`Usuario ${modal.usuario.nombre} ${nuevoEstado === 1 ? 'activado' : 'desactivado'} correctamente`, 'Éxito');
+      cerrarModal();
+      cargarUsuarios();
+    } else {
+      showError(res.error || 'Error al cambiar estado', 'Error');
+    }
     setAccionLoading(false);
   };
 
   const handleEliminar = async () => {
     if (!modal.usuario) return;
-    if (!confirm(`¿Eliminar permanentemente a ${modal.usuario.nombre}? Esta acción no se puede deshacer.`)) return;
+    const confirmed = await confirm({
+      title: 'Eliminar usuario',
+      message: `¿Eliminar permanentemente a ${modal.usuario.nombre}? Esta acción no se puede deshacer.`,
+      confirmText: 'Eliminar',
+      type: 'danger',
+    });
+
+    if (!confirmed) {
+      cerrarModal();
+      return;
+    }
+
     setAccionLoading(true);
     const res = await adminService.deleteUsuario(modal.usuario.usuarioid, modal.usuario.tipo_usuario);
-    if (res.data) { cerrarModal(); cargarUsuarios(); }
-    else alert(res.error || 'Error al eliminar usuario');
+    if (res.data) {
+      showSuccess(`Usuario ${modal.usuario.nombre} eliminado correctamente`, 'Eliminado');
+      cerrarModal();
+      cargarUsuarios();
+    } else {
+      showError(res.error || 'Error al eliminar usuario', 'Error');
+    }
     setAccionLoading(false);
   };
 
@@ -326,6 +356,8 @@ const AdminUsuariosPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      <ConfirmModal />
     </div>
   );
 };

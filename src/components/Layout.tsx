@@ -1,4 +1,3 @@
-// src/components/Layout.tsx
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Navbar, Container, Nav, Offcanvas, NavDropdown } from 'react-bootstrap';
 import { 
@@ -21,6 +20,7 @@ import {
   FileText
 } from 'lucide-react';
 import LogoSvg from '/Logo.svg';
+import { useNotification } from '../contexts/NotificationContext';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -50,6 +50,7 @@ const Layout: React.FC<LayoutProps> = ({
   onNavigate,
   currentPage 
 }) => {
+  const { showSuccess, showError, showInfo, showWarning } = useNotification();
   const [showSidebar, setShowSidebar] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
@@ -82,6 +83,11 @@ const Layout: React.FC<LayoutProps> = ({
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
   }, [showSidebar]);
+
+  const handleLogoutClick = async () => {
+    onLogout();
+    showSuccess('Sesión cerrada correctamente', 'Hasta luego');
+  };
 
   const menuItems: MenuItem[] = useMemo(() => {
     const items: MenuItem[] = [
@@ -177,13 +183,13 @@ const Layout: React.FC<LayoutProps> = ({
             <div className="sidebar-divider" />
             <div 
               className="sidebar-item logout" 
-              onClick={onLogout}
+              onClick={handleLogoutClick}
               role="button"
               tabIndex={0}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
-                  onLogout();
+                  handleLogoutClick();
                 }
               }}
             >
@@ -206,7 +212,7 @@ const Layout: React.FC<LayoutProps> = ({
         </div>
       </div>
     </>
-  ), [isAuthenticated, renderSidebarItems, onLogout, userType, userRolid]);
+  ), [isAuthenticated, renderSidebarItems, userType, userRolid]);
 
   return (
     <div className="app-wrapper">
@@ -271,7 +277,7 @@ const Layout: React.FC<LayoutProps> = ({
                   )}
                   
                   <NavDropdown.Divider />
-                  <NavDropdown.Item onClick={onLogout} className="dropdown-item-custom logout-item">
+                  <NavDropdown.Item onClick={handleLogoutClick} className="dropdown-item-custom logout-item">
                     <LogOut size={16} className="me-2" /> <span>Cerrar Sesión</span>
                   </NavDropdown.Item>
                 </NavDropdown>
@@ -308,20 +314,20 @@ const Layout: React.FC<LayoutProps> = ({
       <main className="main-content">
         {children}
       </main>
-        <footer className="footer">
-          <p className="footer_text">
-            &copy; 2026 Derechos reservados para{' '}
-            <a
-              className="footer_link"
-              href="https://renova-automatizacion.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Visitar el sitio web de Renova Automatización"
-            >
-              <span>Renova Automatización</span>
-            </a>{' '}
-          </p>
-        </footer>
+      <footer className="footer">
+        <p className="footer_text">
+          &copy; 2026 Derechos reservados para{' '}
+          <a
+            className="footer_link"
+            href="https://renova-automatizacion.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Visitar el sitio web de Renova Automatización"
+          >
+            <span>Renova Automatización</span>
+          </a>{' '}
+        </p>
+      </footer>
     </div>
   );
 };

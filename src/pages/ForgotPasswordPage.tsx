@@ -1,7 +1,7 @@
-// src/pages/ForgotPasswordPage.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/auth.service';
+import { useNotification } from '../contexts/NotificationContext';
 
 interface ForgotPasswordPageProps {
   tipo?: 'admin' | 'cliente';
@@ -9,6 +9,7 @@ interface ForgotPasswordPageProps {
 
 const ForgotPasswordPage: React.FC<ForgotPasswordPageProps> = ({ tipo = 'cliente' }) => {
   const navigate = useNavigate();
+  const { showSuccess, showError, showInfo, showWarning } = useNotification();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -23,8 +24,10 @@ const ForgotPasswordPage: React.FC<ForgotPasswordPageProps> = ({ tipo = 'cliente
     
     if (response.error) {
       setError(response.error);
+      showError(response.error, 'Error');
     } else {
       setSuccess(true);
+      showSuccess('Se han enviado instrucciones a tu correo electrónico.', 'Correo enviado');
     }
     
     setLoading(false);

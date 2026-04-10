@@ -2189,3 +2189,22 @@ select.form-control { cursor: pointer; }
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+.toast-notification {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.toast-notification:hover {
+  transform: translateX(-4px);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

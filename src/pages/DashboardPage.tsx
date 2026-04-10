@@ -7,6 +7,8 @@ import { tarjetaService } from '../services/tarjeta.service';
 import { api } from '../services/api';
 import { Plantilla } from '../types';
 import { suscripcionService } from '../services/suscripcion.service';
+import { useNotification } from '../contexts/NotificationContext';
+import { useConfirm } from '../hooks/useConfirm';
 
 interface DashboardPageProps {
   onPlantillaClick: (id: number) => void;
@@ -37,6 +39,8 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
   onTarjetaPublicaClick 
 }) => {
   const navigate = useNavigate();
+  const { showSuccess, showError, showInfo, showWarning } = useNotification();
+  const { confirm, ConfirmModal } = useConfirm();
   const [tarjetas, setTarjetas] = useState<Tarjeta[]>([]);
   const [plantillas, setPlantillas] = useState<Plantilla[]>([]);
   const [loading, setLoading] = useState(true);
@@ -85,26 +89,47 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
   }, []);
 
   const handleDelete = async (id: number) => {
-    if (!confirm('¿Eliminar esta tarjeta?')) return;
+    const confirmed = await confirm({
+      title: 'Eliminar tarjeta',
+      message: '¿Estás seguro de que deseas eliminar esta tarjeta? Esta acción no se puede deshacer.',
+      confirmText: 'Eliminar',
+      type: 'danger',
+    });
+
+    if (!confirmed) return;
     
     try {
       await tarjetaService.eliminar(id);
+      showSuccess('Tarjeta eliminada correctamente', 'Eliminada');
       await loadData();
     } catch (err) {
       console.error('Error deleting tarjeta:', err);
-      alert('Error al eliminar la tarjeta. Por favor, intenta de nuevo.');
+      showError('Error al eliminar la tarjeta. Por favor, intenta de nuevo.', 'Error');
     }
   };
 
   const handleToggleVisibility = async (id: number, current: string) => {
+    const newVisibility = current === 'publico' ? 'privado' : 'publico';
+    const confirmed = await confirm({
+      title: newVisibility === 'publico' ? 'Publicar tarjeta' : 'Privatizar tarjeta',
+      message: newVisibility === 'publico' 
+        ? '¿Deseas hacer pública esta tarjeta? Cualquier persona con el enlace podrá verla.'
+        : '¿Deseas hacer privada esta tarjeta? Solo tú podrás verla.',
+      confirmText: newVisibility === 'publico' ? 'Publicar' : 'Privatizar',
+      type: 'info',
+    });
+
+    if (!confirmed) return;
+
     try {
       await tarjetaService.actualizar(id, {
-        visibilidad: current === 'publico' ? 'privado' : 'publico'
+        visibilidad: newVisibility
       });
+      showSuccess(`Tarjeta ${newVisibility === 'publico' ? 'publicada' : 'privatizada'} correctamente`, 'Éxito');
       await loadData();
     } catch (err) {
       console.error('Error toggling visibility:', err);
-      alert('Error al cambiar la visibilidad. Por favor, intenta de nuevo.');
+      showError('Error al cambiar la visibilidad. Por favor, intenta de nuevo.', 'Error');
     }
   };
 
@@ -116,6 +141,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
   const handleCreateSuccess = () => {
     setModalOpen(false);
     loadData();
+    showSuccess('Tarjeta creada correctamente', 'Éxito');
   };
 
   if (loading) return <LoadingSpinner />;
@@ -288,6 +314,8 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
         plantillas={plantillas}
         onSuccess={handleCreateSuccess}
       />
+
+      <ConfirmModal />
     </div>
   );
 };

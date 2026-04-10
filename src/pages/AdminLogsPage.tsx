@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, RefreshCw } from 'lucide-react';
 import { adminService } from '../services/admin.service';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { useNotification } from '../contexts/NotificationContext';
 
 interface Log {
   id: number;
@@ -39,6 +40,7 @@ const getAccionStyle = (accion: string): React.CSSProperties => {
 };
 
 const AdminLogsPage: React.FC = () => {
+  const { showSuccess, showError, showInfo, showWarning } = useNotification();
   const [logs, setLogs]               = useState<Log[]>([]);
   const [loading, setLoading]         = useState(true);
   const [filtroAccion, setFiltroAccion] = useState('');
@@ -133,11 +135,11 @@ const AdminLogsPage: React.FC = () => {
                     <tr key={log.id}>
                       <td style={{ whiteSpace: 'nowrap', color: 'var(--text-secondary)', fontSize: '0.82rem' }}>
                         {new Date(log.fecha).toLocaleString()}
-                      </td>
+                       </td>
                       <td>{log.admin_nombre || <span style={{ color: 'var(--text-muted)' }}>Sistema</span>}</td>
                       <td className="hide-mobile" style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
                         {log.admin_email || '—'}
-                      </td>
+                       </td>
                       <td>
                         <span style={{
                           ...getAccionStyle(log.accion),
@@ -151,13 +153,13 @@ const AdminLogsPage: React.FC = () => {
                         }}>
                           {log.accion}
                         </span>
-                      </td>
+                       </td>
                       <td className="hide-mobile" style={{ color: 'var(--text-secondary)' }}>{log.entidad}</td>
                       <td className="hide-mobile">
                         <code style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
                           {log.ip_address || '—'}
                         </code>
-                      </td>
+                       </td>
                     </tr>
                   ))
                 )}

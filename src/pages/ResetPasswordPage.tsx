@@ -1,7 +1,7 @@
-// src/pages/ResetPasswordPage.tsx
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { authService } from '../services/auth.service';
+import { useNotification } from '../contexts/NotificationContext';
 
 interface ResetPasswordPageProps {
   tipo?: 'admin' | 'cliente';
@@ -10,6 +10,7 @@ interface ResetPasswordPageProps {
 const ResetPasswordPage: React.FC<ResetPasswordPageProps> = ({ tipo = 'cliente' }) => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { showSuccess, showError, showInfo, showWarning } = useNotification();
   const token = searchParams.get('token');
   
   const [newPassword, setNewPassword] = useState('');
@@ -19,11 +20,11 @@ const ResetPasswordPage: React.FC<ResetPasswordPageProps> = ({ tipo = 'cliente' 
   const [success, setSuccess] = useState(false);
   const [validToken, setValidToken] = useState<boolean | null>(null);
 
-  // Validar que el token existe
   useEffect(() => {
     if (!token) {
       setError('Token no válido o expirado');
       setValidToken(false);
+      showError('Token no válido o expirado', 'Error');
     } else {
       setValidToken(true);
     }
@@ -34,11 +35,13 @@ const ResetPasswordPage: React.FC<ResetPasswordPageProps> = ({ tipo = 'cliente' 
     
     if (newPassword !== confirmPassword) {
       setError('Las contraseñas no coinciden');
+      showError('Las contraseñas no coinciden', 'Error');
       return;
     }
     
     if (newPassword.length < 6) {
       setError('La contraseña debe tener al menos 6 caracteres');
+      showError('La contraseña debe tener al menos 6 caracteres', 'Error');
       return;
     }
     
@@ -49,8 +52,10 @@ const ResetPasswordPage: React.FC<ResetPasswordPageProps> = ({ tipo = 'cliente' 
     
     if (response.error) {
       setError(response.error);
+      showError(response.error, 'Error');
     } else {
       setSuccess(true);
+      showSuccess('Contraseña actualizada exitosamente', 'Éxito');
       setTimeout(() => {
         navigate(tipo === 'admin' ? '/login' : '/login');
       }, 3000);

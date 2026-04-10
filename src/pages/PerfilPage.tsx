@@ -3,6 +3,8 @@ import { authService } from '../services/auth.service';
 import { twoFactorService } from '../services/twoFactor.service';
 import { obtenerIpPublica } from '../utils/ipUtils';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { useNotification } from '../contexts/NotificationContext';
+import { useConfirm } from '../hooks/useConfirm';
 
 interface PerfilPageProps {
   onBack: () => void;
@@ -32,13 +34,13 @@ interface TwoFactorEnableResponse {
 }
 
 const PerfilPage: React.FC<PerfilPageProps> = ({ onBack }) => {
+  const { showSuccess, showError, showInfo, showWarning } = useNotification();
+  const { confirm, ConfirmModal } = useConfirm();
   const [perfil, setPerfil] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [editando, setEditando] = useState(false);
   const [formData, setFormData] = useState<PerfilData>({});
   const [passwordData, setPasswordData] = useState({ password_actual: '', password_nuevo: '' });
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [twoFactorLoading, setTwoFactorLoading] = useState(false);
   const [backupCodesRemaining, setBackupCodesRemaining] = useState(0);
@@ -71,34 +73,30 @@ const PerfilPage: React.FC<PerfilPageProps> = ({ onBack }) => {
 
   const handleUpdatePerfil = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setMessage('');
     const response = await authService.updateProfile(formData);
     if (response.data) {
       setPerfil(response.data);
       setEditando(false);
-      setMessage('Perfil actualizado correctamente');
+      showSuccess('Perfil actualizado correctamente', 'Éxito');
+      loadPerfil();
     } else {
-      setError(response.error || 'Error al actualizar perfil');
+      showError(response.error || 'Error al actualizar perfil', 'Error');
     }
   };
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setMessage('');
     const response = await authService.changePassword(passwordData.password_actual, passwordData.password_nuevo);
     if (response.data) {
-      setMessage('Contraseña actualizada correctamente');
+      showSuccess('Contraseña actualizada correctamente', 'Éxito');
       setPasswordData({ password_actual: '', password_nuevo: '' });
     } else {
-      setError(response.error || 'Error al cambiar contraseña');
+      showError(response.error || 'Error al cambiar contraseña', 'Error');
     }
   };
 
   const handleEnableTwoFactor = async () => {
     setTwoFactorLoading(true);
-    setError('');
     const response = await twoFactorService.enable();
     if (response.data) {
       const enableData = response.data as TwoFactorEnableResponse;
@@ -107,41 +105,53 @@ const PerfilPage: React.FC<PerfilPageProps> = ({ onBack }) => {
         setNewBackupCodes(enableData.backup_codes);
         setShowBackupCodes(true);
       }
-      setMessage('2FA activado correctamente. En tu próximo inicio de sesión se te pedirá el código de verificación.');
+      showSuccess('2FA activado correctamente. En tu próximo inicio de sesión se te pedirá el código de verificación.', '2FA Activado');
       loadTwoFactorStatus();
     } else {
-      setError(response.error || 'Error al activar 2FA');
+      showError(response.error || 'Error al activar 2FA', 'Error');
     }
     setTwoFactorLoading(false);
   };
 
   const handleDisableTwoFactor = async () => {
-    if (!confirm('¿Estás seguro de desactivar la verificación de dos pasos? Tu cuenta será menos segura.')) return;
+    const confirmed = await confirm({
+      title: 'Desactivar 2FA',
+      message: '¿Estás seguro de desactivar la verificación de dos pasos? Tu cuenta será menos segura.',
+      confirmText: 'Desactivar',
+      type: 'danger',
+    });
+
+    if (!confirmed) return;
 
     setTwoFactorLoading(true);
-    setError('');
     const response = await twoFactorService.disable();
     if (response.data) {
       setTwoFactorEnabled(false);
-      setMessage('2FA desactivado correctamente');
+      showSuccess('2FA desactivado correctamente', '2FA Desactivado');
       loadTwoFactorStatus();
     } else {
-      setError(response.error || 'Error al desactivar 2FA');
+      showError(response.error || 'Error al desactivar 2FA', 'Error');
     }
     setTwoFactorLoading(false);
   };
 
   const handleRegenerateBackupCodes = async () => {
-    if (!confirm('Esto generará nuevos códigos de respaldo. Los anteriores dejarán de funcionar. ¿Continuar?')) return;
+    const confirmed = await confirm({
+      title: 'Regenerar códigos de respaldo',
+      message: 'Esto generará nuevos códigos de respaldo. Los anteriores dejarán de funcionar. ¿Continuar?',
+      confirmText: 'Regenerar',
+      type: 'warning',
+    });
+
+    if (!confirmed) return;
 
     setTwoFactorLoading(true);
-    setError('');
     const response = await twoFactorService.regenerateBackupCodes();
     if (response.data) {
-      setMessage('Nuevos códigos de respaldo han sido enviados a tu correo electrónico');
+      showSuccess('Nuevos códigos de respaldo han sido enviados a tu correo electrónico', 'Códigos regenerados');
       loadTwoFactorStatus();
     } else {
-      setError(response.error || 'Error al regenerar códigos de respaldo');
+      showError(response.error || 'Error al regenerar códigos de respaldo', 'Error');
     }
     setTwoFactorLoading(false);
   };
@@ -154,8 +164,6 @@ const PerfilPage: React.FC<PerfilPageProps> = ({ onBack }) => {
         <button className="btn-back" onClick={onBack}>← Volver</button>
         <div className="perfil-container">
           <h1>Mi Perfil</h1>
-          {message && <div className="success-message">{message}</div>}
-          {error && <div className="error-message">{error}</div>}
 
           <div className="perfil-section">
             <h2>Información Personal</h2>
@@ -363,6 +371,7 @@ const PerfilPage: React.FC<PerfilPageProps> = ({ onBack }) => {
           </div>
         </div>
       </div>
+      <ConfirmModal />
     </div>
   );
 };

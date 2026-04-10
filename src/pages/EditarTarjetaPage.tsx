@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { tarjetaService } from '../services/tarjeta.service';
 import { api } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { useNotification } from '../contexts/NotificationContext';
+import { useConfirm } from '../hooks/useConfirm';
 
 interface TarjetaData {
   tarjetaclienteid: number;
@@ -19,6 +21,8 @@ interface TarjetaData {
 
 const EditarTarjetaPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const navigate = useNavigate();
+  const { showSuccess, showError, showInfo, showWarning } = useNotification();
+  const { confirm, ConfirmModal } = useConfirm();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [tarjeta, setTarjeta] = useState<TarjetaData | null>(null);
@@ -29,8 +33,6 @@ const EditarTarjetaPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [previewHtml, setPreviewHtml] = useState('');
   const [previewCss, setPreviewCss] = useState('');
   const [previewLoading, setPreviewLoading] = useState(false);
-  const [saveError, setSaveError] = useState('');
-  const [saveSuccess, setSaveSuccess] = useState('');
   const [showFullscreenModal, setShowFullscreenModal] = useState(false);
 
   const getTarjetaId = () => {
@@ -82,6 +84,7 @@ const EditarTarjetaPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }
       } catch (error) {
         console.error('[EditarTarjeta] Error en loadData:', error);
+        showError('Error al cargar la tarjeta', 'Error');
       }
       
       setLoading(false);
@@ -116,8 +119,6 @@ const EditarTarjetaPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     if (!tarjetaId) return;
     
     setSaving(true);
-    setSaveError('');
-    setSaveSuccess('');
     
     try {
       const response = await tarjetaService.actualizar(tarjetaId, {
@@ -127,24 +128,34 @@ const EditarTarjetaPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       });
       
       if (response.error) {
-        setSaveError(response.error);
+        showError(response.error, 'Error al guardar');
       } else {
-        setSaveSuccess('Tarjeta actualizada correctamente');
+        showSuccess('Tarjeta actualizada correctamente', 'Guardado');
         if (response.data) {
           setTarjeta(response.data as TarjetaData);
         }
         setTimeout(() => {
-          setSaveSuccess('');
-        }, 3000);
+          navigate('/dashboard');
+        }, 1500);
       }
     } catch (error) {
-      setSaveError('Error al guardar los cambios');
-      setTimeout(() => {
-        setSaveError('');
-      }, 3000);
+      showError('Error al guardar los cambios', 'Error');
     }
     
     setSaving(false);
+  };
+
+  const handleCancel = async () => {
+    const confirmed = await confirm({
+      title: 'Cancelar edición',
+      message: '¿Estás seguro de que deseas cancelar? Los cambios no guardados se perderán.',
+      confirmText: 'Sí, cancelar',
+      type: 'warning',
+    });
+
+    if (confirmed) {
+      navigate('/dashboard');
+    }
   };
 
   const getPublicUrl = () => {
@@ -299,7 +310,7 @@ const EditarTarjetaPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             className="btn-copy-url"
                             onClick={() => {
                               navigator.clipboard.writeText(getPublicUrl()!);
-                              alert('URL copiada al portapapeles');
+                              showSuccess('URL copiada al portapapeles', 'Copiado');
                             }}
                           >
                             📋 Copiar
@@ -356,9 +367,6 @@ const EditarTarjetaPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   )}
                 </div>
                 
-                {saveError && <div className="error-message">{saveError}</div>}
-                {saveSuccess && <div className="success-message">{saveSuccess}</div>}
-                
                 <div className="edit-form-actions">
                   <button 
                     className="btn-save" 
@@ -369,7 +377,7 @@ const EditarTarjetaPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   </button>
                   <button 
                     className="btn-cancel" 
-                    onClick={() => navigate('/dashboard')}
+                    onClick={handleCancel}
                     disabled={saving}
                   >
                     Cancelar
@@ -450,6 +458,8 @@ const EditarTarjetaPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           </div>
         </div>
       )}
+
+      <ConfirmModal />
     </>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { twoFactorService } from '../services/twoFactor.service';
+import { useNotification } from '../contexts/NotificationContext';
 
 interface TwoFactorModalProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ interface TwoFactorVerifyResponse {
 }
 
 const TwoFactorModal: React.FC<TwoFactorModalProps> = ({ isOpen, onClose, email, tipo, onVerified }) => {
+  const { showSuccess, showError, showInfo, showWarning } = useNotification();
   const [codigo, setCodigo] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -30,8 +32,10 @@ const TwoFactorModal: React.FC<TwoFactorModalProps> = ({ isOpen, onClose, email,
 
     if (response.error) {
       setError(response.error);
+      showError(response.error, 'Error de verificación');
     } else if (response.data?.token) {
       localStorage.setItem('token', response.data.token);
+      showSuccess('Verificación exitosa', 'Bienvenido');
       onVerified(response.data.token);
     }
 
@@ -43,9 +47,10 @@ const TwoFactorModal: React.FC<TwoFactorModalProps> = ({ isOpen, onClose, email,
     const response = await twoFactorService.sendCode(email, tipo);
     if (response.error) {
       setError(response.error);
+      showError(response.error, 'Error');
     } else {
       setError('');
-      alert('Nuevo código enviado a tu correo');
+      showSuccess('Nuevo código enviado a tu correo', 'Código reenviado');
     }
     setLoading(false);
   };

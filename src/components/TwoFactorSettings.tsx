@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { twoFactorService } from '../services/twoFactor.service';
+import { useNotification } from '../contexts/NotificationContext';
 
 const TwoFactorSettings: React.FC = () => {
+  const { showSuccess, showError, showInfo, showWarning } = useNotification();
   const [enabled, setEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [backupCodesRemaining, setBackupCodesRemaining] = useState(0);
@@ -23,35 +25,37 @@ const TwoFactorSettings: React.FC = () => {
     const response = await twoFactorService.enable();
     if (response.data) {
       setEnabled(true);
-      alert('2FA activado. Revisa tu correo para los códigos de respaldo.');
+      showSuccess('2FA activado. Revisa tu correo para los códigos de respaldo.', '2FA Activado');
       loadStatus();
     } else {
-      alert(response.error || 'Error al activar 2FA');
+      showError(response.error || 'Error al activar 2FA', 'Error');
     }
   };
 
   const handleDisable = async () => {
-    if (confirm('¿Estás seguro de desactivar la verificación de dos pasos?')) {
-      const response = await twoFactorService.disable();
-      if (response.data) {
-        setEnabled(false);
-        alert('2FA desactivado correctamente');
-        loadStatus();
-      } else {
-        alert(response.error || 'Error al desactivar 2FA');
-      }
+    const confirmed = window.confirm('¿Estás seguro de desactivar la verificación de dos pasos?');
+    if (!confirmed) return;
+    
+    const response = await twoFactorService.disable();
+    if (response.data) {
+      setEnabled(false);
+      showSuccess('2FA desactivado correctamente', '2FA Desactivado');
+      loadStatus();
+    } else {
+      showError(response.error || 'Error al desactivar 2FA', 'Error');
     }
   };
 
   const handleRegenerateBackupCodes = async () => {
-    if (confirm('Esto generará nuevos códigos de respaldo. Los anteriores dejarán de funcionar. ¿Continuar?')) {
-      const response = await twoFactorService.regenerateBackupCodes();
-      if (response.data) {
-        alert('Nuevos códigos de respaldo enviados a tu correo');
-        loadStatus();
-      } else {
-        alert(response.error || 'Error al regenerar códigos');
-      }
+    const confirmed = window.confirm('Esto generará nuevos códigos de respaldo. Los anteriores dejarán de funcionar. ¿Continuar?');
+    if (!confirmed) return;
+    
+    const response = await twoFactorService.regenerateBackupCodes();
+    if (response.data) {
+      showSuccess('Nuevos códigos de respaldo enviados a tu correo', 'Códigos regenerados');
+      loadStatus();
+    } else {
+      showError(response.error || 'Error al regenerar códigos', 'Error');
     }
   };
 

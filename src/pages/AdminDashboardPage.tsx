@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TrendingUp, Activity, RefreshCw } from 'lucide-react';
 import { adminService } from '../services/admin.service';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { useNotification } from '../contexts/NotificationContext';
 
 interface DashboardStats {
   usuarios: { admins: number; clientes: number; total: number };
@@ -12,6 +13,7 @@ interface DashboardStats {
 }
 
 const AdminDashboardPage: React.FC = () => {
+  const { showSuccess, showError, showInfo, showWarning } = useNotification();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -24,7 +26,12 @@ const AdminDashboardPage: React.FC = () => {
     const [statsRes] = await Promise.all([
       adminService.getDashboardStats(),
     ]);
-    if (statsRes.data) setStats(statsRes.data);
+    if (statsRes.data) {
+      setStats(statsRes.data);
+      showSuccess('Datos del dashboard actualizados', 'Actualizado');
+    } else if (statsRes.error) {
+      showError(statsRes.error, 'Error');
+    }
     setLoading(false);
   };
 
@@ -125,7 +132,7 @@ const AdminDashboardPage: React.FC = () => {
                     <tr key={i}>
                       <td style={{ whiteSpace: 'nowrap', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
                         {new Date(log.fecha).toLocaleString()}
-                      </td>
+                       </td>
                       <td>{log.admin_nombre || 'Sistema'}</td>
                       <td>
                         <span style={{
@@ -140,7 +147,7 @@ const AdminDashboardPage: React.FC = () => {
                         }}>
                           {log.accion}
                         </span>
-                      </td>
+                       </td>
                       <td style={{ color: 'var(--text-secondary)' }}>{log.entidad}</td>
                     </tr>
                   ))

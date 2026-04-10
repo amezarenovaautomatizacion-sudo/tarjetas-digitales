@@ -3,6 +3,7 @@ import { Plantilla, PlantillaDetalle } from '../types';
 import { tarjetaService } from '../services/tarjeta.service';
 import { api } from '../services/api';
 import { X, Eye, Save } from 'lucide-react';
+import { useNotification } from '../contexts/NotificationContext';
 
 interface CrearTarjetaModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ const CrearTarjetaModal: React.FC<CrearTarjetaModalProps> = ({
   plantillas,
   onSuccess,
 }) => {
+  const { showSuccess, showError, showInfo, showWarning } = useNotification();
   const [plantillaid, setPlantillaid] = useState('');
   const [nombre_tarjeta, setNombreTarjeta] = useState('');
   const [visibilidad, setVisibilidad] = useState('privado');
@@ -82,13 +84,16 @@ const CrearTarjetaModal: React.FC<CrearTarjetaModalProps> = ({
       });
       if (response.error) {
         setError(response.error);
+        showError(response.error, 'Error');
       } else {
+        showSuccess('Tarjeta creada exitosamente', 'Éxito');
         onSuccess();
         onClose();
         resetForm();
       }
     } catch {
       setError('Error al crear la tarjeta');
+      showError('Error al crear la tarjeta', 'Error');
     }
     setLoading(false);
   };

@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Edit2, Trash2, RefreshCw } from 'lucide-react';
 import { adminService } from '../services/admin.service';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { useNotification } from '../contexts/NotificationContext';
+import { useConfirm } from '../hooks/useConfirm';
 
 interface Categoria {
   categoriaid: number;
@@ -15,6 +17,8 @@ interface Categoria {
 const emptyForm = { nombre: '', descripcion: '', orden: 0, activo: 1 };
 
 const AdminCategoriasPage: React.FC = () => {
+  const { showSuccess, showError, showInfo, showWarning } = useNotification();
+  const { confirm, ConfirmModal } = useConfirm();
   const [categorias, setCategorias]   = useState<Categoria[]>([]);
   const [loading, setLoading]         = useState(true);
   const [modalOpen, setModalOpen]     = useState(false);
@@ -51,29 +55,46 @@ const AdminCategoriasPage: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!formData.nombre.trim()) return alert('El nombre es obligatorio');
+    if (!formData.nombre.trim()) {
+      showError('El nombre es obligatorio', 'Error');
+      return;
+    }
     setSaving(true);
     const res = editando
       ? await adminService.updateCategoria(editando.categoriaid, formData)
       : await adminService.createCategoria(formData);
     if (res.data) {
+      showSuccess(editando ? 'Categoría actualizada correctamente' : 'Categoría creada correctamente', 'Éxito');
       cerrarModal();
       cargarCategorias();
     } else {
-      alert(res.error || 'Error al guardar');
+      showError(res.error || 'Error al guardar', 'Error');
     }
     setSaving(false);
   };
 
-  const handleDelete = async (id: number, tienePlantillas: number) => {
+  const handleDelete = async (id: number, nombre: string, tienePlantillas: number) => {
     if (tienePlantillas > 0) {
-      alert(`No se puede eliminar: tiene ${tienePlantillas} plantilla(s) asociada(s)`);
+      showError(`No se puede eliminar: tiene ${tienePlantillas} plantilla(s) asociada(s)`, 'Error');
       return;
     }
-    if (!confirm('¿Eliminar esta categoría?')) return;
+
+    const confirmed = await confirm({
+      title: 'Eliminar categoría',
+      message: `¿Eliminar la categoría "${nombre}"?`,
+      confirmText: 'Eliminar',
+      type: 'danger',
+    });
+
+    if (!confirmed) return;
+
     const res = await adminService.deleteCategoria(id);
-    if (res.data) cargarCategorias();
-    else alert(res.error || 'Error al eliminar');
+    if (res.data) {
+      showSuccess(`Categoría "${nombre}" eliminada correctamente`, 'Eliminada');
+      cargarCategorias();
+    } else {
+      showError(res.error || 'Error al eliminar', 'Error');
+    }
   };
 
   if (loading) {
@@ -146,7 +167,7 @@ const AdminCategoriasPage: React.FC = () => {
                           </button>
                           <button
                             className="btn-small btn-danger"
-                            onClick={() => handleDelete(c.categoriaid, c.total_plantillas)}
+                            onClick={() => handleDelete(c.categoriaid, c.nombre, c.total_plantillas)}
                             title="Eliminar"
                           >
                             <Trash2 size={13} />
@@ -223,6 +244,8 @@ const AdminCategoriasPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      <ConfirmModal />
     </div>
   );
 };
