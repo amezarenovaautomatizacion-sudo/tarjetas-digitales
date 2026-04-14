@@ -5,6 +5,8 @@ import { api } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useNotification } from '../contexts/NotificationContext';
 import { useConfirm } from '../hooks/useConfirm';
+import ImageVariableInput from '../components/ImageVariableInput';
+import { fixPreviewImages } from '../utils/fixPreviewImages'; // ← NUEVO
 
 interface TarjetaData {
   tarjetaclienteid: number;
@@ -21,7 +23,7 @@ interface TarjetaData {
 
 const EditarTarjetaPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const navigate = useNavigate();
-  const { showSuccess, showError, showInfo, showWarning } = useNotification();
+  const { showSuccess, showError } = useNotification();
   const { confirm, ConfirmModal } = useConfirm();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -98,7 +100,8 @@ const EditarTarjetaPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     try {
       const response = await api.getPreview(plantillaId, data);
       if (response.data) {
-        setPreviewHtml(response.data.html_preview);
+        // ↓ Aplicamos el fix antes de guardar en estado
+        setPreviewHtml(fixPreviewImages(response.data.html_preview));
         setPreviewCss(response.data.css_preview);
       }
     } catch (error) {
@@ -165,14 +168,109 @@ const EditarTarjetaPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     return null;
   };
 
-  if (loading) {
-    return (
-      <div className="loading-spinner">
-        <div className="spinner"></div>
-        <p>Cargando tarjeta...</p>
-      </div>
-    );
-  }
+  const renderVariableInput = (variable: any) => {
+    const isImage = variable.nombre.toLowerCase().includes('img');
+    
+    if (isImage) {
+      return (
+        <ImageVariableInput
+          key={variable.variableid}
+          variable={variable}
+          value={formData[variable.nombre] || ''}
+          onChange={handleInputChange}
+        />
+      );
+    }
+
+    const value = formData[variable.nombre] || '';
+    
+    switch (variable.tipo_dato) {
+      case 'textarea':
+        return (
+          <div key={variable.variableid} className="form-group">
+            <label>{variable.etiqueta}</label>
+            <textarea
+              value={value}
+              onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
+              placeholder={variable.ejemplo || `Ingresa ${variable.etiqueta.toLowerCase()}`}
+              rows={4}
+              className="form-control"
+            />
+          </div>
+        );
+      case 'select':
+        const options = variable.opciones?.split(',').map((opt: string) => opt.trim()) || [];
+        return (
+          <div key={variable.variableid} className="form-group">
+            <label>{variable.etiqueta}</label>
+            <select
+              value={value}
+              onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
+              className="form-control"
+            >
+              <option value="">Selecciona una opción</option>
+              {options.map((opt: string) => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+          </div>
+        );
+      case 'color':
+        return (
+          <div key={variable.variableid} className="form-group">
+            <label>{variable.etiqueta}</label>
+            <input
+              type="color"
+              value={value || '#0DB8D3'}
+              onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
+              className="form-control color-input"
+              style={{ height: '44px', padding: '4px 8px', cursor: 'pointer' }}
+            />
+          </div>
+        );
+      case 'url':
+        return (
+          <div key={variable.variableid} className="form-group">
+            <label>{variable.etiqueta}</label>
+            <input
+              type="url"
+              value={value}
+              onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
+              placeholder={variable.ejemplo || 'https://ejemplo.com'}
+              className="form-control"
+            />
+          </div>
+        );
+      case 'tel':
+        return (
+          <div key={variable.variableid} className="form-group">
+            <label>{variable.etiqueta}</label>
+            <input
+              type="tel"
+              value={value}
+              onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
+              placeholder={variable.ejemplo || '123-456-7890'}
+              className="form-control"
+            />
+          </div>
+        );
+      default:
+        return (
+          <div key={variable.variableid} className="form-group">
+            <label>{variable.etiqueta}</label>
+            <input
+              type={variable.tipo_dato === 'email' ? 'email' : 'text'}
+              value={value}
+              onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
+              placeholder={variable.ejemplo || `Ingresa ${variable.etiqueta.toLowerCase()}`}
+              className="form-control"
+            />
+          </div>
+        );
+    }
+  };
+
+  if (loading) return <LoadingSpinner />;
 
   if (!tarjeta || !plantilla) {
     return (
@@ -186,65 +284,6 @@ const EditarTarjetaPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
   const requiredVariables = plantilla.variables_requeridas?.filter((v: any) => v.es_requerida === 1) || [];
   const optionalVariables = plantilla.variables_requeridas?.filter((v: any) => v.es_requerida === 0) || [];
-
-  const renderVariableInput = (variable: any) => {
-    const value = formData[variable.nombre] || '';
-    
-    switch (variable.tipo_dato) {
-      case 'textarea':
-        return (
-          <textarea
-            value={value}
-            onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
-            placeholder={variable.ejemplo || `Ingresa ${variable.etiqueta.toLowerCase()}`}
-            rows={4}
-            className="form-control"
-          />
-        );
-      case 'select':
-        const options = variable.opciones?.split(',').map((opt: string) => opt.trim()) || [];
-        return (
-          <select
-            value={value}
-            onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
-            className="form-control"
-          >
-            <option value="">Selecciona una opción</option>
-            {options.map((opt: string) => (
-              <option key={opt} value={opt}>{opt}</option>
-            ))}
-          </select>
-        );
-      case 'color':
-        return (
-          <div className="color-input-wrapper">
-            <input
-              type="color"
-              value={value || '#0DB8D3'}
-              onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
-              className="color-picker"
-            />
-            <input
-              type="text"
-              value={value || '#0DB8D3'}
-              onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
-              placeholder="#RRGGBB"
-              className="color-text form-control"
-            />
-          </div>
-        );
-      default:
-        return (
-          <input
-            type="text"
-            value={value}
-            onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
-            placeholder={variable.ejemplo || `Ingresa ${variable.etiqueta.toLowerCase()}`}
-            className="form-control"
-          />
-        );
-    }
-  };
 
   return (
     <>
@@ -328,18 +367,7 @@ const EditarTarjetaPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         Campos Requeridos 
                         <span className="required-badge">Obligatorios</span>
                       </h4>
-                      {requiredVariables.map((variable: any) => (
-                        <div key={variable.variableid} className="form-group">
-                          <label>
-                            {variable.etiqueta}
-                            <span className="required">*</span>
-                          </label>
-                          {renderVariableInput(variable)}
-                          {variable.descripcion && (
-                            <small className="form-help">{variable.descripcion}</small>
-                          )}
-                        </div>
-                      ))}
+                      {requiredVariables.map((variable: any) => renderVariableInput(variable))}
                     </div>
                   )}
                   
@@ -351,18 +379,7 @@ const EditarTarjetaPage: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         <span className="optional-badge">Mejora tu tarjeta</span>
                       </h4>
                       <p className="group-description">Estos campos son opcionales pero ayudan a enriquecer tu tarjeta</p>
-                      {optionalVariables.map((variable: any) => (
-                        <div key={variable.variableid} className="form-group">
-                          <label>
-                            {variable.etiqueta}
-                            <span className="optional"> (Opcional)</span>
-                          </label>
-                          {renderVariableInput(variable)}
-                          {variable.descripcion && (
-                            <small className="form-help">{variable.descripcion}</small>
-                          )}
-                        </div>
-                      ))}
+                      {optionalVariables.map((variable: any) => renderVariableInput(variable))}
                     </div>
                   )}
                 </div>

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { usePlantillaDetalle, usePreview } from '../hooks/usePlantillas';
 import { tarjetaService } from '../services/tarjeta.service';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ImageVariableInput from '../components/ImageVariableInput';
+import { fixPreviewImages } from '../utils/fixPreviewImages'; // ← NUEVO
 
 interface PlantillaDetailPageProps {
   plantillaId?: number;
@@ -32,7 +34,11 @@ const PlantillaDetailPage: React.FC<PlantillaDetailPageProps> = ({
   const [saveSuccess, setSaveSuccess] = useState('');
   const { preview, loading: previewLoading, error: previewError, generatePreview } = usePreview();
 
-  // Inicializar con datos existentes
+  // ↓ Aplicamos el fix al html del preview antes de renderizar
+  const safePreviewHtml = preview?.html_preview
+    ? fixPreviewImages(preview.html_preview)
+    : null;
+
   useEffect(() => {
     if (existingData) {
       setFormData(existingData);
@@ -45,7 +51,6 @@ const PlantillaDetailPage: React.FC<PlantillaDetailPageProps> = ({
     }
   }, [existingData, existingNombre, existingVisibilidad]);
 
-  // Cargar datos de la plantilla y generar preview inicial
   useEffect(() => {
     if (plantilla?.variables_requeridas) {
       const initial: Record<string, string> = {};
@@ -95,6 +100,155 @@ const PlantillaDetailPage: React.FC<PlantillaDetailPageProps> = ({
     setSaving(false);
   };
 
+  const renderVariableInput = (variable: any) => {
+    const isImage = variable.nombre.toLowerCase().includes('img');
+    
+    if (isImage) {
+      return (
+        <ImageVariableInput
+          key={variable.variableid}
+          variable={variable}
+          value={formData[variable.nombre] || ''}
+          onChange={handleInputChange}
+        />
+      );
+    }
+
+    const value = formData[variable.nombre] || '';
+    
+    switch (variable.tipo_dato) {
+      case 'textarea':
+        return (
+          <div key={variable.variableid} className="form-group">
+            <label>{variable.etiqueta}</label>
+            <textarea
+              value={value}
+              onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
+              placeholder={variable.ejemplo || `Ingresa ${variable.etiqueta.toLowerCase()}`}
+              rows={4}
+            />
+            {variable.descripcion && <small className="form-help">{variable.descripcion}</small>}
+          </div>
+        );
+      case 'select':
+        const options = variable.opciones?.split(',').map((opt: string) => opt.trim()) || [];
+        return (
+          <div key={variable.variableid} className="form-group">
+            <label>{variable.etiqueta}</label>
+            <select
+              value={value}
+              onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
+            >
+              <option value="">Selecciona una opción</option>
+              {options.map((opt: string) => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+            {variable.descripcion && <small className="form-help">{variable.descripcion}</small>}
+          </div>
+        );
+      case 'color':
+        return (
+          <div key={variable.variableid} className="form-group">
+            <label>{variable.etiqueta}</label>
+            <div className="color-input-wrapper">
+              <input
+                type="color"
+                value={value || '#0DB8D3'}
+                onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
+                className="color-picker"
+              />
+              <input
+                type="text"
+                value={value || '#0DB8D3'}
+                onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
+                placeholder="#RRGGBB"
+                className="color-text"
+              />
+            </div>
+            {variable.descripcion && <small className="form-help">{variable.descripcion}</small>}
+          </div>
+        );
+      case 'url':
+        return (
+          <div key={variable.variableid} className="form-group">
+            <label>{variable.etiqueta}</label>
+            <input
+              type="url"
+              value={value}
+              onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
+              placeholder={variable.ejemplo || 'https://ejemplo.com'}
+            />
+            {variable.descripcion && <small className="form-help">{variable.descripcion}</small>}
+          </div>
+        );
+      case 'tel':
+        return (
+          <div key={variable.variableid} className="form-group">
+            <label>{variable.etiqueta}</label>
+            <input
+              type="tel"
+              value={value}
+              onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
+              placeholder={variable.ejemplo || '123-456-7890'}
+            />
+            {variable.descripcion && <small className="form-help">{variable.descripcion}</small>}
+          </div>
+        );
+      case 'email':
+        return (
+          <div key={variable.variableid} className="form-group">
+            <label>{variable.etiqueta}</label>
+            <input
+              type="email"
+              value={value}
+              onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
+              placeholder={variable.ejemplo || 'correo@ejemplo.com'}
+            />
+            {variable.descripcion && <small className="form-help">{variable.descripcion}</small>}
+          </div>
+        );
+      case 'number':
+        return (
+          <div key={variable.variableid} className="form-group">
+            <label>{variable.etiqueta}</label>
+            <input
+              type="number"
+              value={value}
+              onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
+              placeholder={variable.ejemplo || '0'}
+            />
+            {variable.descripcion && <small className="form-help">{variable.descripcion}</small>}
+          </div>
+        );
+      case 'date':
+        return (
+          <div key={variable.variableid} className="form-group">
+            <label>{variable.etiqueta}</label>
+            <input
+              type="date"
+              value={value}
+              onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
+            />
+            {variable.descripcion && <small className="form-help">{variable.descripcion}</small>}
+          </div>
+        );
+      default:
+        return (
+          <div key={variable.variableid} className="form-group">
+            <label>{variable.etiqueta}</label>
+            <input
+              type="text"
+              value={value}
+              onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
+              placeholder={variable.ejemplo || `Ingresa ${variable.etiqueta.toLowerCase()}`}
+            />
+            {variable.descripcion && <small className="form-help">{variable.descripcion}</small>}
+          </div>
+        );
+    }
+  };
+
   if (loading) return <LoadingSpinner />;
   if (!plantilla) return (
     <div className="error-container">
@@ -105,106 +259,6 @@ const PlantillaDetailPage: React.FC<PlantillaDetailPageProps> = ({
 
   const requiredVariables = plantilla.variables_requeridas.filter(v => v.es_requerida === 1);
   const optionalVariables = plantilla.variables_requeridas.filter(v => v.es_requerida === 0);
-
-  const renderVariableInput = (variable: any) => {
-    const value = formData[variable.nombre] || '';
-    
-    switch (variable.tipo_dato) {
-      case 'textarea':
-        return (
-          <textarea
-            value={value}
-            onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
-            placeholder={variable.ejemplo || `Ingresa ${variable.etiqueta.toLowerCase()}`}
-            rows={4}
-          />
-        );
-      case 'select':
-        const options = variable.opciones?.split(',').map((opt: string) => opt.trim()) || [];
-        return (
-          <select
-            value={value}
-            onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
-          >
-            <option value="">Selecciona una opción</option>
-            {options.map((opt: string) => (
-              <option key={opt} value={opt}>{opt}</option>
-            ))}
-          </select>
-        );
-      case 'color':
-        return (
-          <div className="color-input-wrapper">
-            <input
-              type="color"
-              value={value || '#0DB8D3'}
-              onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
-              className="color-picker"
-            />
-            <input
-              type="text"
-              value={value || '#0DB8D3'}
-              onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
-              placeholder="#RRGGBB"
-              className="color-text"
-            />
-          </div>
-        );
-      case 'url':
-        return (
-          <input
-            type="url"
-            value={value}
-            onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
-            placeholder={variable.ejemplo || 'https://ejemplo.com'}
-          />
-        );
-      case 'tel':
-        return (
-          <input
-            type="tel"
-            value={value}
-            onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
-            placeholder={variable.ejemplo || '123-456-7890'}
-          />
-        );
-      case 'email':
-        return (
-          <input
-            type="email"
-            value={value}
-            onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
-            placeholder={variable.ejemplo || 'correo@ejemplo.com'}
-          />
-        );
-      case 'number':
-        return (
-          <input
-            type="number"
-            value={value}
-            onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
-            placeholder={variable.ejemplo || '0'}
-          />
-        );
-      case 'date':
-        return (
-          <input
-            type="date"
-            value={value}
-            onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
-          />
-        );
-      default:
-        return (
-          <input
-            type="text"
-            value={value}
-            onChange={(e) => handleInputChange(variable.nombre, e.target.value)}
-            placeholder={variable.ejemplo || `Ingresa ${variable.etiqueta.toLowerCase()}`}
-          />
-        );
-    }
-  };
 
   return (
     <div className="plantilla-detail-page">
@@ -264,18 +318,7 @@ const PlantillaDetailPage: React.FC<PlantillaDetailPageProps> = ({
               {requiredVariables.length > 0 && (
                 <div className="variables-group">
                   <h4>Campos Requeridos <span className="required-badge">Obligatorios</span></h4>
-                  {requiredVariables.map(variable => (
-                    <div key={variable.variableid} className="form-group">
-                      <label>
-                        {variable.etiqueta}
-                        <span className="required">*</span>
-                      </label>
-                      {renderVariableInput(variable)}
-                      {variable.descripcion && (
-                        <small className="form-help">{variable.descripcion}</small>
-                      )}
-                    </div>
-                  ))}
+                  {requiredVariables.map(variable => renderVariableInput(variable))}
                 </div>
               )}
               
@@ -283,18 +326,7 @@ const PlantillaDetailPage: React.FC<PlantillaDetailPageProps> = ({
                 <div className="variables-group">
                   <h4>Campos Opcionales <span className="optional-badge">Mejora tu tarjeta</span></h4>
                   <p className="group-description">Estos campos son opcionales pero ayudan a enriquecer tu tarjeta</p>
-                  {optionalVariables.map(variable => (
-                    <div key={variable.variableid} className="form-group">
-                      <label>
-                        {variable.etiqueta}
-                        <span className="optional"> (Opcional)</span>
-                      </label>
-                      {renderVariableInput(variable)}
-                      {variable.descripcion && (
-                        <small className="form-help">{variable.descripcion}</small>
-                      )}
-                    </div>
-                  ))}
+                  {optionalVariables.map(variable => renderVariableInput(variable))}
                 </div>
               )}
               
@@ -332,10 +364,11 @@ const PlantillaDetailPage: React.FC<PlantillaDetailPageProps> = ({
                 {previewError && (
                   <div className="error-message">{previewError}</div>
                 )}
-                {preview ? (
+                {safePreviewHtml ? (
                   <div className="preview-render">
-                    <style dangerouslySetInnerHTML={{ __html: preview.css_preview }} />
-                    <div dangerouslySetInnerHTML={{ __html: preview.html_preview }} />
+                    <style dangerouslySetInnerHTML={{ __html: preview!.css_preview }} />
+                    {/* ↓ Usamos safePreviewHtml ya procesado */}
+                    <div dangerouslySetInnerHTML={{ __html: safePreviewHtml }} />
                   </div>
                 ) : (
                   <div className="preview-placeholder">

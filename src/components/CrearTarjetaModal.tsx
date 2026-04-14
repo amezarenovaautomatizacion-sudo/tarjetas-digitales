@@ -4,6 +4,8 @@ import { tarjetaService } from '../services/tarjeta.service';
 import { api } from '../services/api';
 import { X, Eye, Save } from 'lucide-react';
 import { useNotification } from '../contexts/NotificationContext';
+import ImageVariableInput from './ImageVariableInput';
+import { fixPreviewImages } from '../utils/fixPreviewImages'; // ← NUEVO
 
 interface CrearTarjetaModalProps {
   isOpen: boolean;
@@ -18,7 +20,7 @@ const CrearTarjetaModal: React.FC<CrearTarjetaModalProps> = ({
   plantillas,
   onSuccess,
 }) => {
-  const { showSuccess, showError, showInfo, showWarning } = useNotification();
+  const { showSuccess, showError } = useNotification();
   const [plantillaid, setPlantillaid] = useState('');
   const [nombre_tarjeta, setNombreTarjeta] = useState('');
   const [visibilidad, setVisibilidad] = useState('privado');
@@ -59,7 +61,8 @@ const CrearTarjetaModal: React.FC<CrearTarjetaModalProps> = ({
     setGeneratingPreview(true);
     const response = await api.getPreview(id, data);
     if (response.data) {
-      setPreviewHtml(response.data.html_preview);
+      // ↓ Aplicamos el fix antes de guardar en estado
+      setPreviewHtml(fixPreviewImages(response.data.html_preview));
       setPreviewCss(response.data.css_preview);
     }
     setGeneratingPreview(false);
@@ -110,10 +113,139 @@ const CrearTarjetaModal: React.FC<CrearTarjetaModalProps> = ({
 
   if (!isOpen) return null;
 
+  const renderVariableInput = (variable: any) => {
+    const isImage = variable.nombre.toLowerCase().includes('img');
+    
+    if (isImage) {
+      return (
+        <ImageVariableInput
+          key={variable.variableid}
+          variable={variable}
+          value={datos[variable.nombre] || ''}
+          onChange={handleDataChange}
+        />
+      );
+    }
+
+    const value = datos[variable.nombre] || '';
+
+    switch (variable.tipo_dato) {
+      case 'textarea':
+        return (
+          <div key={variable.variableid} className="form-group">
+            <label>
+              {variable.etiqueta}
+              {variable.es_requerida === 1 && <span className="required">*</span>}
+              {variable.es_requerida === 0 && (
+                <span style={{ color: 'var(--text-muted)', fontWeight: 400, marginLeft: 4, fontSize: '0.8rem' }}>
+                  (Opcional)
+                </span>
+              )}
+            </label>
+            <textarea
+              value={value}
+              onChange={(e) => handleDataChange(variable.nombre, e.target.value)}
+              placeholder={variable.ejemplo || `Ingresa ${variable.etiqueta.toLowerCase()}`}
+              className="form-control"
+              rows={4}
+            />
+            {variable.descripcion && <small className="form-help">{variable.descripcion}</small>}
+          </div>
+        );
+      case 'select':
+        return (
+          <div key={variable.variableid} className="form-group">
+            <label>
+              {variable.etiqueta}
+              {variable.es_requerida === 1 && <span className="required">*</span>}
+            </label>
+            <select
+              value={value}
+              onChange={(e) => handleDataChange(variable.nombre, e.target.value)}
+              className="form-control"
+            >
+              <option value="">Selecciona una opción</option>
+              {variable.opciones?.split(',').map((opt: string) => (
+                <option key={opt} value={opt.trim()}>{opt.trim()}</option>
+              ))}
+            </select>
+            {variable.descripcion && <small className="form-help">{variable.descripcion}</small>}
+          </div>
+        );
+      case 'color':
+        return (
+          <div key={variable.variableid} className="form-group">
+            <label>
+              {variable.etiqueta}
+              {variable.es_requerida === 1 && <span className="required">*</span>}
+            </label>
+            <input
+              type="color"
+              value={value || '#0DB8D3'}
+              onChange={(e) => handleDataChange(variable.nombre, e.target.value)}
+              className="form-control color-input"
+              style={{ height: '44px', padding: '4px 8px', cursor: 'pointer' }}
+            />
+            {variable.descripcion && <small className="form-help">{variable.descripcion}</small>}
+          </div>
+        );
+      case 'url':
+        return (
+          <div key={variable.variableid} className="form-group">
+            <label>
+              {variable.etiqueta}
+              {variable.es_requerida === 1 && <span className="required">*</span>}
+            </label>
+            <input
+              type="url"
+              value={value}
+              onChange={(e) => handleDataChange(variable.nombre, e.target.value)}
+              placeholder={variable.ejemplo || 'https://ejemplo.com'}
+              className="form-control"
+            />
+            {variable.descripcion && <small className="form-help">{variable.descripcion}</small>}
+          </div>
+        );
+      case 'tel':
+        return (
+          <div key={variable.variableid} className="form-group">
+            <label>
+              {variable.etiqueta}
+              {variable.es_requerida === 1 && <span className="required">*</span>}
+            </label>
+            <input
+              type="tel"
+              value={value}
+              onChange={(e) => handleDataChange(variable.nombre, e.target.value)}
+              placeholder={variable.ejemplo || '123-456-7890'}
+              className="form-control"
+            />
+            {variable.descripcion && <small className="form-help">{variable.descripcion}</small>}
+          </div>
+        );
+      default:
+        return (
+          <div key={variable.variableid} className="form-group">
+            <label>
+              {variable.etiqueta}
+              {variable.es_requerida === 1 && <span className="required">*</span>}
+            </label>
+            <input
+              type={variable.tipo_dato === 'email' ? 'email' : 'text'}
+              value={value}
+              onChange={(e) => handleDataChange(variable.nombre, e.target.value)}
+              placeholder={variable.ejemplo || `Ingresa ${variable.etiqueta.toLowerCase()}`}
+              className="form-control"
+            />
+            {variable.descripcion && <small className="form-help">{variable.descripcion}</small>}
+          </div>
+        );
+    }
+  };
+
   return (
     <div className="modal-overlay">
       <div className="modal-content modal-large" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-
         <div className="modal-header">
           <h2>Crear Nueva Tarjeta</h2>
           <button className="modal-close" onClick={onClose} aria-label="Cerrar">
@@ -122,10 +254,8 @@ const CrearTarjetaModal: React.FC<CrearTarjetaModalProps> = ({
         </div>
 
         <div className="modal-split" style={{ flex: 1, overflow: 'hidden', alignItems: 'stretch' }}>
-
           <div className="edit-form-panel">
             <div className="edit-form-card">
-
               <div className="edit-form-header">
                 <h3>Datos de la tarjeta</h3>
                 <p>Completa el formulario para crear tu nueva tarjeta digital</p>
@@ -133,7 +263,6 @@ const CrearTarjetaModal: React.FC<CrearTarjetaModalProps> = ({
 
               <div className="edit-form-scroll">
                 <form id="crear-tarjeta-form" onSubmit={handleSubmit}>
-
                   <div className="form-group">
                     <label>Plantilla</label>
                     <select
@@ -178,76 +307,7 @@ const CrearTarjetaModal: React.FC<CrearTarjetaModalProps> = ({
                   {plantillaDetalle && (
                     <div className="variables-section">
                       <h3>Campos de la plantilla</h3>
-                      {plantillaDetalle.variables_requeridas.map((variable) => (
-                        <div key={variable.variableid} className="form-group">
-                          <label>
-                            {variable.etiqueta}
-                            {variable.es_requerida === 1 && <span className="required">*</span>}
-                            {variable.es_requerida === 0 && (
-                              <span style={{ color: 'var(--text-muted)', fontWeight: 400, marginLeft: 4, fontSize: '0.8rem' }}>
-                                (Opcional)
-                              </span>
-                            )}
-                          </label>
-
-                          {variable.tipo_dato === 'textarea' ? (
-                            <textarea
-                              value={datos[variable.nombre] || ''}
-                              onChange={(e) => handleDataChange(variable.nombre, e.target.value)}
-                              placeholder={variable.ejemplo || `Ingresa ${variable.etiqueta.toLowerCase()}`}
-                              className="form-control"
-                              rows={4}
-                            />
-                          ) : variable.tipo_dato === 'select' ? (
-                            <select
-                              value={datos[variable.nombre] || ''}
-                              onChange={(e) => handleDataChange(variable.nombre, e.target.value)}
-                              className="form-control"
-                            >
-                              <option value="">Selecciona una opción</option>
-                              {variable.opciones?.split(',').map((opt) => (
-                                <option key={opt} value={opt.trim()}>{opt.trim()}</option>
-                              ))}
-                            </select>
-                          ) : variable.tipo_dato === 'color' ? (
-                            <input
-                              type="color"
-                              value={datos[variable.nombre] || '#0DB8D3'}
-                              onChange={(e) => handleDataChange(variable.nombre, e.target.value)}
-                              className="form-control color-input"
-                              style={{ height: '44px', padding: '4px 8px', cursor: 'pointer' }}
-                            />
-                          ) : variable.tipo_dato === 'url' ? (
-                            <input
-                              type="url"
-                              value={datos[variable.nombre] || ''}
-                              onChange={(e) => handleDataChange(variable.nombre, e.target.value)}
-                              placeholder={variable.ejemplo || 'https://ejemplo.com'}
-                              className="form-control"
-                            />
-                          ) : variable.tipo_dato === 'tel' ? (
-                            <input
-                              type="tel"
-                              value={datos[variable.nombre] || ''}
-                              onChange={(e) => handleDataChange(variable.nombre, e.target.value)}
-                              placeholder={variable.ejemplo || '123-456-7890'}
-                              className="form-control"
-                            />
-                          ) : (
-                            <input
-                              type={variable.tipo_dato === 'email' ? 'email' : 'text'}
-                              value={datos[variable.nombre] || ''}
-                              onChange={(e) => handleDataChange(variable.nombre, e.target.value)}
-                              placeholder={variable.ejemplo || `Ingresa ${variable.etiqueta.toLowerCase()}`}
-                              className="form-control"
-                            />
-                          )}
-
-                          {variable.descripcion && (
-                            <small className="form-help">{variable.descripcion}</small>
-                          )}
-                        </div>
-                      ))}
+                      {plantillaDetalle.variables_requeridas.map((variable) => renderVariableInput(variable))}
                     </div>
                   )}
 
@@ -263,7 +323,6 @@ const CrearTarjetaModal: React.FC<CrearTarjetaModalProps> = ({
                       {error}
                     </div>
                   )}
-
                 </form>
               </div>
 
@@ -286,13 +345,11 @@ const CrearTarjetaModal: React.FC<CrearTarjetaModalProps> = ({
                   Cancelar
                 </button>
               </div>
-
             </div>
           </div>
 
           <div className="edit-preview-panel">
             <div className="preview-card">
-
               <div className="preview-header">
                 <h3>
                   <Eye size={16} style={{ marginRight: 8, verticalAlign: 'middle' }} />
@@ -316,10 +373,8 @@ const CrearTarjetaModal: React.FC<CrearTarjetaModalProps> = ({
                   </div>
                 )}
               </div>
-
             </div>
           </div>
-
         </div>
       </div>
     </div>
