@@ -3,7 +3,7 @@ import { Eye, FileText, Link, ArrowLeft, QrCode, Download, X, ShoppingBag, Copy 
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useAuth } from '../hooks/useAuth';
 import { useNotification } from '../contexts/NotificationContext';
-import { fixPreviewImages } from '../utils/fixPreviewImages'; // ← NUEVO
+import { fixPreviewImages } from '../utils/fixPreviewImages';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api-tarjetas.vercel.app';
 
@@ -14,7 +14,7 @@ interface TarjetaPublicaPageProps {
 
 const TarjetaPublicaPage: React.FC<TarjetaPublicaPageProps> = ({ slug, onBack }) => {
   const { isAuthenticated } = useAuth();
-  const { showSuccess, showError, showInfo, showWarning } = useNotification();
+  const { showSuccess, showError } = useNotification();
   const [tarjeta, setTarjeta] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -53,7 +53,7 @@ const TarjetaPublicaPage: React.FC<TarjetaPublicaPageProps> = ({ slug, onBack })
     try {
       await navigator.clipboard.writeText(url);
       showSuccess('URL copiada al portapapeles', 'Copiado');
-    } catch (err) {
+    } catch {
       showError('No se pudo copiar la URL', 'Error');
     }
   };
@@ -145,7 +145,6 @@ const TarjetaPublicaPage: React.FC<TarjetaPublicaPageProps> = ({ slug, onBack })
     );
   }
 
-  // ↓ Aplicar fix de imágenes al HTML del renderizado antes de mostrarlo
   const safeHtml = fixPreviewImages(tarjeta.renderizado?.html || '');
   const safeCss = tarjeta.renderizado?.css || '';
 
@@ -268,90 +267,133 @@ const TarjetaPublicaPage: React.FC<TarjetaPublicaPageProps> = ({ slug, onBack })
       onClick={handleAnuncioOverlayClick}
       style={{ cursor: 'default' }}
     >
-      <div className="modal-content modal-small" style={{ maxWidth: 480, textAlign: 'center' }}>
-        <div className="modal-header" style={{ justifyContent: 'flex-end', borderBottom: 'none' }}>
+      <div className="modal-content" style={{ maxWidth: 800 }} onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header" style={{ borderBottom: 'none', justifyContent: 'flex-end', paddingBottom: 0 }}>
           <button className="modal-close" onClick={handleCloseAnuncioModal}>
             <X size={20} />
           </button>
         </div>
-        <div className="modal-body" style={{ padding: '0 2rem 2rem' }}>
-          <div style={{
-            width: 64,
-            height: 64,
-            background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 1rem',
-          }}>
-            <ShoppingBag size={28} color="white" />
-          </div>
-          
-          <h2 style={{ 
-            fontSize: '1.5rem', 
-            fontWeight: 700, 
-            marginBottom: '1rem',
-            background: 'var(--primary-gradient)',
-            WebkitBackgroundClip: 'text',
-            backgroundClip: 'text',
-            color: 'transparent',
-          }}>
-            Lleva tu QR a todas partes
-          </h2>
-          
-          <p style={{ 
-            color: 'var(--text-secondary)', 
-            fontSize: '1rem', 
-            lineHeight: 1.6,
-            marginBottom: '1.5rem',
-          }}>
-            Usa el QR que generaste para imprimirlo en una ficha 3D que tus clientes y compañeros siempre puedan escanear.
-          </p>
-          
-          <div style={{ 
-            display: 'flex', 
-            gap: '0.5rem', 
-            flexWrap: 'wrap',
-            marginBottom: '1.5rem',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ color: 'var(--success)' }}>✓</span>
-              <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Diseño 3D personalizado</span>
+        
+        <div className="modal-body" style={{ padding: '0 1.5rem 1.5rem' }}>
+          <div className="row align-items-center g-4">
+            <div className="col-12 col-md-6 text-center">
+              <div style={{
+                padding: 0,
+                margin: 0,
+                background: 'transparent',
+              }}>
+                <img 
+                  src="/llavero.png" 
+                  alt="Llavero con código QR 3D" 
+                  style={{
+                    width: '100%',
+                    maxWidth: '320px',
+                    height: 'auto',
+                    display: 'block',
+                    margin: '0 auto',
+                    borderRadius: 'var(--radius-lg)',
+                    filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.2))',
+                  }}
+                />
+              </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ color: 'var(--success)' }}>✓</span>
-              <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Material resistente</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ color: 'var(--success)' }}>✓</span>
-              <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Envío a toda la República</span>
+
+            {/* Columna del texto */}
+            <div className="col-12 col-md-6 text-center text-md-start">
+              <div style={{
+                width: 56,
+                height: 56,
+                background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '1rem',
+                marginLeft: 'auto',
+                marginRight: 'auto',
+                marginTop: 0,
+              }}>
+                <ShoppingBag size={28} color="white" />
+              </div>
+              
+              <h2 style={{ 
+                fontSize: '1.75rem', 
+                fontWeight: 700, 
+                marginBottom: '0.75rem',
+                background: 'linear-gradient(135deg, var(--primary), var(--primary-light))',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                color: 'transparent',
+              }}>
+                Lleva tu QR a todas partes
+              </h2>
+              
+              <p style={{ 
+                color: 'var(--text-secondary)', 
+                fontSize: '1rem', 
+                lineHeight: 1.6,
+                marginBottom: '1.25rem',
+              }}>
+                Usa el QR que generaste para imprimirlo en un <strong>llavero 3D personalizado</strong> que tus clientes y compañeros siempre puedan escanear.
+              </p>
+              
+              <div className="d-flex flex-wrap gap-3 justify-content-center justify-content-md-start mb-4">
+                <div className="d-flex align-items-center gap-2">
+                  <span style={{ color: 'var(--success)' }}>✓</span>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Diseño 3D personalizado</span>
+                </div>
+                <div className="d-flex align-items-center gap-2">
+                  <span style={{ color: 'var(--success)' }}>✓</span>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Material resistente</span>
+                </div>
+                <div className="d-flex align-items-center gap-2">
+                  <span style={{ color: 'var(--success)' }}>✓</span>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Envío a toda la República</span>
+                </div>
+              </div>
+              
+              <div className="d-flex flex-wrap gap-3 justify-content-center justify-content-md-start">
+                {/* Botón de WhatsApp comentado - listo para usar */}
+                {/* 
+                <button 
+                  className="btn-primary" 
+                  onClick={() => window.open('https://wa.me/521234567890?text=Hola%2C%20me%20interesa%20el%20llavero%203D%20con%20c%C3%B3digo%20QR', '_blank')}
+                  style={{ padding: '0.7rem 1.8rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+                >
+                  <span>💬</span>
+                  Lo quiero
+                </button>
+                */}
+                <button 
+                  className="btn-primary" 
+                  onClick={handleCloseAnuncioModal}
+                  style={{ padding: '0.7rem 1.8rem', cursor: 'pointer' }}
+                >
+                  Lo quiero
+                </button>
+                <button 
+                  className="btn-secondary" 
+                  onClick={handleCloseAnuncioModal}
+                  style={{ padding: '0.7rem 1.8rem', cursor: 'pointer', background: 'rgba(55,65,81,0.6)' }}
+                >
+                  Ahora no
+                </button>
+              </div>
+              
+              <p style={{ 
+                marginTop: '1.25rem', 
+                fontSize: '0.7rem', 
+                color: 'var(--text-muted)' 
+              }}>
+                *Este servicio posee un costo adicional.
+              </p>
             </div>
           </div>
-          
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-            <button 
-              className="btn-secondary" 
-              onClick={handleCloseAnuncioModal}
-              style={{ padding: '0.75rem 1.5rem', cursor: 'pointer' }}
-            >
-              Ahora no
-            </button>
-          </div>
-          
-          <p style={{ 
-            marginTop: '1rem', 
-            fontSize: '0.7rem', 
-            color: 'var(--text-muted)' 
-          }}>
-            *Oferta válida por tiempo limitado
-          </p>
         </div>
       </div>
     </div>
   );
 
-  // ↓ Ambos renders usan safeHtml y safeCss ya procesados
   const renderContent = () => (
     <>
       <div className="tarjeta-publica-page" style={{ 
