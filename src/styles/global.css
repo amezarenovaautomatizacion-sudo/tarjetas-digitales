@@ -1016,7 +1016,7 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.5rem); color: var(--text-primary); }
   .color-input-wrapper { flex-direction: column; align-items: flex-start; }
   .color-picker { width: 100%; height: 40px; }
   .color-text { width: 100%; }
-  .variables-group h4 { flex-direction: column; align-items: flex-start; }
+  .variables-group h4 { flex-direction: column; align-items: flex-start;}
   .form-actions { flex-direction: column; gap: 0.75rem; }
   .edit-info { padding: var(--spacing-md); }
   .edit-form-card, .preview-card { max-height: 60vh; }
@@ -1068,7 +1068,7 @@ h3 { font-size: clamp(1.25rem, 3vw, 1.5rem); color: var(--text-primary); }
 }
 
 .variables-group { margin-bottom: var(--spacing-2xl); }
-.variables-group h4 { font-size: 1.125rem; margin-bottom: var(--spacing-md); display: flex; align-items: center; gap: var(--spacing-sm); flex-wrap: wrap; }
+.variables-group h4 { font-size: 1.125rem; margin-bottom: var(--spacing-md); display: flex; align-items: center; gap: var(--spacing-sm); flex-wrap: wrap; color: var(--primary);}
 .group-description { color: var(--text-muted); font-size: 0.8rem; margin-bottom: var(--spacing-lg); }
 
 .required-badge { background: rgba(239, 68, 68, 0.2); color: #f87171; padding: 0.2rem 0.6rem; border-radius: var(--radius-full); font-size: 0.7rem; font-weight: 500; }
@@ -2207,4 +2207,131 @@ select.form-control { cursor: pointer; }
     transform: translateX(0);
     opacity: 1;
   }
+}
+.image-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.image-upload-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xl) var(--spacing-lg);
+  border: 2px dashed var(--border-light);
+  border-radius: var(--radius-lg);
+  background: rgba(13, 184, 211, 0.03);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-height: 110px;
+  text-align: center;
+}
+
+.image-upload-area:hover {
+  border-color: var(--primary);
+  background: rgba(13, 184, 211, 0.07);
+}
+
+.upload-icon { font-size: 1.75rem; line-height: 1; }
+
+.upload-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.upload-hint {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.image-preview-wrapper {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  background: rgba(17, 24, 39, 0.6);
+  max-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-preview {
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  display: block;
+  border-radius: var(--radius-lg);
+}
+
+.image-remove-btn {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(220, 38, 38, 0.85);
+  border: none;
+  color: white;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  backdrop-filter: blur(4px);
+}
+
+.image-remove-btn:hover {
+  background: var(--danger);
+  transform: scale(1.1);
+}
+
+.image-upload-btn {
+  background: rgba(13, 184, 211, 0.12);
+  border: 1px solid rgba(13, 184, 211, 0.25);
+  color: var(--primary-light);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  align-self: flex-start;
+}
+
+.image-upload-btn:hover {
+  background: rgba(13, 184, 211, 0.22);
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.image-change-btn {
+  background: rgba(55, 65, 81, 0.6);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  align-self: flex-start;
+}
+
+.image-change-btn:hover {
+  background: rgba(55, 65, 81, 0.9);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.error-message.small {
+  font-size: 0.75rem;
+  padding: 0.5rem 0.75rem;
 }
