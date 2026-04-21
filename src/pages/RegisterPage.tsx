@@ -16,6 +16,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -32,10 +33,32 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess }) => {
       showError(response.error, 'Error de registro');
     } else {
       showSuccess('Cuenta creada exitosamente. Ahora puedes iniciar sesión.', 'Registro exitoso');
-      onRegisterSuccess();
+      setIsRegistered(true);
     }
     setLoading(false);
   };
+
+  if (isRegistered) {
+    return (
+      <div className="auth-page">
+        <div className="auth-container" style={{ maxWidth: '500px', textAlign: 'center', padding: '40px' }}>
+          <div style={{ fontSize: '50px', marginBottom: '20px' }}>📧</div>
+          <h2>¡Casi listo!</h2>
+          <p style={{ fontSize: '16px', color: '#555', lineHeight: '1.6' }}>
+            Hemos enviado un enlace de confirmación a <strong>{formData.email}</strong>. 
+            Por favor, revisa tu bandeja de entrada (y la carpeta de spam) y haz clic en el enlace para activar tu cuenta.
+          </p>
+          <button 
+            className="btn-primary" 
+            style={{ marginTop: '20px' }}
+            onClick={onRegisterSuccess}
+          >
+            Entendido, ir al inicio
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="auth-page">
