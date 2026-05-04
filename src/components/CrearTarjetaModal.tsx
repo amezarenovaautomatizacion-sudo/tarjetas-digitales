@@ -300,7 +300,7 @@ const CrearTarjetaModal: React.FC<CrearTarjetaModalProps> = ({
                       className="form-control"
                     >
                       <option value="privado">Privado — Solo podras verla desde tu cuenta</option>
-                      <option value="publico">Público — Visible para todos</option>
+                      <option value="publico">Público — Visible con cualquier metodo</option>
                     </select>
                   </div>
 
