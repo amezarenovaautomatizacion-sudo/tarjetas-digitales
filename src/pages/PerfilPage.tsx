@@ -5,6 +5,7 @@ import { obtenerIpPublica } from '../utils/ipUtils';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useNotification } from '../contexts/NotificationContext';
 import { useConfirm } from '../hooks/useConfirm';
+import { suscripcionService } from '../services/suscripcion.service';
 
 interface PerfilPageProps {
   onBack: () => void;
@@ -46,10 +47,14 @@ const PerfilPage: React.FC<PerfilPageProps> = ({ onBack }) => {
   const [backupCodesRemaining, setBackupCodesRemaining] = useState(0);
   const [showBackupCodes, setShowBackupCodes] = useState(false);
   const [newBackupCodes, setNewBackupCodes] = useState<string[]>([]);
+  const [suscripcion, setSuscripcion] = useState<any>(null);
+  const [loadingSuscripcion, setLoadingSuscripcion] = useState<boolean>(true);
+  const [cancelando, setCancelando] = useState<boolean>(false);
 
   useEffect(() => {
     loadPerfil();
     loadTwoFactorStatus();
+    verificarSuscripcionActiva();
   }, []);
 
   const loadPerfil = async () => {
@@ -60,6 +65,48 @@ const PerfilPage: React.FC<PerfilPageProps> = ({ onBack }) => {
       setFormData(userData);
     }
     setLoading(false);
+  };
+
+  const verificarSuscripcionActiva = async () => {
+    try {
+      // Usamos el servicio correspondiente para traer la suscripción del cliente conectado
+      const response = await suscripcionService.getMiSuscripcion(); 
+      if (response.data) {
+        setSuscripcion(response.data);
+      }
+    } catch (error) {
+      console.error("Error al obtener la suscripción:", error);
+    } finally {
+      setLoadingSuscripcion(false);
+    }
+  };
+
+  const handleCancelarSuscripcion = async () => {
+    if (cancelando) return;
+    const confirmado = await confirm({
+      title: '¿Cancelar suscripción?',
+      message: '¿Estás completamente seguro? Perderás de inmediato el acceso a los beneficios Premium y tus funciones avanzadas.',
+      confirmText: 'Sí, cancelar',
+      cancelText: 'Mantener plan'
+    });
+
+    if (!confirmado) return;
+
+    try {
+      // 🔥 Llamamos exactamente a la ruta de tu imagen
+      const response = await suscripcionService.cancelarSuscripcionCliente();
+      
+      if (response.data) {
+        showSuccess("Tu suscripción ha sido cancelada correctamente.");
+        // Actualizamos el estado local para ocultar el botón de cancelación
+        setSuscripcion(null); 
+      }
+    } catch (error: any) {
+      console.error("Error al cancelar:", error);
+      showError(error.response?.data?.error || "Ocurrió un error al intentar cancelar la suscripción.");
+    }finally {
+      setCancelando(false); // 🔓 Liberamos el estado al terminar
+    }
   };
 
   const loadTwoFactorStatus = async () => {
@@ -254,6 +301,46 @@ const PerfilPage: React.FC<PerfilPageProps> = ({ onBack }) => {
               <button type="submit" className="btn-primary">Actualizar Contraseña</button>
             </form>
           </div>
+
+          {!loadingSuscripcion && suscripcion && (
+            <div className="perfil-section">
+              <h2>Mi Suscripción Premium</h2>
+              <form onSubmit={(e) => { e.preventDefault(); handleCancelarSuscripcion(); }}>
+                
+                <div className="form-group">
+                  <label>Plan Actual</label>
+                  <input
+                    type="text"
+                    value={suscripcion.plan_nombre || 'Premium'}
+                    disabled
+                    style={{ cursor: 'not-allowed', opacity: 0.7 }}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Estado de la Cuenta</label>
+                  <input
+                    type="text"
+                    value="Activa (Pagado mediante Mercado Pago)"
+                    disabled
+                    style={{ cursor: 'not-allowed', opacity: 0.7, color: 'var(--success, #28a745)' }}
+                  />
+                </div>
+
+                {/* Botón estructurado exactamente igual que el tuyo, pero con estilo de alerta */}
+                <button 
+                  type="submit" 
+                  className="btn-primary" 
+                  style={{ backgroundColor: '#ef4444', borderColor: '#ef4444' }}
+                  onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#dc2626')}
+                  onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#ef4444')}
+                >
+                  Cancelar Suscripción
+                </button>
+                
+              </form>
+            </div>
+          )}
 
           <div className="perfil-section">
             <h2>🔐 Verificación de dos pasos (2FA)</h2>

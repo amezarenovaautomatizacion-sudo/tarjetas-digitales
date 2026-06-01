@@ -76,17 +76,23 @@ class SuscripcionService {
   }
 
   async crearSuscripcionAdmin(usuarioid: number, tiposuscripcionid: number, dias: number, renovarAutomatico: boolean) {
-  return this.request('/api/admin/suscripciones/crear', {
-    method: 'POST',
-    body: JSON.stringify({ usuarioid, tiposuscripcionid, dias, renovar_automatico: renovarAutomatico })
-  });
-}
+    return this.request('/api/admin/suscripciones/crear', {
+      method: 'POST',
+      body: JSON.stringify({ usuarioid, tiposuscripcionid, dias, renovar_automatico: renovarAutomatico })
+    });
+  }
 
-async enviarNotificacionVencimiento(suscripcionid: number) {
-  return this.request(`/api/admin/suscripciones/${suscripcionid}/notificar-vencimiento`, {
-    method: 'POST'
-  });
-}
+  async enviarNotificacionVencimiento(suscripcionid: number) {
+    return this.request(`/api/admin/suscripciones/${suscripcionid}/notificar-vencimiento`, {
+      method: 'POST'
+    });
+  }
+
+  async cancelarSuscripcionCliente(){
+    return this.request(`/api/cliente/suscripcion/cancelar`, {
+      method: 'POST'
+    });
+  }
 }
 
 export const suscripcionService = new SuscripcionService();

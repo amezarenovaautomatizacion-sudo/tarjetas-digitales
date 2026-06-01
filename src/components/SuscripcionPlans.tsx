@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Badge, Button, Tab, Tabs } from 'react-bootstrap';
+import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
 import {
   CheckCircle,
   Star,
@@ -18,6 +19,8 @@ import {
 import { suscripcionService } from '../services/suscripcion.service';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useNotification } from '../contexts/NotificationContext';
+
+//initMercadoPago(import.meta.env.VITE_MP_PUBLIC_KEY);
 
 interface Plan {
   id: string;
@@ -41,6 +44,20 @@ const SuscripcionPlans: React.FC = () => {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const [suscripcionActiva, setSuscripcionActiva] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [preferenceId, setPreferenceId] = useState<string | null>(null);
+  const [planSeleccionado, setPlanSeleccionado] = useState<string | null>(null);
+  const [loadingPago, setLoadingPago] = useState(false);
+  
+  useEffect(() => {
+    const publicKey = import.meta.env.VITE_MP_PUBLIC_KEY;
+    
+    
+    if (publicKey && publicKey !== "TU_PUBLIC_KEY_AQUI") {
+      initMercadoPago(publicKey);
+    } else {
+      console.error("⚠️ Error crítico: VITE_MP_PUBLIC_KEY no está definida en el archivo .env o tiene el texto de ejemplo.");
+    }
+  }, []);
 
   useEffect(() => {
     cargarSuscripcionActiva();
@@ -64,7 +81,7 @@ const SuscripcionPlans: React.FC = () => {
       icon: <Sparkles size={28} strokeWidth={1.5} />,
       popular: true,
       badge: 'Más Popular',
-      buttonText: 'Solicitar por WhatsApp',
+      buttonText: 'Proceder al pago',
       annualDiscount: 'Ahorra 2 meses',
       max_tarjetas: 1,
       duracion_dias: 30,
@@ -86,7 +103,7 @@ const SuscripcionPlans: React.FC = () => {
       priceLabel: '/mes',
       icon: <Users size={28} strokeWidth={1.5} />,
       badge: 'Para Equipos',
-      buttonText: 'Solicitar por WhatsApp',
+      buttonText: 'Proceder al pago',
       annualDiscount: 'Ahorra 2 meses',
       max_tarjetas: 10,
       duracion_dias: 30,
@@ -103,13 +120,56 @@ const SuscripcionPlans: React.FC = () => {
     },
   ];
 
-  const handleSolicitarPlan = (plan: Plan) => {
-    const userData = localStorage.getItem('userData');
-    const email = userData ? JSON.parse(userData).email : '';
-    const mensaje = `Hola, estoy interesado en el plan ${plan.name}. Mi correo registrado es: ${email}`;
-    const whatsappUrl = `https://wa.me/523326239790?text=${encodeURIComponent(mensaje)}`;
-    window.open(whatsappUrl, '_blank');
-    showInfo(`Serás redirigido a WhatsApp para solicitar el plan ${plan.name}`, 'Solicitud');
+  const handleSuscribirse = async (plan: any) => {
+    setLoadingPago(true);
+    setPreferenceId(null);
+
+    // 1. Extraemos el string identificador ("premium", "mensual", etc.)
+    // Si 'plan.id' es una cadena de texto, la usamos directamente.
+    const planIdString = plan?.id || plan?.tiposuscripcionid || plan;
+
+    console.log("📥 Mandando string identificador al backend:", planIdString);
+
+    // Validación básica por si por algún motivo viene completamente vacío
+    if (!planIdString) {
+      console.error("❌ Error: No se encontró ningún identificador en el objeto plan.");
+      showError('No se pudo identificar el plan seleccionado.');
+      setLoadingPago(false);
+      return;
+    }
+
+    // Guardamos el estado temporal (puedes dejarlo como string si tu useState lo permite)
+    setPlanSeleccionado(planIdString);
+
+    try {
+      // 2. Disparamos la petición enviando el String crudo
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/suscripcion/checkout`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ 
+          tiposuscripcionid: planIdString // 👈 Mandamos "premium", "mensual", etc. como String
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.id) {
+        console.log("🎉 ¡Preferencia recibida con éxito desde el Backend! ID:", data.id);
+
+        const mpUrl = `https://sandbox.mercadopago.com.mx/checkout/v1/redirect?pref_id=${data.id}`;
+        window.location.href = mpUrl;
+      } else {
+        showError(data.error || 'No se pudo generar el enlace de pago. Intenta más tarde.');
+      }
+    } catch (error) {
+      console.error("❌ Error en la petición de pago:", error);
+      showError('Error de conexión con el servidor de pagos.');
+    } finally {
+      setLoadingPago(false);
+    }
   };
 
   const getSegmentPlans = (segment: 'B2C' | 'SMB' | 'B2B') =>
@@ -123,6 +183,9 @@ const SuscripcionPlans: React.FC = () => {
     const annualPrice = getAnnualPrice(plan.price);
     const tieneSuscripcionActiva = suscripcionActiva?.tiene_suscripcion === true;
     const planActivo = suscripcionActiva?.suscripcion?.plan_nombre?.toLowerCase() === plan.name.toLowerCase();
+
+    // Variable para saber si este es el plan que se está intentando pagar actualmente
+    const esPlanSeleccionado = planSeleccionado === plan.id;
 
     return (
       <Col
@@ -182,14 +245,34 @@ const SuscripcionPlans: React.FC = () => {
               </small>
             </div>
 
-            <Button
-              variant={plan.popular ? 'primary' : 'outline-primary'}
-              className={`w-100 py-2 rounded-pill fw-semibold${plan.popular ? ' btn-popular' : ''}`}
-              onClick={() => handleSolicitarPlan(plan)}
-              disabled={planActivo}
-            >
-              {planActivo ? 'Plan Activo' : (plan.buttonText ?? 'Solicitar por WhatsApp')}
-            </Button>
+            {/* --- INICIO DE LÓGICA DE MERCADO PAGO --- */}
+            <div className="payment-action-area">
+              {preferenceId && esPlanSeleccionado ? (
+                <div className="animate__animated animate__fadeIn">
+                  <Button 
+                    variant="link" 
+                    size="sm" 
+                    className="mt-2 text-decoration-none" 
+                    onClick={() => { setPreferenceId(null); setPlanSeleccionado(null); }}
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant={plan.popular ? 'primary' : 'outline-primary'}
+                  className={`w-100 py-2 rounded-pill fw-semibold${plan.popular ? ' btn-popular' : ''}`}
+                  onClick={() => handleSuscribirse(plan)}
+                  disabled={planActivo || (loadingPago && !esPlanSeleccionado)}
+                >
+                  {planActivo 
+                    ? 'Plan Activo' 
+                    : (loadingPago && esPlanSeleccionado ? 'Generando pago...' : (plan.buttonText ?? 'Suscribirme ahora'))}
+                </Button>
+              )}
+            </div>
+            {/* --- FIN DE LÓGICA DE MERCADO PAGO --- */}
+
           </Card.Body>
 
           <Card.Footer className="bg-transparent border-0 pt-0 pb-4 px-4">

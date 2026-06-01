@@ -4,6 +4,9 @@ import { Search, RefreshCw, CheckCircle, XCircle, Clock, AlertCircle, UserPlus, 
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useNotification } from '../contexts/NotificationContext';
 import { useConfirm } from '../hooks/useConfirm';
+import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
+
+initMercadoPago('TU_PUBLIC_KEY_AQUI');
 
 interface Suscripcion {
   suscripcionid: number;
@@ -64,6 +67,7 @@ const AdminSuscripciones: React.FC = () => {
   const [resultadoGlobal, setResultadoGlobal] = useState<{ total: number; exitosos: number; fallidos: number; detalles: any[] } | null>(null);
   const [modalSuscribir, setModalSuscribir] = useState(emptyModalSuscribir);
   const [modalRenovar, setModalRenovar]     = useState(emptyModalRenovar);
+  const [preferenceId, setPreferenceId] = useState<string | null>(null);
   const [formSuscripcion, setFormSuscripcion] = useState({
     tiposuscripcionid: 1,
     periodo: 'mensual',
@@ -92,6 +96,36 @@ const AdminSuscripciones: React.FC = () => {
     }
     setLoading(false);
   };
+  
+  const handleGenerarPago = async () => {
+  setLoading(true);
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/mercadopago/create-preference`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify({
+        title: `Plan ${formSuscripcion.tiposuscripcionid === 1 ? 'Premium' : 'Negocios'}`,
+        price: formSuscripcion.tiposuscripcionid === 1 ? 40 : 150, // Precios de tus opciones
+        quantity: 1,
+        // Opcional: enviar metadata para saber a qué cliente asignar el pago
+        usuarioid: modalSuscribir.clienteId 
+      })
+    });
+    const data = await response.json();
+    if (data.id) {
+      setPreferenceId(data.id);
+    } else {
+      showError('No se pudo generar el ID de pago');
+    }
+  } catch (err) {
+    showError('Error de conexión con Mercado Pago');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const cargarClientes = async () => {
     try {
