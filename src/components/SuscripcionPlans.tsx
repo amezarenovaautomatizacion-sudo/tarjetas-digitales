@@ -178,6 +178,10 @@ const SuscripcionPlans: React.FC = () => {
 
       if (data.id) {
         console.log("🎉 ¡Preferencia recibida con éxito desde el Backend! ID:", data.id);
+        localStorage.setItem('plan_pendiente_id', planIdString); 
+        // Si tu variable 'billingCycle' o 'plan' te dice el tiempo, calcúlalo aquí:
+        const diasCalculados = billingCycle === 'annual' ? 365 : 30;
+        localStorage.setItem('plan_pendiente_dias', diasCalculados.toString());
 
         const mpUrl = `https://sandbox.mercadopago.com.mx/checkout/v1/redirect?pref_id=${data.id}`;
         window.location.href = mpUrl;

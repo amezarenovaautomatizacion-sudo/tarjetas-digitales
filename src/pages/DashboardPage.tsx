@@ -49,8 +49,14 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
   const [statsLoading, setStatsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loadingSuscripcion, setLoadingSuscripcion] = useState(false);
+  const urlParams = new URLSearchParams(window.location.search);
+  const paymentStatus = urlParams.get('payment');
+  const paymentId = urlParams.get('payment_id');
+  const preferenceId = urlParams.get('preference_id');
   
   const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+  const idDelPlanComprado = Number(localStorage.getItem('plan_pendiente_id')) || 2;
+  const diasDelPlanComprado = Number(localStorage.getItem('plan_pendiente_dias')) || 30;
 
   const loadData = async () => {
     try {
@@ -110,7 +116,11 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
             },
             body: JSON.stringify({
               payment_id: paymentId,
-              preference_id: preferenceId
+              preference_id: preferenceId,
+              tiposuscripcionid: idDelPlanComprado,   // 🎯 Dinámico del handler!
+              duracion_dias: diasDelPlanComprado,
+              metodo_pago: 'mercadopago',
+              renovar_automatico: false
             })
           });
 
