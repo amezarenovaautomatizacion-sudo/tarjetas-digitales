@@ -77,14 +77,45 @@ const SuscripcionPlans: React.FC = () => {
     const paymentStatus = urlParams.get('payment');
 
     if (paymentStatus === 'success') {
-      // Lanzamos la notificación flotante de éxito
-      showSuccess('🎉 ¡Tu pago fue aprobado con éxito! Tu suscripción se está activando.');
-      
-      // Volvemos a consultar la suscripción para que el botón cambie a "Plan Activo" de inmediato
-      cargarSuscripcionActiva();
+      // 🌟 Creamos una función interna asíncrona para evitar el error de TypeScript
+      const guardarYActivarSuscripcion = async () => {
+        try {
+          // 1. Recuperamos de forma dinámica el plan temporal del almacenamiento
+          const idGuardado = localStorage.getItem('plan_pendiente_id');
+          
+          // Mapeamos el string identificador al ID numérico que espera tu base de datos
+          // Si el usuario eligió el plan "premium" es el ID 2, si fue "business" el ID 3 (ajústalos según tus IDs reales)
+          let idDelPlanNumerico = 1; 
+          if (idGuardado === 'business') {
+            idDelPlanNumerico = 2; 
+          }
 
-      // Opcional: Limpiamos la URL para que no se quede el '?payment=success' ahí pegado si recargan la página
-      window.history.replaceState({}, document.title, window.location.pathname);
+          console.log('🚀 [RETORNO MP] Intentando guardar en BD el plan ID:', idDelPlanNumerico);
+
+          // 2. 🎯 Disparamos la petición HTTP real mandándole el Body exacto a tu Endpoint
+          await suscripcionService.crearSuscripcionMercadoPago(idDelPlanNumerico, 'tarjeta', false);
+
+          // 3. Si el Backend responde exitosamente, notificamos y limpiamos
+          showSuccess('🎉 ¡Tu pago fue aprobado con éxito! Tu suscripción ha sido registrada.');
+          
+          localStorage.removeItem('plan_pendiente_id');
+          localStorage.removeItem('plan_pendiente_dias');
+
+          // 4. Volvemos a consultar la suscripción para cambiar el botón de la interfaz a "Plan Activo"
+          await cargarSuscripcionActiva();
+
+        } catch (error) {
+          console.error('❌ Error crítico al sincronizar con el backend:', error);
+          showError('❌ Tu pago pasó, pero hubo un problema al registrarlo en la base de datos.');
+        } finally {
+          // Limpiamos los parámetros de Mercado Pago de la URL para estética (?payment=success)
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      };
+
+      // Ejecutamos la función interna asíncrona de inmediato
+      guardarYActivarSuscripcion();
+
     } else if (paymentStatus === 'error') {
       showError('❌ Hubo un problema al procesar tu pago. Por favor, inténtalo de nuevo.');
       window.history.replaceState({}, document.title, window.location.pathname);

@@ -95,41 +95,6 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
     loadDashboardStats();
   }, []);
 
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const paymentStatus = urlParams.get('payment');
-
-    // Si Mercado Pago nos regresa con éxito, ejecutamos tu API
-    if (paymentStatus === 'success') {
-      const activarPlanConServicio = async () => {
-        try {
-          // 🌟 Llamamos a tu servicio (enviará el JSON idéntico a tu imagen)
-          await suscripcionService.crearSuscripcionMercadoPago();
-
-          showSuccess('🎉 ¡Tu suscripción ha sido activada con éxito!');
-
-          // Limpiamos los rastros del localStorage por orden
-          localStorage.removeItem('plan_pendiente_id');
-          localStorage.removeItem('plan_pendiente_dias');
-
-          // Actualizamos los botones de la pantalla a "Plan Activo"
-          
-
-        } catch (error) {
-          console.error('❌ Error al activar plan desde el servicio:', error);
-          showError('Hubo un detalle al procesar la activación. Refresca la página.');
-        } finally {
-          // Limpiamos la URL para remover los parámetros de Mercado Pago (?payment=success...)
-          window.history.replaceState({}, document.title, window.location.pathname);
-        }
-      };
-
-      activarPlanConServicio();
-    }
-  }, []);
-
-  
-
   const handleDelete = async (id: number) => {
     const confirmed = await confirm({
       title: 'Eliminar tarjeta',
