@@ -175,12 +175,10 @@ const SuscripcionPlans: React.FC = () => {
     setLoadingPago(true);
     setPreferenceId(null);
 
-    // 1. Extraemos el string identificador ("premium", "mensual", etc.)
-    // Si 'plan.id' es una cadena de texto, la usamos directamente.
-    const basePlanId = plan?.id || plan?.tiposuscripcionid || plan;
-    const planIdString = billingCycle === 'annual' ? `${basePlanId}_annual` : basePlanId;
+    // 1. Extraemos el identificador base puro ("premium" o "business")
+    const planIdString = plan?.id || plan?.tiposuscripcionid || plan;
 
-    console.log("📥 Mandando string identificador al backend:", planIdString);
+    console.log(`📥 Mandando al backend -> Plan: "${planIdString}" | Periodo: "${billingCycle}"`);
 
     // Validación básica por si por algún motivo viene completamente vacío
     if (!planIdString) {
@@ -190,11 +188,11 @@ const SuscripcionPlans: React.FC = () => {
       return;
     }
 
-    // Guardamos el estado temporal (puedes dejarlo como string si tu useState lo permite)
+    // Guardamos el estado para el loading del botón usando el id puro ('premium' o 'business')
     setPlanSeleccionado(planIdString);
 
     try {
-      // 2. Disparamos la petición enviando el String crudo
+      // 2. Disparamos la petición enviando la estructura exacta que tu backend lee
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/suscripcion/checkout`, {
         method: 'POST',
         headers: { 
@@ -202,7 +200,8 @@ const SuscripcionPlans: React.FC = () => {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({ 
-          tiposuscripcionid: planIdString // 👈 Mandamos "premium", "mensual", etc. como String
+          tiposuscripcionid: planIdString, // 👈 Envía "premium" o "business"
+          periodo: billingCycle           // 👈 Envía "monthly" o "annual" dinámicamente!
         })
       });
 
@@ -210,10 +209,10 @@ const SuscripcionPlans: React.FC = () => {
 
       if (data.id) {
         console.log("🎉 ¡Preferencia recibida con éxito desde el Backend! ID:", data.id);
+        
+        // 🌟 Guardamos ambos datos en el localStorage para recordar con exactitud qué activar al regresar
         localStorage.setItem('plan_pendiente_id', planIdString); 
-        // Si tu variable 'billingCycle' o 'plan' te dice el tiempo, calcúlalo aquí:
-        const diasCalculados = billingCycle === 'annual' ? 365 : 30;
-        localStorage.setItem('plan_pendiente_dias', diasCalculados.toString());
+        localStorage.setItem('plan_pendiente_periodo', billingCycle);
 
         const mpUrl = `https://sandbox.mercadopago.com.mx/checkout/v1/redirect?pref_id=${data.id}`;
         window.location.href = mpUrl;
