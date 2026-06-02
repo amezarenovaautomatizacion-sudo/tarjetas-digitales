@@ -86,16 +86,16 @@ const SuscripcionPlans: React.FC = () => {
 
           // 1. Calculamos los días exactos según el periodo
           if (periodoGuardado === 'annual' || periodoGuardado === 'anual') {
-            diasact = 365; // 🌟 Si es anual, asignamos 365 días
+            diasact = 365; 
           } else {
             diasact = 30;
           }
 
-          // 2. Mapeamos los IDs numéricos exactos de tu base de datos
+          // 2. Asignamos el ID real de tu BD (Premium siempre es 1, Business siempre es 2)
           if (planGuardado === 'premium') {
-            idDelPlanNumerico = (periodoGuardado === 'annual') ? 2 : 1; 
+            idDelPlanNumerico = 1; 
           } else if (planGuardado === 'business') {
-            idDelPlanNumerico = (periodoGuardado === 'annual') ? 4 : 3; 
+            idDelPlanNumerico = 2; 
           }
 
           console.log(`🚀 [RETORNO] Enviando ID: ${idDelPlanNumerico} | Días: ${diasact}`);
