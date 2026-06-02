@@ -115,10 +115,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
               'Authorization': `Bearer ${localStorage.getItem('token')}` // El token del usuario logueado
             },
             body: JSON.stringify({
-              payment_id: paymentId,
-              preference_id: preferenceId,
               tiposuscripcionid: idDelPlanComprado,   // 🎯 Dinámico del handler!
-              duracion_dias: diasDelPlanComprado,
               metodo_pago: 'mercadopago',
               renovar_automatico: false
             })
