@@ -81,24 +81,31 @@ const SuscripcionPlans: React.FC = () => {
           const planGuardado = localStorage.getItem('plan_pendiente_id');       // "premium" o "business"
           const periodoGuardado = localStorage.getItem('plan_pendiente_periodo'); // "monthly" o "annual"
           
-          // 🌟 ¡REVISA ESTOS NÚMEROS! Deben ser idénticos a los de tu base de datos
           let idDelPlanNumerico = 1; 
+          let diasact = 30; // 🌟 Por defecto asumimos 30 días
 
+          // 1. Calculamos los días exactos según el periodo
+          if (periodoGuardado === 'annual' || periodoGuardado === 'anual') {
+            diasact = 365; // 🌟 Si es anual, asignamos 365 días
+          } else {
+            diasact = 30;
+          }
+
+          // 2. Mapeamos los IDs numéricos exactos de tu base de datos
           if (planGuardado === 'premium') {
-            // EJEMPLO: Si en tu base de datos el Premium Mensual es ID 1 y el Anual es ID 2:
             idDelPlanNumerico = (periodoGuardado === 'annual') ? 2 : 1; 
           } else if (planGuardado === 'business') {
-            // EJEMPLO: Si el Business Mensual es ID 3 y el Anual es ID 4:
             idDelPlanNumerico = (periodoGuardado === 'annual') ? 4 : 3; 
           }
 
-          console.log(`🚀 Enviando al servicio el ID numérico real de la BD: ${idDelPlanNumerico}`);
+          console.log(`🚀 [RETORNO] Enviando ID: ${idDelPlanNumerico} | Días: ${diasact}`);
 
-          // Mandamos el ID verificado por parámetro al servicio
-          await suscripcionService.crearSuscripcionMercadoPago(idDelPlanNumerico, 'tarjeta', true);
+          // 3. 🎯 Mandamos los argumentos en el orden correcto al servicio
+          await suscripcionService.crearSuscripcionMercadoPago(idDelPlanNumerico, 'tarjeta', diasact, true);
 
           showSuccess('🎉 ¡Tu pago fue aprobado con éxito! Tu suscripción ha sido registrada.');
           
+          // Limpieza de almacenamiento local
           localStorage.removeItem('plan_pendiente_id');
           localStorage.removeItem('plan_pendiente_periodo');
 
@@ -108,6 +115,7 @@ const SuscripcionPlans: React.FC = () => {
           console.error('❌ Error crítico al sincronizar con el backend:', error);
           showError('❌ Tu pago pasó, pero hubo un problema al registrarlo en la base de datos.');
         } finally {
+          // 🌟 Cerramos correctamente el bloque del try/catch y limpiamos la URL
           window.history.replaceState({}, document.title, window.location.pathname);
         }
       };
