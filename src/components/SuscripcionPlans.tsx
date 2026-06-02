@@ -177,7 +177,8 @@ const SuscripcionPlans: React.FC = () => {
 
     // 1. Extraemos el string identificador ("premium", "mensual", etc.)
     // Si 'plan.id' es una cadena de texto, la usamos directamente.
-    const planIdString = plan?.id || plan?.tiposuscripcionid || plan;
+    const basePlanId = plan?.id || plan?.tiposuscripcionid || plan;
+    const planIdString = billingCycle === 'annual' ? `${basePlanId}_annual` : basePlanId;
 
     console.log("📥 Mandando string identificador al backend:", planIdString);
 
