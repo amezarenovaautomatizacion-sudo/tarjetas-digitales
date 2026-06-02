@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Badge, Button, Tab, Tabs } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
 import {
   CheckCircle,
@@ -40,6 +41,7 @@ interface Plan {
 
 const SuscripcionPlans: React.FC = () => {
   const { showSuccess, showError, showInfo, showWarning } = useNotification();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>('b2c');
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const [suscripcionActiva, setSuscripcionActiva] = useState<any>(null);
@@ -174,9 +176,18 @@ const SuscripcionPlans: React.FC = () => {
   ];
 
   const handleSuscribirse = async (plan: any) => {
+    
+    const token = localStorage.getItem('token');
+    if (!token) {
+      showWarning('👋 ¡Hola! Necesitas crear una cuenta o iniciar sesión para poder adquirir un plan.');
+      
+      // Redirigimos al usuario a la vista de registro o login. 
+      // Ajusta '/register' por la ruta exacta que manejes en tu App.tsx
+      navigate('/register'); 
+      return;
+    }
     setLoadingPago(true);
     setPreferenceId(null);
-
     // 1. Extraemos el identificador base puro ("premium" o "business")
     const planIdString = plan?.id || plan?.tiposuscripcionid || plan;
 
