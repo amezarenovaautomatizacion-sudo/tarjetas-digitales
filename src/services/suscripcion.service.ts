@@ -93,6 +93,26 @@ class SuscripcionService {
       method: 'POST'
     });
   }
+
+  async crearSuscripcionMercadoPago() {
+    // 1. Recuperamos de forma dinámica el plan que guardamos en el localStorage en el handler
+    const idDelPlanComprado = localStorage.getItem('plan_pendiente_id');
+
+    console.log('[SUSCRIPCION] Enviando datos exactos a la API para el plan:', idDelPlanComprado);
+
+    // 2. Endpoint relativo de tu documentación
+    const endpoint = '/api/cliente/suscripcion/crear';
+
+    // 3. 🎯 BODY LIMPIO: Mandamos EXACTAMENTE lo que pide la imagen de tu documentación
+    return this.request(endpoint, {
+      method: 'POST',
+      body: JSON.stringify({
+        tiposuscripcionid: idDelPlanComprado ? Number(idDelPlanComprado) : 2, // El ID dinámico (ej: 2)
+        metodo_pago: 'tarjeta', // Tal cual viene en tu ejemplo de la imagen
+        renovar_automatico: true // Tal cual viene en tu ejemplo de la imagen
+      })
+    });
+  }
 }
 
 export const suscripcionService = new SuscripcionService();
