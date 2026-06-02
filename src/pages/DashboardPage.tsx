@@ -102,7 +102,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
         setLoadingSuscripcion(true);
         try {
           // Enviamos el aviso a nuestro Backend (puedes crear un endpoint rápido de verificación o re-consultar el estado del usuario)
-          const response = await fetch(`${import.meta.env.VITE_API_URL}/api/suscripcion/verificar-regreso`, {
+          const response = await fetch("${import.meta.env.VITE_API_URL}/api/suscripciones/verificar-regreso", {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
