@@ -48,6 +48,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
   const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [loadingSuscripcion, setLoadingSuscripcion] = useState(false);
   
   const userData = JSON.parse(localStorage.getItem('userData') || '{}');
 
@@ -86,6 +87,60 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
   useEffect(() => {
     loadData();
     loadDashboardStats();
+  }, []);
+
+  useEffect(() => {
+    // 1. Analizamos la URL para ver si tiene los parámetros de Mercado Pago
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment');     // Detecta tu '?payment=success'
+    const paymentId = urlParams.get('payment_id');      // Mercado Pago te regala el ID del pago en la URL automáticamente
+    const preferenceId = urlParams.get('preference_id'); // Mercado Pago también te da el ID de la preferencia
+
+    // 2. Si el estatus es 'success', obligamos al sistema a activar e impactar la interfaz
+    if (paymentStatus === 'success') {
+      const verificarYActivarSuscripcion = async () => {
+        setLoadingSuscripcion(true);
+        try {
+          // Enviamos el aviso a nuestro Backend (puedes crear un endpoint rápido de verificación o re-consultar el estado del usuario)
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/api/suscripcion/verificar-regreso`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}` // El token del usuario logueado
+            },
+            body: JSON.stringify({
+              payment_id: paymentId,
+              preference_id: preferenceId
+            })
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            showSuccess('🎉 ¡Tu suscripción ha sido activada con éxito! Disfruta de tus beneficios.');
+            
+            // 🌟 AQUÍ LLAMAS A LA FUNCIÓN QUE COLOQUE EL ROL EN TU ESTADO GLOBAL
+            // Por ejemplo: actualizarUsuario({ ...usuario, rol: 'premium' });
+            // O simplemente recargar la página/datos para que lea la nueva fila de la BD.
+            window.location.reload(); 
+            
+          } else {
+            showError(data.error || 'El pago fue exitoso, pero estamos procesando tu activación. Refresca en unos momentos.');
+          }
+        } catch (error) {
+          console.error('❌ Error al verificar pago al regresar:', error);
+          showError('Hubo un problema de red al validar tu suscripción.');
+        } finally {
+          setLoadingSuscripcion(false);
+          
+          // 3. LIMPIAMOS LA URL para que se borren los parámetros feos de Mercado Pago 
+          // y si el usuario recarga la página, no se vuelva a ejecutar este código.
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      };
+
+      verificarYActivarSuscripcion();
+    }
   }, []);
 
   const handleDelete = async (id: number) => {

@@ -71,6 +71,26 @@ const SuscripcionPlans: React.FC = () => {
     setLoading(false);
   };
 
+  useEffect(() => {
+    // Leemos los parámetros que vienen en la barra de direcciones de la pestaña
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment');
+
+    if (paymentStatus === 'success') {
+      // Lanzamos la notificación flotante de éxito
+      showSuccess('🎉 ¡Tu pago fue aprobado con éxito! Tu suscripción se está activando.');
+      
+      // Volvemos a consultar la suscripción para que el botón cambie a "Plan Activo" de inmediato
+      cargarSuscripcionActiva();
+
+      // Opcional: Limpiamos la URL para que no se quede el '?payment=success' ahí pegado si recargan la página
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (paymentStatus === 'error') {
+      showError('❌ Hubo un problema al procesar tu pago. Por favor, inténtalo de nuevo.');
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
   const plans: Plan[] = [
     {
       id: 'premium',
