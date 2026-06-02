@@ -94,8 +94,8 @@ class SuscripcionService {
     });
   }
 
-  async crearSuscripcionMercadoPago(tiposuscripcionid: number, metodoPago: string = 'tarjeta', dias: number, renovarAutomatico: boolean = true) {
-    console.log('[SUSCRIPCION SERVICE] Enviando payload exacto a la API:', { tiposuscripcionid, metodoPago, renovarAutomatico });
+  async crearSuscripcionMercadoPago(tiposuscripcionid: number, metodoPago: string = 'tarjeta', dias: number, renovarAutomatico: boolean = false) {
+    console.log('[SUSCRIPCION SERVICE] Enviando payload exacto a la API:', { tiposuscripcionid, metodoPago, dias, renovarAutomatico });
 
     const endpoint = '/api/cliente/suscripcion/crear';
 

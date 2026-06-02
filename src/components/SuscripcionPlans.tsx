@@ -101,7 +101,7 @@ const SuscripcionPlans: React.FC = () => {
           console.log(`🚀 [RETORNO] Enviando ID: ${idDelPlanNumerico} | Días: ${diasact}`);
 
           // 3. 🎯 Mandamos los argumentos en el orden correcto al servicio
-          await suscripcionService.crearSuscripcionMercadoPago(idDelPlanNumerico, 'tarjeta', diasact, true);
+          await suscripcionService.crearSuscripcionMercadoPago(idDelPlanNumerico, 'tarjeta', diasact, false);
 
           showSuccess('🎉 ¡Tu pago fue aprobado con éxito! Tu suscripción ha sido registrada.');
           
